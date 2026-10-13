@@ -1,0 +1,21 @@
+{
+  "name": "Rapidito - Transporte Venezuela",
+  "short_name": "Rapidito",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f1f5f9",
+  "theme_color": "#000080",
+  "description": "La aplicación definitiva para moverte en transporte público.",
+  "icons": [
+    {
+      "src": "icono.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icono.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

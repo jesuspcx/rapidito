@@ -485,7 +485,7 @@
         </div>
     </div>
 
-    <!-- MODAL: INSTALAR LA APP (Estilo tarjeta profesional con botón nativo) -->
+    <!-- MODAL: INSTALAR LA APP -->
     <div id="modal-instalar" class="generic-modal" onclick="if(event.target === this) cerrarModal('modal-instalar')">
         <div class="generic-modal-content" style="align-items:center; text-align:center; max-width: 340px; padding: 28px 24px;">
             <div class="generic-modal-header" style="width:100%; border:none; margin-bottom:0; position:absolute; top:12px; right:12px;">
@@ -495,7 +495,6 @@
                 </button>
             </div>
             
-            <!-- Icono circular de la app -->
             <div style="width: 64px; height: 64px; background: var(--primary-brand); border-radius: 20px; display: flex; justify-content: center; align-items: center; color: #ffffff; margin: 10px auto 4px auto; box-shadow: 0 8px 20px var(--shadow-color);">
                 <svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
             </div>
@@ -645,19 +644,45 @@
         let capasCaminata = null, marcadoresRuta = null, inputActivo = 'destino', precioPasajeNormal = "0.00 Bs";
         let currentLat = 10.0714, currentLon = -69.3333;
         let deferredPrompt = null;
+        let vistaAnteriorMapa = 'viaje'; // Controla si volvemos al dashboard o a la vista "Tu viaje"
 
         const RUTAS_DATA = {
             "ruta_av_venezuela": {
                 "type": "FeatureCollection",
                 "features": [{
                     "type": "Feature",
-                    "properties": { "nombre": "Ruta Avenida Venezuela", "origen": "Oeste / Centro", "destino": "Este / Sambil" },
+                    "properties": { "nombre": "Ruta Avenida Venezuela", "origen": "Oeste", "destino": "Este" },
                     "geometry": { "type": "LineString", "coordinates": [
                         [-69.333321,10.071435],[-69.33033,10.07167],[-69.326557,10.071959],[-69.321887,10.072343],[-69.317488,10.072682],[-69.314158,10.072946],[-69.309817,10.073274],[-69.304129,10.07374],[-69.303218,10.073771],[-69.30206,10.073894],[-69.301133,10.073985],[-69.299811,10.074037],[-69.297051,10.073907],[-69.294804,10.073855],[-69.293613,10.073719],[-69.290619,10.073153],[-69.289797,10.073056],[-69.286333,10.072867],[-69.284926,10.07277],[-69.284755,10.07277],[-69.283545,10.072252],[-69.280736,10.071701],[-69.28073,10.071695]
                     ] }
                 }]
             }
         };
+
+        // Función para limpiar y reiniciar completamente el mapa al retroceder
+        function limpiarMapa() {
+            if (!mapInstance) return;
+            if (rutaDibujada && mapInstance.hasLayer(rutaDibujada)) {
+                mapInstance.removeLayer(rutaDibujada);
+                rutaDibujada = null;
+            }
+            if (marcadorDestino && mapInstance.hasLayer(marcadorDestino)) {
+                mapInstance.removeLayer(marcadorDestino);
+                marcadorDestino = null;
+            }
+            if (marcadorOrigen && mapInstance.hasLayer(marcadorOrigen)) {
+                mapInstance.removeLayer(marcadorOrigen);
+                marcadorOrigen = null;
+            }
+            if (capasCaminata) capasCaminata.clearLayers();
+            if (marcadoresRuta) marcadoresRuta.clearLayers();
+            resultsContainer.style.display = 'none';
+            resultsContainer.innerHTML = '';
+            autocompleteContainer.style.display = 'none';
+            originInput.value = '';
+            searchInput.value = '';
+            mapInstance.setView([currentLat, currentLon], 14);
+        }
 
         function guardarEnHistorial(destino) {
             if (!destino || destino.trim() === "") return;
@@ -750,6 +775,7 @@
         };
 
         function abrirVistaViaje() {
+            limpiarMapa();
             dashboardWrapper.classList.add('hidden');
             tripView.classList.add('active');
             if (!tripOrigenInput.value) tripOrigenInput.value = "Ubicación actual";
@@ -758,17 +784,25 @@
         }
 
         function cerrarVistaViaje() {
+            limpiarMapa();
             tripView.classList.remove('active');
             dashboardWrapper.classList.remove('hidden');
         }
 
         function volverAVistaViaje() {
+            limpiarMapa();
             mapUiView.classList.remove('active');
-            dashboardWrapper.classList.add('hidden'); 
-            tripView.classList.add('active');
+            if (vistaAnteriorMapa === 'dashboard') {
+                tripView.classList.remove('active');
+                dashboardWrapper.classList.remove('hidden');
+            } else {
+                dashboardWrapper.classList.add('hidden'); 
+                tripView.classList.add('active');
+            }
         }
 
         window.abrirMapaDesdeVistaViaje = function() {
+            vistaAnteriorMapa = 'viaje';
             dashboardWrapper.classList.add('hidden');
             tripView.classList.remove('active');
             mapUiView.classList.add('active');
@@ -777,7 +811,8 @@
             actualizarFocoInputs();
         };
 
-        function abrirMapaConRutasPersonalizadas(origenStr, destinoStr) {
+        function abrirMapaConRutasPersonalizadas(origenStr, destinoStr, desdeDirectorio = false) {
+            vistaAnteriorMapa = desdeDirectorio ? 'dashboard' : 'viaje';
             dashboardWrapper.classList.add('hidden');
             tripView.classList.remove('active');
             mapUiView.classList.add('active');
@@ -823,13 +858,15 @@
                             }
                         });
                 } catch(e) { inputActivo = 'origen'; ubicarConGPS(); }
-            } else { inputActivo = 'origen'; ubicarConGPS(); }
+            } else if (!desdeDirectorio) { 
+                inputActivo = 'origen'; ubicarConGPS(); 
+            }
         }
 
         function cotizarViajeDesdeVista() { 
             if (!tripDestinoInput.value.trim()) { alert("Introduce tu destino"); return; } 
             guardarEnHistorial(tripDestinoInput.value.trim());
-            abrirMapaConRutasPersonalizadas(tripOrigenInput.value === "Ubicación actual" ? null : tripOrigenInput.value, tripDestinoInput.value.trim()); 
+            abrirMapaConRutasPersonalizadas(tripOrigenInput.value === "Ubicación actual" ? null : tripOrigenInput.value, tripDestinoInput.value.trim(), false); 
         }
 
         function configurarAutocompletadoVista(inputEl, dropdownEl, tipo) {
@@ -937,13 +974,11 @@
 
         window.ejecutarInstalacionNativa = async function() {
             if (deferredPrompt) {
-                // Si el navegador ya tiene el evento listo, lanza la instalación nativa
                 cerrarModal('modal-instalar');
                 deferredPrompt.prompt();
                 const { outcome } = await deferredPrompt.userChoice;
                 deferredPrompt = null;
             } else {
-                // Si el navegador aún no lo dispara, cambiamos el texto del modal para guiarlo visualmente en lugar de tirar un alert feo
                 const contenidoModal = document.querySelector('#modal-instalar .generic-modal-content');
                 if (contenidoModal) {
                     contenidoModal.innerHTML = `
@@ -1049,7 +1084,7 @@
                     let etiqueta = index === 0 ? `<span class="badge-cercana" style="margin-left:auto;">Más cerca</span>` : '';
                     extraInfo = `<div style="display:flex; flex-direction:column; margin-left:auto; text-align:right;">${etiqueta}<span style="font-size:12px; color:var(--text-gray); margin-top:4px;">A ${textoDist}</span></div>`;
                 }
-                html += `<div class="ruta-item interactive" onclick="verRutaDesdeDirectorio('${ruta.idVar}')"><div class="icon">${ruta.acronimo}</div><div style="max-width: 50%; display: flex; flex-direction: column; gap: 2px; flex-grow: 1; min-width: 0;"><span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${ruta.nombre}</span><span style="font-size: 11px; color: var(--text-gray);">De: ${ruta.origen}</span><span style="font-size: 11px; color: var(--text-gray);">A: ${ruta.destino}</span></div>${extraInfo}</div>`;
+                html += `<div class="ruta-item interactive" onclick="verRutaDesdeDirectorio('${ruta.idVar}')"><div class="icon">${ruta.acronimo}</div><div style="max-width: 50%; display: flex; flex-direction: column; gap: 3px; flex-grow: 1; min-width: 0;"><span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${ruta.nombre}</span><span style="font-size: 12px; color: var(--text-gray); font-weight: 700;">${ruta.origen} → ${ruta.destino}</span></div>${extraInfo}</div>`;
             });
             list.innerHTML = html;
         }
@@ -1128,7 +1163,8 @@
 
         window.dibujarRutaYPasos = function(nombre, colorHex, idRuta) {
             if (rutaDibujada && mapInstance.hasLayer(rutaDibujada)) mapInstance.removeLayer(rutaDibujada);
-            if (capasCaminata) capasCaminata.clearLayers(); if (marcadoresRuta) marcadoresRuta.clearLayers(); 
+            if (capasCaminata) capasCaminata.clearLayers();
+            if (marcadoresRuta) marcadoresRuta.clearLayers(); 
             
             const datosRuta = RUTAS_DATA[idRuta];
             if (!datosRuta) return; 
@@ -1137,7 +1173,33 @@
             
             const coords = datosRuta.features[0].geometry.coordinates;
             if (coords?.length >= 2) {
-                L.marker([coords[0][1], coords[0][0]], { icon: L.divIcon({ className: 'custom-start-icon', html: `<div style="width: 12px; height: 12px; background: white; border: 4px solid ${colorHex}; border-radius: 50%;"></div>`, iconSize: [24,24] }) }).addTo(marcadoresRuta);
+                // Circulito en el inicio de la ruta
+                L.marker([coords[0][1], coords[0][0]], { 
+                    icon: L.divIcon({ 
+                        className: 'custom-start-icon', 
+                        html: `<div style="width: 20px; height: 20px; background: white; border: 4px solid ${colorHex}; border-radius: 50%; box-sizing: border-box;"></div>`, 
+                        iconSize: [20, 20],
+                        iconAnchor: [10, 10]
+                    }) 
+                }).addTo(marcadoresRuta);
+
+                // Flechita orientada en el final de la ruta
+                const p1 = mapInstance.project(L.latLng(coords[coords.length - 2][1], coords[coords.length - 2][0]), 18);
+                const p2 = mapInstance.project(L.latLng(coords[coords.length - 1][1], coords[coords.length - 1][0]), 18);
+                const angleDeg = Math.atan2(p2.y - p1.y, p2.x - p1.x) * 180 / Math.PI;
+
+                L.marker([coords[coords.length - 1][1], coords[coords.length - 1][0]], {
+                    icon: L.divIcon({
+                        className: 'custom-end-arrow',
+                        html: `<div style="transform: rotate(${angleDeg}deg); width: 24px; height: 24px; display: flex; justify-content: center; align-items: center;">
+                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="${colorHex}" stroke="#ffffff" stroke-width="2" stroke-linejoin="round">
+                                   <polygon points="3,3 21,12 3,21 7,12" />
+                                 </svg>
+                               </div>`,
+                        iconSize: [24, 24],
+                        iconAnchor: [12, 12]
+                    })
+                }).addTo(marcadoresRuta);
             }
 
             if (marcadorOrigen && marcadorDestino) {
@@ -1149,11 +1211,15 @@
         };
 
         window.verRutaDesdeDirectorio = function(idRuta) {
-            abrirMapaConRutasPersonalizadas("Ubicación actual", "");
+            limpiarMapa();
+            abrirMapaConRutasPersonalizadas("Ubicación actual", "", true);
             let props = RUTAS_DATA[idRuta].features[0].properties;
             dibujarRutaYPasos(props.nombre, '#305CDE', idRuta); 
             resultsContainer.style.display = 'block';
-            resultsContainer.innerHTML = `<div class="result-title">Viendo ruta seleccionada</div><div class="route-option interactive" style="cursor:default;"><div class="route-badge" style="font-size: 11px;">${props.nombre.substring(0, 4).toUpperCase()}</div><div class="route-info"><h4>${props.nombre}</h4><p style="margin-bottom: 4px; font-size: 11px; color: var(--neutral-accent);">De: ${props.origen} <br> A: ${props.destino}</p><p>Tarifa: ${precioPasajeNormal}</p></div></div>`;
+            resultsContainer.innerHTML = `<div class="result-title">Viendo ruta seleccionada</div><div class="route-option interactive" style="cursor:default;"><div class="route-badge" style="font-size: 11px;">${props.nombre.substring(0, 4).toUpperCase()}</div><div class="route-info"><h4>${props.nombre}</h4><p style="margin-bottom: 4px; font-size: 12px; color: var(--neutral-accent); font-weight: 700;">${props.origen} → ${props.destino}</p><p>Tarifa: ${precioPasajeNormal}</p></div></div>`;
+            if (rutaDibujada) {
+                centrarMapaConMenu(rutaDibujada.getBounds(), 15);
+            }
         };
 
         function actualizarFocoInputs() {
@@ -1272,7 +1338,7 @@
                         <div class="route-badge" style="font-size: 11px;">${ruta.nombre.substring(0, 4).toUpperCase()}</div>
                         <div class="route-info">
                             <h4>${ruta.nombre} ${etiquetaGanadora}</h4>
-                            <p style="margin-bottom: 4px; font-size: 11px; color: var(--neutral-accent);">De: ${ruta.origen} <br> A: ${ruta.destino}</p>
+                            <p style="margin-bottom: 4px; font-size: 12px; color: var(--neutral-accent); font-weight: 700;">${ruta.origen} → ${ruta.destino}</p>
                             <p>Caminando: <span style="color:var(--text-dark); font-weight:900;">${textoDist}</span> • Tarifa: ${precioPasajeNormal}</p>
                         </div>
                     </div>
