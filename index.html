@@ -1,0 +1,1284 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Rapidito - Transporte Venezuela</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <style>
+        /* ================= SISTEMA DE TEMAS Y GLASS UI ================= */
+        :root {
+            --bg-white: #ffffff;
+            --bg-light: #f1f5f9;
+            --primary-brand: #000080;
+            --neutral-accent: #305CDE;
+            --text-dark: #0f172a;
+            --text-gray: #64748b;
+            --border-color: rgba(15, 23, 42, 0.08);
+            --card-bg: rgba(255, 255, 255, 0.75);
+            --input-bg: rgba(226, 232, 240, 0.7);
+            --shadow-color: rgba(0, 0, 128, 0.08); 
+            --glass-bg: rgba(255, 255, 255, 0.65);
+            --glass-border: rgba(255, 255, 255, 0.7);
+            --dashboard-glass: rgba(248, 250, 252, 0.45);
+            --blur-effect: blur(14px) saturate(180%);
+            
+            --transition-smooth: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        body.dark-mode {
+            --bg-white: #000000;
+            --bg-light: #0b1120;
+            --primary-brand: #305CDE; 
+            --neutral-accent: #6084f7;
+            --text-dark: #f8fafc;
+            --text-gray: #94a3b8;
+            --border-color: rgba(255, 255, 255, 0.08);
+            --card-bg: rgba(21, 29, 47, 0.75);
+            --input-bg: rgba(30, 41, 59, 0.7);
+            --shadow-color: rgba(0, 0, 0, 0.5);
+            --glass-bg: rgba(15, 23, 42, 0.75); 
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --dashboard-glass: rgba(11, 17, 32, 0.5);
+        }
+
+        body, html { 
+            margin: 0; padding: 0; height: 100dvh; 
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+            background-color: var(--bg-light); color: var(--text-dark); 
+            overflow-x: hidden; transition: background-color 0.4s ease, color 0.4s ease;
+            padding-bottom: env(safe-area-inset-bottom);
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+        }
+
+        .interactive { cursor: pointer; user-select: none; transition: var(--transition-smooth) !important; }
+        .interactive:active { transform: scale(0.97); opacity: 0.85; }
+
+        svg { display: block; flex-shrink: 0; }
+        .chevron-icon { transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1); }
+        .chevron-icon.up { transform: rotate(180deg); }
+
+        /* ================= PANTALLA DE CARGA ================= */
+        #splash-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100dvh;
+            background: var(--bg-light); z-index: 9999; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; gap: 16px; visibility: visible; opacity: 1;
+            transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.5s;
+        }
+        body.dark-mode #splash-screen { background: var(--bg-light); }
+        #splash-screen.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+
+        .splash-logo { font-size: 38px; font-weight: 900; color: var(--primary-brand); letter-spacing: -0.04em; text-transform: uppercase; animation: pulseLogo 1.2s infinite alternate cubic-bezier(0.16, 1, 0.3, 1); }
+        .splash-subtitle { font-size: 13px; font-weight: 800; color: var(--text-gray); text-transform: uppercase; letter-spacing: 0.1em; }
+        @keyframes pulseLogo { 0% { transform: scale(0.95); opacity: 0.8; } 100% { transform: scale(1.05); opacity: 1; } }
+
+        /* ================= MAPA DE FONDO ================= */
+        #map { position: fixed; top: 0; left: 0; width: 100%; height: 100dvh; z-index: 1; pointer-events: auto; }
+        .leaflet-tile-pane { filter: grayscale(40%) contrast(1.1) brightness(1.05); transition: filter 0.4s ease; }
+        body.dark-mode .leaflet-tile-pane { filter: grayscale(40%) invert(100%) hue-rotate(180deg) contrast(1.1) brightness(0.8); }
+
+        /* ================= VISTA 1: DASHBOARD ================= */
+        #dashboard-wrapper {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100dvh;
+            overflow-y: auto; background: var(--dashboard-glass);
+            backdrop-filter: var(--blur-effect); -webkit-backdrop-filter: var(--blur-effect); z-index: 10;
+            opacity: 1; visibility: visible; transform: scale(1); pointer-events: auto;
+            transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.35s;
+        }
+        #dashboard-wrapper.hidden { opacity: 0; visibility: hidden; transform: scale(0.97); pointer-events: none; }
+
+        #dashboard-view { min-height: 100dvh; padding: 20px; box-sizing: border-box; display: flex; flex-direction: column; width: 100%; max-width: 600px; margin: 0 auto; position: relative; }
+
+        .header-dash { display: flex; justify-content: space-between; align-items: center; margin: -20px -20px 24px -20px; padding: 30px 20px 16px 20px; position: sticky; top: 0; z-index: 100; background: var(--glass-bg); backdrop-filter: var(--blur-effect); border-bottom: 1px solid var(--border-color); }
+        .app-title-container { flex-grow: 1; display: flex; justify-content: center; }
+        .app-title { margin: 0; font-size: 26px; font-weight: 900; color: var(--primary-brand); letter-spacing: -0.04em; text-transform: uppercase; }
+
+        .avatar-dash { width: 42px; height: 42px; background: var(--primary-brand); color: #ffffff; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 16px; font-weight: 800; box-shadow: 0 4px 12px var(--shadow-color); cursor: pointer; flex-shrink: 0; }
+
+        .search-trigger { background: var(--card-bg); backdrop-filter: var(--blur-effect); border: 1px solid var(--border-color); color: var(--text-dark); border-radius: 50px; padding: 16px 20px; display: flex; align-items: center; gap: 14px; box-shadow: 0 6px 20px var(--shadow-color); margin-bottom: 24px; }
+        .search-trigger .icon { background: var(--input-bg); color: var(--primary-brand); padding: 10px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .search-trigger .text { flex-grow: 1; color: var(--text-gray); font-size: 15px; font-weight: 600; }
+
+        .dash-finance { display: flex; gap: 12px; margin-bottom: 30px; align-items: flex-start; }
+        .dash-finance-pill { background: var(--card-bg); backdrop-filter: var(--blur-effect); border: 1px solid var(--border-color); border-radius: 20px; padding: 16px; flex: 1; display: flex; flex-direction: column; gap: 8px; box-shadow: 0 4px 15px var(--shadow-color); }
+        .dash-finance-pill > span { display: flex; justify-content: space-between; align-items: center; font-size: 11px; font-weight: 800; color: var(--text-gray); text-transform: uppercase; }
+        .dash-finance-pill > strong { font-size: 18px; font-weight: 900; color: var(--text-dark); }
+        .finance-details, .map-finance-details, .rutas-list { max-height: 0; opacity: 0; overflow: hidden; pointer-events: none; transition: max-height 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease, padding 0.3s ease; display: flex; flex-direction: column; gap: 10px; }
+        .finance-details.active, .map-finance-details.active, .rutas-list.active { max-height: 250px; opacity: 1; pointer-events: auto; margin-top: 8px; padding-top: 10px; border-top: 1px solid var(--border-color); }
+
+        .section-header { font-size: 13px; font-weight: 800; margin-bottom: 12px; color: var(--text-gray); text-transform: uppercase; letter-spacing: 0.06em; }
+        .transport-options { display: flex; flex-direction: column; gap: 12px; margin-bottom: 40px; }
+        .transport-card { background: var(--card-bg); backdrop-filter: var(--blur-effect); color: var(--text-dark); border: 1px solid var(--border-color); padding: 18px 20px; border-radius: 20px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 8px var(--shadow-color); }
+        .transport-card.disabled { background: var(--input-bg); color: var(--text-gray); border-color: var(--border-color); box-shadow: none; cursor: default; }
+        .t-card-info { display: flex; align-items: center; gap: 14px; }
+        .t-card-info h3 { margin: 0; font-size: 16px; font-weight: 800; }
+        .ruta-item { padding: 14px 20px; border-bottom: 1px solid var(--border-color); font-size: 14px; color: var(--text-dark); font-weight: 700; display: flex; align-items: center; gap: 14px; }
+        .ruta-item:last-child { border-bottom: none; }
+        .ruta-item .icon { background: var(--primary-brand); color: #ffffff; width: 36px; height: 36px; border-radius: 10px; display: flex; justify-content: center; align-items: center; font-size: 13px; font-weight: 900; flex-shrink: 0; }
+
+        /* ================= PANEL LATERAL DE PERFIL ================= */
+        .panel-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100dvh;
+            background: rgba(0,0,0,0.5); z-index: 4999; opacity: 0; visibility: hidden;
+            transition: opacity 0.35s ease, visibility 0.35s;
+        }
+        .panel-overlay.active { opacity: 1; visibility: visible; }
+
+        .side-panel {
+            position: fixed; top: 0; right: -100%; width: 85%; max-width: 380px; height: 100dvh;
+            background: var(--dashboard-glass); backdrop-filter: var(--blur-effect); -webkit-backdrop-filter: var(--blur-effect);
+            z-index: 5000; box-shadow: -10px 0 40px rgba(0,0,0,0.15); border-left: 1px solid var(--glass-border);
+            transition: right 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex; flex-direction: column; overflow-y: auto; padding-bottom: 20px;
+        }
+        .side-panel.active { right: 0; }
+        
+        .side-panel-header { display: flex; align-items: center; justify-content: space-between; padding: 20px; border-bottom: 1px solid var(--border-color); position: sticky; top: 0; background: var(--glass-bg); backdrop-filter: var(--blur-effect); z-index: 10; }
+        .side-panel-close { background: var(--input-bg); border: none; width: 36px; height: 36px; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: var(--text-dark); cursor: pointer; }
+        .side-panel-title { font-size: 16px; font-weight: 900; color: var(--text-dark); margin: 0; flex-grow: 1; text-align: center; }
+
+        .sp-user-info { padding: 24px 20px 20px 20px; display: flex; align-items: center; gap: 16px; border-bottom: 1px solid var(--border-color); }
+        .sp-avatar { width: 54px; height: 54px; border-radius: 50%; background: var(--primary-brand); color: #fff; display: flex; justify-content: center; align-items: center; font-size: 22px; font-weight: 900; box-shadow: 0 4px 15px var(--shadow-color); flex-shrink:0; }
+        .sp-details { flex-grow: 1; min-width: 0; }
+        .sp-name { font-size: 18px; font-weight: 900; color: var(--text-dark); margin: 0; display: flex; align-items: center; justify-content: space-between; gap: 6px; width: 100%; }
+        .sp-name-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        
+        .sp-edit-btn { background: none; border: none; color: var(--text-gray); cursor: pointer; padding: 4px; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: color 0.2s, background 0.2s; }
+        .sp-edit-btn:hover, .sp-edit-btn:active { color: var(--primary-brand); background: var(--input-bg); }
+
+        .sp-menu-list { display: flex; flex-direction: column; padding: 10px 0 90px 0; }
+        .sp-menu-item { padding: 16px 20px; display: flex; align-items: center; gap: 16px; font-size: 15px; font-weight: 800; color: var(--text-dark); border-bottom: 1px solid var(--border-color); text-decoration: none; cursor: pointer; }
+        .sp-menu-item:last-child { border-bottom: none; }
+        .sp-menu-icon { color: var(--text-gray); width: 24px; display: flex; justify-content: center; }
+
+        /* Botón dinámico Sol/Luna */
+        .panel-theme-btn-bottom {
+            position: absolute; bottom: 45px; right: 24px; width: 52px; height: 52px; border-radius: 50%;
+            background: rgba(15, 23, 42, 0.85); backdrop-filter: var(--blur-effect); border: 1px solid rgba(255, 255, 255, 0.15); color: #ffffff; 
+            display: flex; justify-content: center; align-items: center; cursor: pointer; 
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4); z-index: 100;
+        }
+        body:not(.dark-mode) .panel-theme-btn-bottom {
+            background: rgba(255, 255, 255, 0.85); backdrop-filter: var(--blur-effect); border: 1px solid var(--border-color); color: var(--text-dark);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        /* ================= VISTA INTERMEDIA: "TU VIAJE" ================= */
+        #trip-view { 
+            opacity: 0; visibility: hidden; transform: translateX(-50%) translateY(30px); pointer-events: none;
+            position: fixed; top: 0; left: 50%; width: 100%; height: 100dvh; max-width: 600px; z-index: 500; 
+            padding: 24px; box-sizing: border-box; display: flex; flex-direction: column; overflow-y: auto; 
+            background: var(--glass-bg); backdrop-filter: var(--blur-effect); -webkit-backdrop-filter: var(--blur-effect);
+            transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.35s;
+        }
+        #trip-view.active { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); pointer-events: auto; }
+        
+        .trip-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; margin-top: 10px; }
+        .trip-header h2 { margin: 0; font-size: 18px; font-weight: 900; text-align: center; flex-grow: 1; color: var(--text-dark); }
+        .close-trip-btn { background: var(--input-bg); border: none; font-size: 16px; font-weight: 900; color: var(--text-dark); width: 36px; height: 36px; border-radius: 50%; display: flex; justify-content: center; align-items: center; }
+
+        .trip-inputs-container { background: var(--card-bg); backdrop-filter: var(--blur-effect); border: 1px solid var(--glass-border); border-radius: 24px; padding: 18px; box-shadow: 0 10px 40px var(--shadow-color); display: flex; gap: 14px; margin-bottom: 24px; position: relative; }
+        .trip-indicators-col { display: flex; flex-direction: column; align-items: center; position: relative; width: 20px; flex-shrink: 0; }
+        .trip-vertical-line { position: absolute; top: 23px; height: 58px; width: 2px; left: 50%; transform: translateX(-50%); background-color: var(--border-color); z-index: 1; }
+        .trip-dot-node { width: 10px; height: 10px; border-radius: 50%; background-color: var(--primary-brand); position: absolute; left: 50%; transform: translate(-50%, -50%); z-index: 2; box-shadow: 0 0 0 4px var(--card-bg); }
+        .trip-dot-node.origin { background-color: var(--neutral-accent); top: 23px; }
+        .trip-dot-node.destination { top: 81px; }
+
+        .trip-fields-col { display: flex; flex-direction: column; gap: 12px; flex-grow: 1; }
+        .trip-pill-input { width: 100%; background: var(--input-bg); border: 2px solid transparent; border-radius: 16px; padding: 14px 16px; font-size: 14px; font-weight: 700; color: var(--text-dark); outline: none; box-sizing: border-box; }
+        .trip-pill-input:focus { background: var(--card-bg); border-color: var(--neutral-accent); box-shadow: 0 4px 12px var(--shadow-color); }
+        
+        .trip-autocomplete-dropdown { display: none; background: var(--glass-bg); backdrop-filter: var(--blur-effect); border: 1px solid var(--glass-border); border-radius: 16px; max-height: 220px; overflow-y: auto; box-shadow: 0 10px 40px var(--shadow-color); margin-top: 8px; position: absolute; left: 0; right: 0; z-index: 200; }
+        .trip-auto-item { padding: 16px 18px; border-bottom: 1px solid var(--border-color); font-size: 14px; font-weight: 600; color: var(--text-dark); display: flex; align-items: center; gap: 12px;}
+        .map-picker-link { color: var(--neutral-accent); font-weight: 800; font-size: 13px; text-align: right; text-decoration: none; margin-top: 4px; display: block; cursor: pointer; }
+        
+        .recent-destinations { display: flex; flex-direction: column; gap: 10px; margin-bottom: 30px; }
+        .recent-item { background: var(--card-bg); backdrop-filter: var(--blur-effect); border: 1px solid var(--glass-border); border-radius: 20px; padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 15px var(--shadow-color); cursor: pointer; }
+        .recent-info { display: flex; align-items: center; gap: 14px; min-width: 0; flex-grow: 1; }
+        .recent-icon { background: var(--input-bg); color: var(--primary-brand); width: 40px; height: 40px; border-radius: 50%; display: flex; justify-content: center; align-items: center; flex-shrink: 0; }
+        .recent-text h4 { margin: 0 0 4px 0; font-size: 14px; font-weight: 800; color: var(--text-dark); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .recent-text p { margin: 0; font-size: 12px; color: var(--text-gray); }
+        .delete-recent { color: var(--text-gray); font-weight: 900; font-size: 16px; flex-shrink: 0; margin-left: 10px; width: 34px; height: 34px; border-radius: 50%; display: flex; justify-content: center; align-items: center; }
+
+        .cotizar-btn { width: 100%; background: var(--primary-brand); color: #ffffff; border: none; border-radius: 50px; padding: 18px; font-size: 15px; font-weight: 900; text-transform: uppercase; box-shadow: 0 10px 30px var(--shadow-color); margin-top: auto; }
+
+        /* ================= VISTA 2: UI DEL MAPA ================= */
+        #map-ui-view { opacity: 0; visibility: hidden; pointer-events: none; position: fixed; top: 0; left: 0; width: 100%; height: 100dvh; z-index: 200; transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.35s; }
+        #map-ui-view.active { opacity: 1; visibility: visible; }
+        #map-ui-view.active .back-btn, 
+        #map-ui-view.active .top-widget-container, 
+        #map-ui-view.active .map-bottom-sheet { pointer-events: auto; }
+
+        .back-btn { position: absolute; top: 20px; left: 20px; background: var(--glass-bg); backdrop-filter: var(--blur-effect); border: 1px solid var(--glass-border); color: var(--text-dark); border-radius: 50%; width: 45px; height: 45px; box-shadow: 0 6px 20px var(--shadow-color); z-index: 1000; display: flex; justify-content: center; align-items: center; }
+
+        .top-widget-container { position: absolute; top: 20px; right: 20px; display: flex; flex-direction: column; gap: 10px; z-index: 1000; width: 180px; }
+        .map-rate-pill { background: var(--glass-bg); backdrop-filter: var(--blur-effect); border: 1px solid var(--glass-border); padding: 12px 16px; border-radius: 20px; box-shadow: 0 6px 20px var(--shadow-color); font-size: 12px; font-weight: 800; color: var(--text-dark); display: flex; flex-direction: column; gap: 8px; user-select: none; }
+        .map-rate-pill > span { display: flex; justify-content: space-between; align-items: center; font-size: 11px; font-weight: 800; color: var(--text-gray); text-transform: uppercase; }
+        .map-rate-pill > strong { color: var(--neutral-accent); font-weight: 900; font-size: 16px; }
+
+        .map-bottom-sheet { position: absolute; bottom: 0; left: 0; width: 100%; background: var(--glass-bg); backdrop-filter: var(--blur-effect); border-top-left-radius: 32px; border-top-right-radius: 32px; border-top: 1px solid var(--glass-border); box-shadow: 0 -10px 40px var(--shadow-color); padding: 20px 24px; padding-bottom: calc(20px + env(safe-area-inset-bottom)); box-sizing: border-box; z-index: 1000; display: flex; flex-direction: column; max-height: 80vh; }
+        .sheet-drag-handle { width: 40px; height: 5px; background: var(--text-gray); border-radius: 5px; margin: 0 auto 20px auto; opacity: 0.4; }
+        .trip-container-map { position: relative; display: flex; flex-direction: column; gap: 14px; margin-bottom: 16px; }
+        .trip-line-map { position: absolute; left: 5px; top: 18px; bottom: 18px; width: 2px; background-color: var(--border-color); z-index: 1; }
+        .input-row-map { display: flex; align-items: center; gap: 14px; position: relative; z-index: 2; }
+        .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--primary-brand); flex-shrink: 0; box-shadow: 0 0 0 4px var(--glass-bg); }
+        .dot.origin { background: var(--neutral-accent); }
+        .trip-input-map { flex-grow: 1; padding: 14px 18px; border: 2px solid transparent; border-radius: 16px; font-size: 15px; background-color: var(--input-bg); color: var(--text-dark); outline: none; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        
+        #autocomplete-container { display: none; background: var(--card-bg); backdrop-filter: var(--blur-effect); border-radius: 16px; margin-bottom: 12px; max-height: 200px; overflow-y: auto; box-shadow: 0 10px 30px var(--shadow-color); border: 1px solid var(--glass-border); }
+        .gps-button { background: var(--input-bg); border: none; border-radius: 12px; color: var(--primary-brand); font-weight: 800; font-size: 14px; display: flex; justify-content: center; align-items: center; gap: 8px; padding: 14px; margin-bottom: 10px; }
+
+        #route-results { display: none; flex-grow: 1; overflow-y: auto; padding-top: 10px; padding-bottom: 20px; }
+        .result-title { font-size: 13px; color: var(--text-gray); margin-bottom: 12px; font-weight: 800; text-transform: uppercase; }
+        .route-option { background: var(--card-bg); backdrop-filter: var(--blur-effect); border: 1px solid var(--border-color); border-radius: 20px; padding: 14px; margin-bottom: 12px; display: flex; align-items: center; gap: 14px; box-shadow: 0 4px 15px var(--shadow-color); }
+        .route-badge { background: var(--primary-brand); color: #ffffff; font-weight: 900; width: 48px; height: 48px; border-radius: 14px; display: flex; justify-content: center; align-items: center; font-size: 14px; text-align: center; flex-shrink: 0; }
+        .route-info { flex-grow: 1; min-width: 0; }
+        .route-info h4 { margin: 0 0 4px 0; font-size: 16px; color: var(--text-dark); display: flex; justify-content: space-between; font-weight: 900; }
+        .route-info p { margin: 0; font-size: 13px; color: var(--text-gray); font-weight: 600; }
+        .badge-cercana { background: var(--input-bg); color: var(--text-dark); padding: 4px 8px; border-radius: 8px; font-size: 11px; font-weight: 900; text-transform: uppercase; }
+
+        /* ================= MODALES GENÉRICOS ================= */
+        .generic-modal { opacity: 0; visibility: hidden; pointer-events: none; position: fixed; top: 0; left: 0; width: 100%; height: 100dvh; background: rgba(0,0,0,0.5); backdrop-filter: var(--blur-effect); z-index: 6000; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; display: flex; transition: opacity 0.3s ease, visibility 0.3s; }
+        .generic-modal.active { opacity: 1; visibility: visible; pointer-events: auto; }
+        .generic-modal-content { background: var(--glass-bg); backdrop-filter: var(--blur-effect); border: 1px solid var(--glass-border); border-radius: 28px; padding: 24px; width: 100%; max-width: 340px; box-shadow: 0 20px 50px rgba(0,0,0,0.2); display: flex; flex-direction: column; gap: 16px; color: var(--text-dark); }
+        .generic-modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; margin-bottom: 8px; }
+        .generic-modal-header h3 { margin: 0; font-size: 18px; font-weight: 900; }
+        .close-generic-btn { background: var(--input-bg); color: var(--text-dark); border: none; width: 32px; height: 32px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; }
+        
+        #city-modal { opacity: 0; visibility: hidden; pointer-events: none; position: fixed; top: 0; left: 0; width: 100%; height: 100dvh; background: rgba(0,0,0,0.4); backdrop-filter: var(--blur-effect); z-index: 6001; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; display: flex; transition: opacity 0.3s ease, visibility 0.3s; }
+        #city-modal.active { opacity: 1; visibility: visible; pointer-events: auto; }
+        .city-modal-content { background: var(--glass-bg); backdrop-filter: var(--blur-effect); border: 1px solid var(--glass-border); border-radius: 28px; padding: 24px; width: 100%; max-width: 340px; box-shadow: 0 20px 50px rgba(0,0,0,0.15); display: flex; flex-direction: column; gap: 16px; }
+        .cities-grid { display: flex; flex-direction: column; gap: 8px; max-height: 260px; overflow-y: auto; }
+        .city-option { padding: 14px 16px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 16px; font-weight: 700; font-size: 14px; display: flex; align-items: center; gap: 10px; }
+        .close-modal-btn { background: var(--primary-brand); color: #ffffff; border: none; padding: 16px; border-radius: 50px; font-weight: 800; margin-top: 8px; }
+    </style>
+</head>
+<body>
+
+    <!-- PANTALLA DE CARGA -->
+    <div id="splash-screen">
+        <div class="splash-logo">Rapidito</div>
+        <div class="splash-subtitle">Móvil Venezuela</div>
+    </div>
+
+    <!-- EL MAPA BASE -->
+    <div id="map"></div>
+
+    <!-- PANEL LATERAL DE PERFIL -->
+    <div class="panel-overlay" id="panel-overlay" onclick="cerrarPanelPerfil()"></div>
+    <div class="side-panel" id="side-panel">
+        <div class="side-panel-header">
+            <div style="width: 36px;"></div>
+            <h3 class="side-panel-title">Pasajero</h3>
+            <button class="side-panel-close interactive" onclick="cerrarPanelPerfil()">
+                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+        </div>
+
+        <div class="sp-user-info">
+            <div class="sp-avatar" id="sp-avatar-display">J</div>
+            <div class="sp-details">
+                <h2 class="sp-name">
+                    <span id="sp-name-text">Jesús Vásquez</span>
+                    <button class="sp-edit-btn interactive" onclick="abrirDesdePanel('modal-editar-perfil')" title="Editar Perfil">
+                        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                    </button>
+                </h2>
+            </div>
+        </div>
+
+        <div class="sp-menu-list">
+            <a class="sp-menu-item interactive" onclick="abrirDesdePanel('modal-viajes')">
+                <div class="sp-menu-icon"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg></div>
+                Historial de destinos
+            </a>
+            <a class="sp-menu-item interactive" onclick="instalarAppPWA()" style="color: var(--primary-brand);">
+                <div class="sp-menu-icon" style="color: var(--primary-brand);"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg></div>
+                Instalar Rapidito
+            </a>
+            <a class="sp-menu-item interactive" onclick="abrirDesdePanel('modal-legales')">
+                <div class="sp-menu-icon"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg></div>
+                Legal y Privacidad
+            </a>
+            <a class="sp-menu-item interactive" onclick="abrirDesdePanel('modal-terminos')">
+                <div class="sp-menu-icon"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg></div>
+                Términos de Uso
+            </a>
+            <a href="mailto:soporte@rapidito.app" class="sp-menu-item interactive">
+                <div class="sp-menu-icon"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg></div>
+                Contactar Soporte
+            </a>
+            <a class="sp-menu-item interactive" onclick="abrirDesdePanel('modal-acerca')">
+                <div class="sp-menu-icon"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg></div>
+                Acerca de Rapidito
+            </a>
+        </div>
+        
+        <!-- Botón dinámico Sol/Luna -->
+        <button class="panel-theme-btn-bottom interactive" id="theme-toggle-btn" onclick="toggleDarkMode()" title="Cambiar tema">
+            <svg id="theme-icon" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+        </button>
+
+        <div style="text-align: center; margin-top: auto; padding-top: 20px; font-size: 11px; font-weight: 800; color: var(--text-gray); opacity: 0.6; text-transform: uppercase; letter-spacing: 0.05em;">
+            Rapidito App · Beta 3.0
+        </div>
+    </div>
+
+    <!-- VISTA 1: DASHBOARD -->
+    <div id="dashboard-wrapper">
+        <div id="dashboard-view">
+            <div class="header-dash">
+                <div class="app-title-container">
+                    <h1 class="app-title">Rapidito</h1>
+                </div>
+                
+                <div class="profile-container">
+                    <div class="avatar-dash interactive" onclick="abrirPanelPerfil()">J</div>
+                </div>
+            </div>
+
+            <!-- Buscador ARRIBA -->
+            <div class="search-trigger interactive" onclick="abrirVistaViaje()">
+                <div class="icon">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                </div>
+                <div class="text">¿A dónde vas hoy?</div>
+            </div>
+
+            <!-- Tarjetas financieras ABAJO del buscador -->
+            <div class="dash-finance">
+                <div class="dash-finance-pill interactive" onclick="toggleDivisas()">
+                    <span>TASAS BCV 
+                        <svg id="flecha-divisas" class="chevron-icon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </span>
+                    <strong id="dash-tasa-bcv" style="color: var(--neutral-accent); font-size: 20px;">--</strong>
+                    <div id="detalles-divisas" class="finance-details">
+                        <strong id="dash-tasa-euro" style="font-size: 14px; color: var(--text-dark);">--</strong>
+                        <strong id="dash-tasa-paralelo" style="font-size: 14px; color: var(--text-dark);">--</strong>
+                    </div>
+                </div>
+                <div class="dash-finance-pill interactive" onclick="togglePasaje()">
+                    <span>PASAJE NORMAL 
+                        <svg id="flecha-pasaje" class="chevron-icon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </span>
+                    <strong id="dash-tarifa-normal" style="font-size: 20px;">--</strong>
+                    <div id="detalles-pasaje" class="finance-details">
+                        <strong id="dash-tarifa-pref" style="font-size: 14px; color: var(--neutral-accent);">--</strong>
+                    </div>
+                </div>
+            </div>
+
+            <h2 class="section-header">Servicios</h2>
+            <div class="transport-options">
+                <div class="transport-card interactive" onclick="toggleRutasList()">
+                    <div class="t-card-info">
+                        <svg width="26" height="26" fill="none" stroke="var(--primary-brand)" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"></rect><path d="M6 21v-4M18 21v-4M2 9h20M6 9v4M10 9v4M14 9v4M18 9v4"></path></svg>
+                        <h3>Rutas Urbanas</h3>
+                    </div>
+                    <svg id="flecha-rutas" class="chevron-icon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </div>
+                
+                <div id="rutas-list-container" class="rutas-list"></div>
+
+                <div class="transport-card disabled">
+                    <div class="t-card-info">
+                        <svg width="26" height="26" fill="none" stroke="var(--text-gray)" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="10" rx="2"></rect><path d="M5 17v2a1 1 0 0 0 1 1h1a1 1 0 0 0 1-1v-2M16 17v2a1 1 0 0 0 1 1h1a1 1 0 0 0 1-1v-2M2 12h20M6 7l1-4h10l1 4"></path></svg>
+                        <h3 style="color: var(--text-gray)">Rapiditos</h3>
+                    </div>
+                    <span style="font-size: 11px; font-weight: 800; background: var(--border-color); padding: 4px 8px; border-radius: 8px; color: var(--text-gray); text-transform: uppercase;">Próximamente</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- VISTA INTERMEDIA: TU VIAJE -->
+    <div id="trip-view">
+        <div class="trip-header">
+            <button class="close-trip-btn interactive" onclick="cerrarVistaViaje()">
+                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+            <h2>Tu viaje</h2>
+            <div style="width: 36px;"></div> 
+        </div>
+
+        <div class="trip-inputs-container">
+            <div class="trip-indicators-col">
+                <div class="trip-dot-node origin"></div>
+                <div class="trip-vertical-line"></div>
+                <div class="trip-dot-node destination"></div>
+            </div>
+            <div class="trip-fields-col" style="position: relative;">
+                <div style="position: relative;">
+                    <input type="text" id="trip-origen-input" class="trip-pill-input" placeholder="Ubicación actual">
+                    <div id="trip-auto-origen" class="trip-autocomplete-dropdown"></div>
+                </div>
+                <div style="position: relative;">
+                    <input type="text" id="trip-destino-input" class="trip-pill-input" placeholder="Introduce tu destino">
+                    <div id="trip-auto-destino" class="trip-autocomplete-dropdown"></div>
+                </div>
+                <a class="map-picker-link interactive" onclick="abrirMapaDesdeVistaViaje()">Escoger dirección en el mapa ></a>
+            </div>
+        </div>
+
+        <h2 class="section-header">Búsquedas recientes</h2>
+        <div id="historial-container" class="recent-destinations"></div>
+
+        <button class="cotizar-btn interactive" onclick="cotizarViajeDesdeVista()">Ver rutas cercanas</button>
+    </div>
+
+    <!-- MODALES GENÉRICOS -->
+    <div id="modal-editar-perfil" class="generic-modal" onclick="if(event.target === this) { cerrarModal('modal-editar-perfil'); }">
+        <div class="generic-modal-content">
+            <div class="generic-modal-header">
+                <h3>Editar Perfil</h3>
+                <button class="close-generic-btn interactive" onclick="cerrarModal('modal-editar-perfil')">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 14px; margin-bottom: 10px;">
+                <div>
+                    <label style="font-size: 12px; font-weight: 800; color: var(--text-gray); margin-bottom: 6px; display: block; text-transform: uppercase;">Nombre Completo</label>
+                    <input type="text" id="edit-nombre" class="trip-pill-input" style="background: var(--input-bg); border-radius: 12px; padding: 12px 16px;">
+                </div>
+                <div>
+                    <label style="font-size: 12px; font-weight: 800; color: var(--text-gray); margin-bottom: 6px; display: block; text-transform: uppercase;">Ciudad Principal</label>
+                    <div class="interactive" onclick="cerrarModal('modal-editar-perfil'); setTimeout(()=> openCitySelector('profile'), 150)" style="background: var(--input-bg); border-radius: 12px; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; cursor: pointer;">
+                        <span id="edit-ciudad-display" style="font-size: 14px; font-weight: 700; color: var(--text-dark);">Barquisimeto</span>
+                        <input type="hidden" id="edit-ciudad-value" value="Barquisimeto">
+                        <svg style="color: var(--text-gray);" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </div>
+                </div>
+            </div>
+            <button class="cotizar-btn interactive" style="padding:14px; font-size:14px; margin-top:0;" onclick="guardarPerfil()">Guardar Cambios</button>
+        </div>
+    </div>
+
+    <div id="modal-viajes" class="generic-modal" onclick="if(event.target === this) cerrarModal('modal-viajes')">
+        <div class="generic-modal-content">
+            <div class="generic-modal-header">
+                <h3>Mis Viajes</h3>
+                <button class="close-generic-btn interactive" onclick="cerrarModal('modal-viajes')">
+                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+            <p style="font-size:13px; color:var(--text-gray); font-weight:600; margin:0 0 10px 0;">Tu historial de destinos:</p>
+            <div id="lista-mis-viajes" style="display:flex; flex-direction:column; gap:8px; max-height:250px; overflow-y:auto;"></div>
+        </div>
+    </div>
+
+    <div id="modal-acerca" class="generic-modal" onclick="if(event.target === this) cerrarModal('modal-acerca')">
+        <div class="generic-modal-content" style="align-items:center; text-align:center; max-width: 360px;">
+            <div class="generic-modal-header" style="width:100%; border:none; margin-bottom:0;">
+                <div style="width:32px;"></div>
+                <button class="close-generic-btn interactive" onclick="cerrarModal('modal-acerca')">
+                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+            <h1 style="margin:0; font-size:28px; font-weight:900; color:var(--primary-brand);">Rapidito</h1>
+            <p style="font-size:13px; color:var(--neutral-accent); font-weight:800; margin:4px 0 12px 0;">Versión 3.0.0 · Edición Barquisimeto</p>
+            <p style="font-size:13px; color:var(--text-gray); font-weight:600; line-height:1.5; margin:0 0 16px 0;">La aplicación web progresiva (PWA) diseñada para transformar y simplificar la experiencia de moverte en transporte público en Venezuela.</p>
+            <p style="font-size:11px; color:var(--text-gray); font-weight:700; margin:0; opacity: 0.8;">Desarrollado con pasión para la optimización de la movilidad urbana.</p>
+        </div>
+    </div>
+
+    <!-- MODAL: INSTALAR LA APP (Estilo tarjeta profesional con botón nativo) -->
+    <div id="modal-instalar" class="generic-modal" onclick="if(event.target === this) cerrarModal('modal-instalar')">
+        <div class="generic-modal-content" style="align-items:center; text-align:center; max-width: 340px; padding: 28px 24px;">
+            <div class="generic-modal-header" style="width:100%; border:none; margin-bottom:0; position:absolute; top:12px; right:12px;">
+                <div style="width:32px;"></div>
+                <button class="close-generic-btn interactive" onclick="cerrarModal('modal-instalar')">
+                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+            
+            <!-- Icono circular de la app -->
+            <div style="width: 64px; height: 64px; background: var(--primary-brand); border-radius: 20px; display: flex; justify-content: center; align-items: center; color: #ffffff; margin: 10px auto 4px auto; box-shadow: 0 8px 20px var(--shadow-color);">
+                <svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            </div>
+
+            <h3 style="margin:4px 0 2px 0; font-size:20px; font-weight:900; color:var(--text-dark);">Rapidito en tu dispositivo</h3>
+            <p style="font-size:13px; color:var(--text-gray); font-weight:600; line-height:1.5; margin:0 0 20px 0;">Accede a tus rutas y tarifas de transporte al instante, como una app nativa.</p>
+            
+            <button class="cotizar-btn interactive" style="padding:16px; font-size:14px; margin-top:0; border-radius: 50px;" onclick="ejecutarInstalacionNativa()">Instalar en este dispositivo</button>
+            <p style="font-size:11px; color:var(--text-gray); font-weight:700; margin:8px 0 0 0; opacity: 0.7;">Instalar la app no requiere permisos especiales ni altera tu sistema.</p>
+        </div>
+    </div>
+
+    <!-- MODAL: LEGAL Y PRIVACIDAD -->
+    <div id="modal-legales" class="generic-modal" onclick="if(event.target === this) cerrarModal('modal-legales')">
+        <div class="generic-modal-content" style="max-width: 420px; max-height: 80vh;">
+            <div class="generic-modal-header">
+                <h3>Legal y Privacidad</h3>
+                <button class="close-generic-btn interactive" onclick="cerrarModal('modal-legales')">
+                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+            <div style="max-height: 380px; overflow-y: auto; font-size: 13px; color: var(--text-gray); font-weight: 600; line-height: 1.6; display: flex; flex-direction: column; gap: 14px; padding-right: 4px;">
+                <p style="margin:0;"><strong style="color: var(--text-dark);">1. Política de Privacidad y GPS:</strong> Rapidito valora tu privacidad. El uso de la geolocalización (GPS) se realiza exclusivamente en tiempo real dentro de tu dispositivo móvil para calcular distancias y trazar rutas cercanas. <span style="color: var(--neutral-accent); font-weight: 700;">No recopilamos, almacenamos ni compartimos tu ubicación en servidores externos.</span></p>
+                
+                <p style="margin:0;"><strong style="color: var(--text-dark);">2. Almacenamiento Local:</strong> Datos como tu nombre de usuario, ciudad seleccionada y el historial de búsquedas recientes se guardan de forma local en la memoria de tu teléfono (<code style="font-size:11px; background:var(--input-bg); padding:2px 6px; border-radius:4px;">localStorage</code>), bajo tu absoluto control y sin acceso de terceros.</p>
+                
+                <p style="margin:0;"><strong style="color: var(--text-dark);">3. Servicios de Terceros:</strong> La aplicación consulta APIs públicas y de código abierto (como OpenStreetMap para los mapas y DolarAPI para las tasas de cambio oficiales del BCV). Dichos servicios operan bajo sus propias políticas de disponibilidad y uso.</p>
+
+                <p style="margin:0;"><strong style="color: var(--text-dark);">4. Propiedad Intelectual:</strong> El diseño de la interfaz, el logotipo, el nombre "Rapidito" y la estructura de desarrollo están protegidos bajo los principios de autoría de proyectos independientes de movilidad urbana.</p>
+            </div>
+            <button class="cotizar-btn interactive" style="padding:12px; font-size:13px; margin-top:0;" onclick="cerrarModal('modal-legales')">Entendido</button>
+        </div>
+    </div>
+
+    <!-- MODAL: TÉRMINOS DE USO -->
+    <div id="modal-terminos" class="generic-modal" onclick="if(event.target === this) cerrarModal('modal-terminos')">
+        <div class="generic-modal-content" style="max-width: 420px; max-height: 80vh;">
+            <div class="generic-modal-header">
+                <h3>Términos de Uso</h3>
+                <button class="close-generic-btn interactive" onclick="cerrarModal('modal-terminos')">
+                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+            <div style="max-height: 380px; overflow-y: auto; font-size: 13px; color: var(--text-gray); font-weight: 600; line-height: 1.6; display: flex; flex-direction: column; gap: 14px; padding-right: 4px;">
+                <p style="margin:0;"><strong style="color: var(--text-dark);">1. Naturaleza de la App:</strong> Rapidito es una herramienta tecnológica de carácter informativo y de orientación ciudadana diseñada para facilitar la visualización de rutas de transporte público y el cálculo referencial de tarifas en Venezuela.</p>
+                
+                <p style="margin:0;"><strong style="color: var(--text-dark);">2. Exención de Responsabilidad:</strong> Los desarrolladores de Rapidito no operan líneas de transporte ni formulan políticas tarifarias oficiales directas. Las tarifas mostradas se basan en los lineamientos del Banco Central de Venezuela (BCV) y los tiempos de traslado son estimados, por lo que no asumimos responsabilidad por desvíos viales, tráfico o cambios imprevistos de los transportistas.</p>
+                
+                <p style="margin:0;"><strong style="color: var(--text-dark);">3. Uso Gratuito:</strong> La aplicación es de libre acceso y uso para todos los ciudadanos que deseen optimizar su movilidad urbana de manera segura.</p>
+            </div>
+            <button class="cotizar-btn interactive" style="padding:12px; font-size:13px; margin-top:0;" onclick="cerrarModal('modal-terminos')">Entendido</button>
+        </div>
+    </div>
+
+    <div id="city-modal" class="generic-modal" onclick="if(event.target === this) closeCitySelector()">
+        <div class="city-modal-content">
+            <h3>Selecciona una ciudad</h3>
+            <div class="cities-grid">
+                <div class="city-option interactive" onclick="selectCity('Barquisimeto', 10.0714, -69.3333)">Barquisimeto</div>
+                <div class="city-option interactive" onclick="selectCity('Caracas', 10.4806, -66.9036)">Caracas</div>
+                <div class="city-option interactive" onclick="selectCity('Maracaibo', 10.6549, -71.6437)">Maracaibo</div>
+                <div class="city-option interactive" onclick="selectCity('Valencia', 10.1623, -68.0077)">Valencia</div>
+                <div class="city-option interactive" onclick="selectCity('Barinas', 8.6226, -70.2075)">Barinas</div>
+                <div class="city-option interactive" onclick="selectCity('Mérida', 8.5983, -71.1450)">Mérida</div>
+            </div>
+            <button class="close-modal-btn interactive" onclick="closeCitySelector()">Cancelar</button>
+        </div>
+    </div>
+
+    <!-- VISTA 2: UI DEL MAPA -->
+    <div id="map-ui-view">
+        <button class="back-btn interactive" onclick="volverAVistaViaje()">
+            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+        </button>
+        
+        <div class="top-widget-container">
+            <div class="map-rate-pill interactive" onclick="toggleMapDivisas()">
+                <span>TASAS BCV 
+                    <svg id="map-flecha-divisas" class="chevron-icon" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </span>
+                <strong id="tasa-bcv" style="color: var(--neutral-accent); font-size: 15px;">--</strong>
+                <div id="map-detalles-divisas" class="map-finance-details">
+                    <span id="map-tasa-euro" style="font-size: 12px; color: var(--text-dark); font-weight: 800;">€ = --</span>
+                    <span id="map-tasa-paralelo" style="font-size: 12px; color: var(--text-dark); font-weight: 800;">USD₮ = --</span>
+                </div>
+            </div>
+
+            <div class="map-rate-pill interactive" onclick="toggleMapPasaje()">
+                <span>PASAJE NORMAL 
+                    <svg id="map-flecha-pasaje" class="chevron-icon" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </span>
+                <strong id="tarifa-normal" style="font-size: 15px;">--</strong>
+                <div id="map-detalles-pasaje" class="map-finance-details">
+                    <span id="map-tarifa-pref" style="font-size: 12px; color: var(--neutral-accent); font-weight: 800;">Pref: --</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="map-bottom-sheet" id="bottom-sheet">
+            <div class="sheet-drag-handle"></div>
+            
+            <div class="trip-container-map">
+                <div class="trip-line-map"></div>
+                <div class="input-row-map">
+                    <div class="dot origin"></div>
+                    <input type="text" id="input-origen" class="trip-input-map" placeholder="Ubicación actual">
+                </div>
+                <div class="input-row-map">
+                    <div class="dot destination"></div>
+                    <input type="text" id="map-search-input" class="trip-input-map" placeholder="Introduce tu destino">
+                </div>
+            </div>
+
+            <div id="autocomplete-container" style="background:var(--card-bg); border-radius:16px;"></div>
+
+            <button class="gps-button interactive" onclick="ubicarConGPS()">Usar mi ubicación</button>
+
+            <div id="route-results"></div>
+        </div>
+    </div>
+
+    <!-- Librería Leaflet y Script principal unificado -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(reg => console.log('Service Worker registrado con éxito', reg))
+                    .catch(err => console.log('Error al registrar el Service Worker', err));
+            });
+        }
+
+        const dashboardWrapper = document.getElementById('dashboard-wrapper');
+        const tripView = document.getElementById('trip-view');
+        const mapUiView = document.getElementById('map-ui-view');
+        const originInput = document.getElementById('input-origen');
+        const searchInput = document.getElementById('map-search-input');
+        const tripOrigenInput = document.getElementById('trip-origen-input');
+        const tripDestinoInput = document.getElementById('trip-destino-input');
+        const tripAutoOrigen = document.getElementById('trip-auto-origen');
+        const tripAutoDestino = document.getElementById('trip-auto-destino');
+        const resultsContainer = document.getElementById('route-results');
+        const autocompleteContainer = document.getElementById('autocomplete-container');
+        const bottomSheet = document.querySelector('.map-bottom-sheet');
+        
+        let mapInstance = null, rutaDibujada = null, marcadorDestino = null, marcadorOrigen = null;
+        let capasCaminata = null, marcadoresRuta = null, inputActivo = 'destino', precioPasajeNormal = "0.00 Bs";
+        let currentLat = 10.0714, currentLon = -69.3333;
+        let deferredPrompt = null;
+
+        const RUTAS_DATA = {
+            "ruta_av_venezuela": {
+                "type": "FeatureCollection",
+                "features": [{
+                    "type": "Feature",
+                    "properties": { "nombre": "Ruta Avenida Venezuela", "origen": "Oeste / Centro", "destino": "Este / Sambil" },
+                    "geometry": { "type": "LineString", "coordinates": [
+                        [-69.333321,10.071435],[-69.33033,10.07167],[-69.326557,10.071959],[-69.321887,10.072343],[-69.317488,10.072682],[-69.314158,10.072946],[-69.309817,10.073274],[-69.304129,10.07374],[-69.303218,10.073771],[-69.30206,10.073894],[-69.301133,10.073985],[-69.299811,10.074037],[-69.297051,10.073907],[-69.294804,10.073855],[-69.293613,10.073719],[-69.290619,10.073153],[-69.289797,10.073056],[-69.286333,10.072867],[-69.284926,10.07277],[-69.284755,10.07277],[-69.283545,10.072252],[-69.280736,10.071701],[-69.28073,10.071695]
+                    ] }
+                }]
+            }
+        };
+
+        function guardarEnHistorial(destino) {
+            if (!destino || destino.trim() === "") return;
+            let historial = JSON.parse(localStorage.getItem('rapidito_historial')) || [];
+            historial = historial.filter(item => item.toLowerCase() !== destino.toLowerCase());
+            historial.unshift(destino);
+            if (historial.length > 5) historial.pop();
+            localStorage.setItem('rapidito_historial', JSON.stringify(historial));
+            renderizarHistorial();
+        }
+
+        function eliminarDelHistorial(event, destino) {
+            event.stopPropagation();
+            let historial = JSON.parse(localStorage.getItem('rapidito_historial')) || [];
+            historial = historial.filter(item => item !== destino);
+            localStorage.setItem('rapidito_historial', JSON.stringify(historial));
+            renderizarHistorial();
+            llenarModalViajes();
+        }
+
+        function renderizarHistorial() {
+            const contenedor = document.getElementById('historial-container');
+            if (!contenedor) return;
+            let historial = JSON.parse(localStorage.getItem('rapidito_historial')) || [];
+            if (historial.length === 0) {
+                contenedor.innerHTML = `<p style="font-size:13px; color:var(--text-gray); text-align:center; padding:10px;">No hay búsquedas recientes</p>`;
+                return;
+            }
+            let html = '';
+            historial.forEach(dest => {
+                let escapedDest = dest.replace(/'/g, "\'");
+                html += `<div class="recent-item interactive" onclick="seleccionarHistorial('${escapedDest}')"><div class="recent-info"><div class="recent-icon"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg></div><div class="recent-text"><h4>${dest}</h4><p>Búsqueda reciente</p></div></div><span class="delete-recent interactive" onclick="eliminarDelHistorial(event, '${escapedDest}')" title="Eliminar"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></span></div>`;
+            });
+            contenedor.innerHTML = html;
+        }
+
+        function seleccionarHistorial(destino) { tripDestinoInput.value = destino; cotizarViajeDesdeVista(); }
+
+        function actualizarIconoTema() {
+            const iconContainer = document.getElementById('theme-icon');
+            if (!iconContainer) return;
+            if (document.body.classList.contains('dark-mode')) {
+                iconContainer.innerHTML = `<circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>`;
+            } else {
+                iconContainer.innerHTML = `<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>`;
+            }
+        }
+
+        function toggleDarkMode() { 
+            document.body.classList.toggle('dark-mode'); 
+            const isDark = document.body.classList.contains('dark-mode');
+            localStorage.setItem('rapidito_theme', isDark ? 'dark' : 'light'); 
+            actualizarIconoTema();
+        }
+
+        if (localStorage.getItem('rapidito_theme') === 'dark') {
+            document.body.classList.add('dark-mode');
+        }
+
+        window.addEventListener('load', () => {
+            const splash = document.getElementById('splash-screen');
+            if (splash) splash.classList.add('hidden');
+            actualizarIconoTema();
+        });
+
+        function abrirPanelPerfil() {
+            document.getElementById('panel-overlay').classList.add('active');
+            document.getElementById('side-panel').classList.add('active');
+        }
+        function cerrarPanelPerfil() {
+            document.getElementById('panel-overlay').classList.remove('active');
+            document.getElementById('side-panel').classList.remove('active');
+        }
+
+        function abrirDesdePanel(modalId) {
+            cerrarPanelPerfil();
+            setTimeout(() => {
+                if (modalId === 'modal-viajes') llenarModalViajes();
+                abrirModal(modalId);
+            }, 300);
+        }
+
+        window.cerrarModal = function(id) { 
+            document.getElementById(id).classList.remove('active'); 
+            setTimeout(() => abrirPanelPerfil(), 200);
+        };
+
+        window.abrirModal = function(id) { 
+            document.getElementById(id).classList.add('active'); 
+        };
+
+        function abrirVistaViaje() {
+            dashboardWrapper.classList.add('hidden');
+            tripView.classList.add('active');
+            if (!tripOrigenInput.value) tripOrigenInput.value = "Ubicación actual";
+            renderizarHistorial();
+            tripDestinoInput.focus();
+        }
+
+        function cerrarVistaViaje() {
+            tripView.classList.remove('active');
+            dashboardWrapper.classList.remove('hidden');
+        }
+
+        function volverAVistaViaje() {
+            mapUiView.classList.remove('active');
+            dashboardWrapper.classList.add('hidden'); 
+            tripView.classList.add('active');
+        }
+
+        window.abrirMapaDesdeVistaViaje = function() {
+            dashboardWrapper.classList.add('hidden');
+            tripView.classList.remove('active');
+            mapUiView.classList.add('active');
+            setTimeout(() => { if (mapInstance) mapInstance.invalidateSize(); }, 100);
+            inputActivo = 'destino';
+            actualizarFocoInputs();
+        };
+
+        function abrirMapaConRutasPersonalizadas(origenStr, destinoStr) {
+            dashboardWrapper.classList.add('hidden');
+            tripView.classList.remove('active');
+            mapUiView.classList.add('active');
+            setTimeout(() => { if (mapInstance) mapInstance.invalidateSize(); }, 100);
+
+            originInput.value = origenStr || "⏳ Obteniendo GPS..."; searchInput.value = destinoStr || "";
+            inputActivo = 'destino'; actualizarFocoInputs();
+
+            if (!mapInstance) return;
+            let bounds = L.latLngBounds(), tieneDestino = false;
+
+            if (destinoStr) {
+                try {
+                    let ciudadActual = localStorage.getItem('rapidito_ciudad') || "Barquisimeto";
+                    fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(destinoStr + ", " + ciudadActual)}&limit=1`)
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data?.length > 0) {
+                                const latlngDest = L.latLng(data[0].lat, data[0].lon);
+                                if (marcadorDestino && mapInstance.hasLayer(marcadorDestino)) mapInstance.removeLayer(marcadorDestino);
+                                marcadorDestino = L.marker(latlngDest).addTo(mapInstance);
+                                bounds.extend(latlngDest);
+                                tieneDestino = true;
+                                if (marcadorOrigen) { centrarMapaConMenu(bounds, 15); procesarIntersecciones(); }
+                            }
+                        });
+                } catch(e) {}
+            }
+
+            if (origenStr && origenStr !== "Ubicación actual") {
+                try {
+                    let ciudadActual = localStorage.getItem('rapidito_ciudad') || "Barquisimeto";
+                    fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(origenStr + ", " + ciudadActual)}&limit=1`)
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data?.length > 0) {
+                                const latlngOrig = L.latLng(data[0].lat, data[0].lon);
+                                if (marcadorOrigen && mapInstance.hasLayer(marcadorOrigen)) mapInstance.removeLayer(marcadorOrigen);
+                                marcadorOrigen = L.circleMarker(latlngOrig, {radius:7, fillColor:"var(--primary-brand)", color:"#fff", weight:2, fillOpacity:1}).addTo(mapInstance);
+                                bounds.extend(latlngOrig);
+                                if (tieneDestino) { centrarMapaConMenu(bounds, 15); procesarIntersecciones(); } 
+                                else { centrarMapaConMenu(L.latLngBounds([latlngOrig, latlngOrig]), 15); }
+                            }
+                        });
+                } catch(e) { inputActivo = 'origen'; ubicarConGPS(); }
+            } else { inputActivo = 'origen'; ubicarConGPS(); }
+        }
+
+        function cotizarViajeDesdeVista() { 
+            if (!tripDestinoInput.value.trim()) { alert("Introduce tu destino"); return; } 
+            guardarEnHistorial(tripDestinoInput.value.trim());
+            abrirMapaConRutasPersonalizadas(tripOrigenInput.value === "Ubicación actual" ? null : tripOrigenInput.value, tripDestinoInput.value.trim()); 
+        }
+
+        function configurarAutocompletadoVista(inputEl, dropdownEl, tipo) {
+            let timer;
+            inputEl.addEventListener('input', function() {
+                clearTimeout(timer); const query = this.value;
+                if(query.length < 3) { dropdownEl.style.display = 'none'; return; }
+                timer = setTimeout(async () => {
+                    let ciudadActual = localStorage.getItem('rapidito_ciudad') || "Barquisimeto";
+                    try {
+                        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query + ", " + ciudadActual)}&limit=4`);
+                        const data = await res.json();
+                        let html = '';
+                        data.forEach(item => {
+                            let nombreStr = item.display_name.split(',').slice(0,3).join(', '); 
+                            html += `<div class="trip-auto-item interactive" onclick="seleccionarSugerenciaVista('${nombreStr.replace(/'/g, "\'")}', '${tipo}')"><span class="auto-item-text">${nombreStr}</span></div>`;
+                        });
+                        dropdownEl.innerHTML = html; dropdownEl.style.display = data.length ? 'block' : 'none';
+                    } catch(e) {}
+                }, 500);
+            });
+        }
+
+        configurarAutocompletadoVista(tripOrigenInput, tripAutoOrigen, 'origen');
+        configurarAutocompletadoVista(tripDestinoInput, tripAutoDestino, 'destino');
+
+        function seleccionarSugerenciaVista(lugar, tipo) {
+            if (tipo === 'origen') { tripOrigenInput.value = lugar; tripAutoOrigen.style.display = 'none'; } 
+            else { tripDestinoInput.value = lugar; tripAutoDestino.style.display = 'none'; guardarEnHistorial(lugar); cotizarViajeDesdeVista(); }
+        }
+
+        window.addEventListener('click', (e) => {
+            if (!tripOrigenInput.contains(e.target) && !tripAutoOrigen.contains(e.target)) tripAutoOrigen.style.display = 'none';
+            if (!tripDestinoInput.contains(e.target) && !tripAutoDestino.contains(e.target)) tripAutoDestino.style.display = 'none';
+        });
+
+        let citySelectorTarget = 'dashboard'; 
+        function openCitySelector(target = 'dashboard') { citySelectorTarget = target; document.getElementById('city-modal').classList.add('active'); }
+        function closeCitySelector() { document.getElementById('city-modal').classList.remove('active'); }
+        function selectCity(cityName, lat, lon) {
+            if (citySelectorTarget === 'dashboard') {
+                currentLat = lat; currentLon = lon; 
+                closeCitySelector(); if (mapInstance) mapInstance.setView([lat, lon], 13);
+            } else if (citySelectorTarget === 'profile') {
+                document.getElementById('edit-ciudad-display').innerText = cityName; 
+                document.getElementById('edit-ciudad-value').value = cityName;
+                closeCitySelector();
+                setTimeout(() => abrirModal('modal-editar-perfil'), 300);
+            }
+        }
+
+        window.llenarModalViajes = function() {
+            const contenedor = document.getElementById('lista-mis-viajes');
+            if (!contenedor) return;
+            let historial = JSON.parse(localStorage.getItem('rapidito_historial')) || [];
+            if (historial.length === 0) { contenedor.innerHTML = `<div style="padding:14px; text-align:center; color:var(--text-gray); font-size:13px; font-weight:600; background:var(--input-bg); border-radius:16px;">No tienes viajes registrados.</div>`; return; }
+            let html = '';
+            historial.forEach(dest => { html += `<div style="padding:12px 16px; background:var(--input-bg); border-radius:16px; font-weight:700; font-size:13px; color:var(--text-dark);">${dest}</div>`; });
+            contenedor.innerHTML = html;
+        };
+
+        window.guardarPerfil = function() {
+            let nuevoNombre = document.getElementById('edit-nombre').value.trim();
+            let nuevaCiudad = document.getElementById('edit-ciudad-value').value.trim();
+            if (nuevoNombre) localStorage.setItem('rapidito_nombre', nuevoNombre);
+            if (nuevaCiudad) localStorage.setItem('rapidito_ciudad', nuevaCiudad);
+            
+            cargarPerfil(); 
+            cerrarModal('modal-editar-perfil');
+            setTimeout(() => abrirPanelPerfil(), 150);
+        };
+
+        function toggleDivisas() { document.getElementById('detalles-divisas').classList.toggle('active'); document.getElementById('flecha-divisas').classList.toggle('up'); }
+        function togglePasaje() { document.getElementById('detalles-pasaje').classList.toggle('active'); document.getElementById('flecha-pasaje').classList.toggle('up'); }
+        function toggleMapDivisas() { document.getElementById('map-detalles-divisas').classList.toggle('active'); document.getElementById('map-flecha-divisas').classList.toggle('up'); }
+        function toggleMapPasaje() { document.getElementById('map-detalles-pasaje').classList.toggle('active'); document.getElementById('map-flecha-pasaje').classList.toggle('up'); }
+
+        function toggleRutasList() {
+            const list = document.getElementById('rutas-list-container');
+            const arrow = document.getElementById('flecha-rutas');
+            if (list.classList.contains('active')) { 
+                list.classList.remove('active'); 
+                arrow.classList.remove('up'); 
+            } else {
+                list.classList.add('active'); 
+                arrow.classList.add('up');
+                list.innerHTML = '<div class="ruta-item" style="color: var(--text-gray); justify-content: center; font-size: 13px;">Calculando rutas...</div>';
+                if (marcadorOrigen) { renderizarListaRutas(marcadorOrigen.getLatLng()); } 
+                else if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition((pos) => { renderizarListaRutas(L.latLng(pos.coords.latitude, pos.coords.longitude)); }, () => { renderizarListaRutas(null); }, { timeout: 5000 });
+                } else { renderizarListaRutas(null); }
+            }
+        }
+
+        // Lógica de captura y ejecución del banner de instalación nativa PWA
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+        });
+
+        window.instalarAppPWA = function() {
+            cerrarPanelPerfil();
+            abrirModal('modal-instalar');
+        };
+
+        window.ejecutarInstalacionNativa = async function() {
+            cerrarModal('modal-instalar');
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                deferredPrompt = null;
+            } else {
+                alert("Para instalar la app, también puedes usar la opción 'Agregar a la pantalla de inicio' en el menú de tu navegador.");
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderizarHistorial(); llenarModalViajes();
+            mapInstance = L.map('map', { zoomControl: false }).setView([currentLat, currentLon], 14);
+            capasCaminata = L.layerGroup().addTo(mapInstance); marcadoresRuta = L.layerGroup().addTo(mapInstance);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(mapInstance);
+            
+            mapInstance.on('click', async function(e) {
+                let esOrigen = (inputActivo === 'origen'); let targetInput = esOrigen ? originInput : searchInput;
+                if (esOrigen) {
+                    if (marcadorOrigen && mapInstance.hasLayer(marcadorOrigen)) mapInstance.removeLayer(marcadorOrigen);
+                    marcadorOrigen = L.circleMarker(e.latlng, {radius:7, fillColor:"var(--primary-brand)", color:"#fff", weight:2, fillOpacity:1}).addTo(mapInstance);
+                } else {
+                    if (marcadorDestino && mapInstance.hasLayer(marcadorDestino)) mapInstance.removeLayer(marcadorDestino);
+                    marcadorDestino = L.marker(e.latlng).addTo(mapInstance);
+                }
+                centrarMapaConMenu(L.latLngBounds([e.latlng, e.latlng]), 15);
+                targetInput.value = "Buscando..."; autocompleteContainer.style.display = 'none';
+
+                try {
+                    const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${e.latlng.lat}&lon=${e.latlng.lng}&zoom=18`);
+                    const data = await res.json();
+                    targetInput.value = data?.address?.road || "Punto seleccionado";
+                    if (!esOrigen) guardarEnHistorial(targetInput.value);
+                } catch (error) { targetInput.value = "Punto seleccionado"; }
+                procesarIntersecciones();
+            });
+        });
+
+        async function obtenerTasaYCalcularPasaje() {
+            try {
+                const resBCV = await fetch('https://ve.dolarapi.com/v1/dolares/oficial');
+                const datosBCV = await resBCV.json();
+                const precioOficial = datosBCV.promedio;
+                const pasajeNormal = precioOficial * 0.25;
+                const pasajePreferencial = pasajeNormal / 2;
+                
+                precioPasajeNormal = `${pasajeNormal.toFixed(2)} Bs`;
+                
+                document.getElementById('dash-tasa-bcv').innerText = `$ = ${precioOficial.toFixed(2)} Bs`;
+                document.getElementById('dash-tarifa-normal').innerText = precioPasajeNormal;
+                document.getElementById('dash-tarifa-pref').innerText = `Preferencial: ${pasajePreferencial.toFixed(2)} Bs`;
+                document.getElementById('tasa-bcv').innerText = `$ = ${precioOficial.toFixed(2)} Bs`;
+                document.getElementById('tarifa-normal').innerText = precioPasajeNormal;
+                document.getElementById('map-tarifa-pref').innerText = `Pref: ${pasajePreferencial.toFixed(2)} Bs`;
+
+                try {
+                    const resEuro = await fetch('https://ve.dolarapi.com/v1/euros/oficial');
+                    const datosEuro = await resEuro.json();
+                    if (datosEuro?.promedio) {
+                        document.getElementById('dash-tasa-euro').innerText = `€ = ${datosEuro.promedio.toFixed(2)} Bs`;
+                        document.getElementById('map-tasa-euro').innerText = `€ = ${datosEuro.promedio.toFixed(2)} Bs`;
+                    }
+                } catch (e) {}
+
+                try {
+                    const resParalelo = await fetch('https://ve.dolarapi.com/v1/dolares/paralelo');
+                    const datosParalelo = await resParalelo.json();
+                    if (datosParalelo?.promedio) {
+                        document.getElementById('dash-tasa-paralelo').innerText = `USD₮ = ${datosParalelo.promedio.toFixed(2)} Bs`;
+                        document.getElementById('map-tasa-paralelo').innerText = `USD₮ = ${datosParalelo.promedio.toFixed(2)} Bs`;
+                    }
+                } catch (e) {}
+
+            } catch (error) { 
+                document.getElementById('dash-tasa-bcv').innerText = "$ = Error";
+                document.getElementById('tasa-bcv').innerText = "$ = Error";
+            }
+        }
+        obtenerTasaYCalcularPasaje();
+
+        function renderizarListaRutas(userLatlng) {
+            const list = document.getElementById('rutas-list-container');
+            let opciones = [];
+            for (const id of Object.keys(RUTAS_DATA)) {
+                let props = RUTAS_DATA[id].features[0].properties;
+                let dist = userLatlng ? calcularDistanciaMinima(userLatlng, RUTAS_DATA[id]) : null;
+                opciones.push({ idVar: id, nombre: props.nombre, distancia: dist, acronimo: props.nombre.substring(0,3).toUpperCase(), origen: props.origen, destino: props.destino });
+            }
+            if (userLatlng) opciones.sort((a, b) => a.distancia - b.distancia);
+            let html = '';
+            opciones.forEach((ruta, index) => {
+                let extraInfo = '';
+                if (userLatlng && ruta.distancia !== null) {
+                    let textoDist = ruta.distancia > 1000 ? (ruta.distancia / 1000).toFixed(1) + ' km' : ruta.distancia + ' m';
+                    let etiqueta = index === 0 ? `<span class="badge-cercana" style="margin-left:auto;">Más cerca</span>` : '';
+                    extraInfo = `<div style="display:flex; flex-direction:column; margin-left:auto; text-align:right;">${etiqueta}<span style="font-size:12px; color:var(--text-gray); margin-top:4px;">A ${textoDist}</span></div>`;
+                }
+                html += `<div class="ruta-item interactive" onclick="verRutaDesdeDirectorio('${ruta.idVar}')"><div class="icon">${ruta.acronimo}</div><div style="max-width: 50%; display: flex; flex-direction: column; gap: 2px; flex-grow: 1; min-width: 0;"><span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${ruta.nombre}</span><span style="font-size: 11px; color: var(--text-gray);">De: ${ruta.origen}</span><span style="font-size: 11px; color: var(--text-gray);">A: ${ruta.destino}</span></div>${extraInfo}</div>`;
+            });
+            list.innerHTML = html;
+        }
+
+        function evaluarSentidoRuta(origenLatlng, destinoLatlng, datosGeoJSON) {
+            let coords = datosGeoJSON.features[0].geometry.coordinates;
+            let ptOrigen = mapInstance.project(origenLatlng, 18);
+            let ptDestino = mapInstance.project(destinoLatlng, 18);
+            
+            let minDOrigen = Infinity, idxOrigen = -1;
+            let minDDestino = Infinity, idxDestino = -1;
+
+            for (let i = 0; i < coords.length - 1; i++) {
+                let p1 = mapInstance.project(L.latLng(coords[i][1], coords[i][0]), 18);
+                let p2 = mapInstance.project(L.latLng(coords[i+1][1], coords[i+1][0]), 18);
+                
+                let cOrigen = L.LineUtil.closestPointOnSegment(ptOrigen, p1, p2);
+                let dOrigen = ptOrigen.distanceTo(cOrigen);
+                if (dOrigen < minDOrigen) {
+                    minDOrigen = dOrigen;
+                    let segLength = p1.distanceTo(p2);
+                    let distToP1 = p1.distanceTo(cOrigen);
+                    idxOrigen = i + (segLength > 0 ? distToP1 / segLength : 0);
+                }
+                
+                let cDestino = L.LineUtil.closestPointOnSegment(ptDestino, p1, p2);
+                let dDestino = ptDestino.distanceTo(cDestino);
+                if (dDestino < minDDestino) {
+                    minDDestino = dDestino;
+                    let segLength = p1.distanceTo(p2);
+                    let distToP1 = p1.distanceTo(cDestino);
+                    idxDestino = i + (segLength > 0 ? distToP1 / segLength : 0);
+                }
+            }
+            return idxDestino >= (idxOrigen - 0.05); 
+        }
+
+        function obtenerPuntoMasCercano(latlngRef, datosGeoJSON) {
+            let minDistancia = Infinity, puntoCercano = null;
+            const coordenadas = datosGeoJSON.features[0].geometry.coordinates;
+            const ptRef = mapInstance.project(latlngRef, 18);
+
+            for (let i = 0; i < coordenadas.length - 1; i++) {
+                let p1 = mapInstance.project(L.latLng(coordenadas[i][1], coordenadas[i][0]), 18);
+                let p2 = mapInstance.project(L.latLng(coordenadas[i+1][1], coordenadas[i+1][0]), 18);
+                let closestPt = L.LineUtil.closestPointOnSegment(ptRef, p1, p2);
+                let closestLatLng = mapInstance.unproject(closestPt, 18);
+                let d = mapInstance.distance(latlngRef, closestLatLng);
+                if (d < minDistancia) { minDistancia = d; puntoCercano = closestLatLng; }
+            }
+            return puntoCercano;
+        }
+
+        function calcularDistanciaMinima(latlngRef, datosGeoJSON) {
+            let puntoOptimo = obtenerPuntoMasCercano(latlngRef, datosGeoJSON);
+            return puntoOptimo ? Math.round(mapInstance.distance(latlngRef, puntoOptimo)) : Infinity;
+        }
+
+        async function trazarRutaCaminando(inicio, fin, capa) {
+            if (!inicio || !fin || !capa) return;
+            try {
+                const url = `https://router.project-osrm.org/route/v1/foot/${inicio.lng},${inicio.lat};${fin.lng},${fin.lat}?geometries=geojson`;
+                const res = await fetch(url);
+                const data = await res.json();
+                if (data?.routes?.[0]?.geometry) L.geoJSON(data.routes[0].geometry, { style: { color: '#305CDE', weight: 4, dashArray: '4, 8' } }).addTo(capa);
+            } catch (e) { L.polyline([inicio, fin], { color: '#305CDE', weight: 4, dashArray: '4, 8' }).addTo(capa); }
+        }
+
+        function centrarMapaConMenu(bounds, zoomLimite = null) {
+            setTimeout(() => {
+                let opts = { paddingTopLeft: [20, 80], paddingBottomRight: [20, bottomSheet.offsetHeight + 20] };
+                if (zoomLimite) opts.maxZoom = zoomLimite;
+                mapInstance.fitBounds(bounds, opts);
+            }, 100);
+        }
+
+        window.dibujarRutaYPasos = function(nombre, colorHex, idRuta) {
+            if (rutaDibujada && mapInstance.hasLayer(rutaDibujada)) mapInstance.removeLayer(rutaDibujada);
+            if (capasCaminata) capasCaminata.clearLayers(); if (marcadoresRuta) marcadoresRuta.clearLayers(); 
+            
+            const datosRuta = RUTAS_DATA[idRuta];
+            if (!datosRuta) return; 
+            
+            rutaDibujada = L.geoJSON(datosRuta, { style: { color: colorHex, weight: 6, opacity: 0.9, lineCap: 'round' } }).addTo(mapInstance);
+            
+            const coords = datosRuta.features[0].geometry.coordinates;
+            if (coords?.length >= 2) {
+                L.marker([coords[0][1], coords[0][0]], { icon: L.divIcon({ className: 'custom-start-icon', html: `<div style="width: 12px; height: 12px; background: white; border: 4px solid ${colorHex}; border-radius: 50%;"></div>`, iconSize: [24,24] }) }).addTo(marcadoresRuta);
+            }
+
+            if (marcadorOrigen && marcadorDestino) {
+                let ptInicio = obtenerPuntoMasCercano(marcadorOrigen.getLatLng(), datosRuta);
+                let ptFin = obtenerPuntoMasCercano(marcadorDestino.getLatLng(), datosRuta);
+                if (ptInicio) trazarRutaCaminando(marcadorOrigen.getLatLng(), ptInicio, capasCaminata);
+                if (ptFin) trazarRutaCaminando(marcadorDestino.getLatLng(), ptFin, capasCaminata);
+            }
+        };
+
+        window.verRutaDesdeDirectorio = function(idRuta) {
+            abrirMapaConRutasPersonalizadas("Ubicación actual", "");
+            let props = RUTAS_DATA[idRuta].features[0].properties;
+            dibujarRutaYPasos(props.nombre, '#305CDE', idRuta); 
+            resultsContainer.style.display = 'block';
+            resultsContainer.innerHTML = `<div class="result-title">Viendo ruta seleccionada</div><div class="route-option interactive" style="cursor:default;"><div class="route-badge" style="font-size: 11px;">${props.nombre.substring(0, 4).toUpperCase()}</div><div class="route-info"><h4>${props.nombre}</h4><p style="margin-bottom: 4px; font-size: 11px; color: var(--neutral-accent);">De: ${props.origen} <br> A: ${props.destino}</p><p>Tarifa: ${precioPasajeNormal}</p></div></div>`;
+        };
+
+        function actualizarFocoInputs() {
+            if (inputActivo === 'origen') {
+                originInput.style.borderColor = "var(--neutral-accent)"; originInput.style.backgroundColor = "var(--card-bg)";
+                searchInput.style.borderColor = "transparent"; searchInput.style.backgroundColor = "var(--input-bg)";
+            } else {
+                searchInput.style.borderColor = "var(--neutral-accent)"; searchInput.style.backgroundColor = "var(--card-bg)";
+                originInput.style.borderColor = "transparent"; originInput.style.backgroundColor = "var(--input-bg)";
+            }
+        }
+
+        originInput.addEventListener('focus', () => { inputActivo = 'origen'; actualizarFocoInputs(); });
+        searchInput.addEventListener('focus', () => { inputActivo = 'destino'; actualizarFocoInputs(); });
+
+        let typingTimerMap;
+        function configurarAutocompletadoMapa(inputElement, tipoInput) {
+            inputElement.addEventListener('input', function() {
+                clearTimeout(typingTimerMap); const query = this.value;
+                if(query.length < 3) { autocompleteContainer.style.display = 'none'; return; }
+                typingTimerMap = setTimeout(async () => {
+                    let ciudadActual = localStorage.getItem('rapidito_ciudad') || "Barquisimeto";
+                    const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query + ", " + ciudadActual)}&limit=4`);
+                    const data = await res.json();
+                    let html = '';
+                    data.forEach(item => {
+                        let nombreStr = item.display_name.split(',').slice(0,3).join(', '); 
+                        html += `<div class="trip-auto-item interactive" onclick="seleccionarSugerenciaMapa(${item.lat}, ${item.lon}, '${nombreStr.replace(/'/g, "\'")}', '${tipoInput}')"><span class="auto-item-text">${nombreStr}</span></div>`;
+                    });
+                    autocompleteContainer.innerHTML = html; autocompleteContainer.style.display = data.length ? 'block' : 'none';
+                    resultsContainer.style.display = 'none'; 
+                }, 600); 
+            });
+        }
+
+        configurarAutocompletadoMapa(originInput, 'origen');
+        configurarAutocompletadoMapa(searchInput, 'destino');
+
+        window.seleccionarSugerenciaMapa = function(lat, lon, nombreLugar, tipoInput) {
+            let latlng = L.latLng(lat, lon);
+            if (tipoInput === 'origen') {
+                if (marcadorOrigen && mapInstance.hasLayer(marcadorOrigen)) mapInstance.removeLayer(marcadorOrigen);
+                marcadorOrigen = L.circleMarker(latlng, {radius:7, fillColor:"var(--primary-brand)", color:"#fff", weight:2, fillOpacity:1}).addTo(mapInstance);
+                originInput.value = nombreLugar;
+            } else {
+                if (marcadorDestino && mapInstance.hasLayer(marcadorDestino)) mapInstance.removeLayer(marcadorDestino);
+                marcadorDestino = L.marker(latlng).addTo(mapInstance);
+                searchInput.value = nombreLugar; guardarEnHistorial(nombreLugar);
+            }
+            autocompleteContainer.style.display = 'none';
+            if (marcadorOrigen && marcadorDestino) { centrarMapaConMenu(L.latLngBounds([marcadorOrigen.getLatLng(), marcadorDestino.getLatLng()]), 15); procesarIntersecciones(); } 
+            else { centrarMapaConMenu(L.latLngBounds([latlng, latlng]), 15); }
+        };
+
+        function ubicarConGPS() {
+            if (!mapInstance) return;
+            let targetInput = inputActivo === 'origen' ? originInput : searchInput;
+            targetInput.value = "Buscando señal GPS...";
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(async (pos) => {
+                    const latlng = L.latLng(pos.coords.latitude, pos.coords.longitude);
+                    if (inputActivo === 'origen') {
+                        if (marcadorOrigen && mapInstance.hasLayer(marcadorOrigen)) mapInstance.removeLayer(marcadorOrigen);
+                        marcadorOrigen = L.circleMarker(latlng, { radius: 7, fillColor: "var(--primary-brand)", color: "#fff", weight: 2, fillOpacity: 1 }).addTo(mapInstance);
+                    } else {
+                        if (marcadorDestino && mapInstance.hasLayer(marcadorDestino)) mapInstance.removeLayer(marcadorDestino);
+                        marcadorDestino = L.marker(latlng).addTo(mapInstance);
+                    }
+                    centrarMapaConMenu(L.latLngBounds([latlng, latlng]), 15);
+                    try {
+                        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latlng.lat}&lon=${latlng.lng}&zoom=18`);
+                        const data = await res.json();
+                        targetInput.value = data?.address?.road || "Ubicación actual";
+                        if (inputActivo === 'destino') guardarEnHistorial(targetInput.value);
+                    } catch(e) { targetInput.value = "Ubicación actual"; }
+                    if (marcadorOrigen && marcadorDestino) procesarIntersecciones();
+                }, () => { targetInput.value = "Toca el mapa para fijar"; });
+            }
+        }
+
+        function procesarIntersecciones() {
+            if (!marcadorOrigen || !marcadorDestino) return;
+            let origenLatlng = marcadorOrigen.getLatLng();
+            let destinoLatlng = marcadorDestino.getLatLng();
+            resultsContainer.style.display = 'block';
+            let opciones = [];
+            let rutasDescartadas = 0;
+
+            for (const [idRuta, datosRuta] of Object.entries(RUTAS_DATA)) {
+                let sentidoValido = evaluarSentidoRuta(origenLatlng, destinoLatlng, datosRuta);
+                if (!sentidoValido) { rutasDescartadas++; continue; }
+
+                let dist = calcularDistanciaMinima(destinoLatlng, datosRuta);
+                let props = datosRuta.features[0].properties;
+                opciones.push({ idVar: idRuta, nombre: props.nombre, distanciaDestino: dist, origen: props.origen, destino: props.destino, colorLinea: '#305CDE' });
+            }
+
+            if (opciones.length === 0) {
+                if (rutasDescartadas > 0) {
+                    resultsContainer.innerHTML = `<div class="result-title" style="text-align:center; padding: 16px 10px; color: var(--text-gray); line-height: 1.5; text-transform:none;">❌ Ninguna ruta te sirve.<br>Las opciones cercanas van en <strong style="color:var(--text-dark);">sentido contrario</strong> a tu destino.</div>`;
+                } else {
+                    resultsContainer.innerHTML = `<div class="result-title" style="text-align:center; padding: 10px; color: var(--text-gray); text-transform:none;">Aún no has digitalizado rutas.<br>Comienza a mapear la ciudad.</div>`;
+                }
+                centrarMapaConMenu(L.latLngBounds([origenLatlng, destinoLatlng]));
+                return;
+            }
+
+            opciones.sort((a, b) => a.distanciaDestino - b.distanciaDestino);
+            let htmlContent = `<div class="result-title">Opciones sugeridas</div>`;
+
+            opciones.forEach((ruta, index) => {
+                let textoDist = ruta.distanciaDestino > 1000 ? (ruta.distanciaDestino / 1000).toFixed(1) + ' km' : ruta.distanciaDestino + ' m';
+                let etiquetaGanadora = index === 0 ? `<span class="badge-cercana">Más cerca</span>` : '';
+                htmlContent += `
+                    <div class="route-option interactive" onclick='dibujarRutaYPasos("${ruta.nombre}", "${ruta.colorLinea}", "${ruta.idVar}")'>
+                        <div class="route-badge" style="font-size: 11px;">${ruta.nombre.substring(0, 4).toUpperCase()}</div>
+                        <div class="route-info">
+                            <h4>${ruta.nombre} ${etiquetaGanadora}</h4>
+                            <p style="margin-bottom: 4px; font-size: 11px; color: var(--neutral-accent);">De: ${ruta.origen} <br> A: ${ruta.destino}</p>
+                            <p>Caminando: <span style="color:var(--text-dark); font-weight:900;">${textoDist}</span> • Tarifa: ${precioPasajeNormal}</p>
+                        </div>
+                    </div>
+                `;
+            });
+            resultsContainer.innerHTML = htmlContent;
+            centrarMapaConMenu(L.latLngBounds([origenLatlng, destinoLatlng]));
+        }
+
+        window.cargarPerfil = function() {
+            let nombre = localStorage.getItem('rapidito_nombre') || 'Jesús Vásquez';
+            let ciudad = localStorage.getItem('rapidito_ciudad') || 'Barquisimeto';
+            let inicial = nombre.charAt(0).toUpperCase();
+
+            if (document.getElementById('sp-name-text')) document.getElementById('sp-name-text').innerText = nombre;
+            if (document.getElementById('edit-ciudad-display')) document.getElementById('edit-ciudad-display').innerText = ciudad;
+
+            document.querySelectorAll('.avatar-dash, .sp-avatar').forEach(el => el.innerText = inicial);
+            if (document.getElementById('edit-nombre')) document.getElementById('edit-nombre').value = nombre;
+        };
+
+        cargarPerfil();
+    </script>
+</body>
+</html>
