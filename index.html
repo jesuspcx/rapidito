@@ -936,13 +936,29 @@
         };
 
         window.ejecutarInstalacionNativa = async function() {
-            cerrarModal('modal-instalar');
             if (deferredPrompt) {
+                // Si el navegador ya tiene el evento listo, lanza la instalación nativa
+                cerrarModal('modal-instalar');
                 deferredPrompt.prompt();
                 const { outcome } = await deferredPrompt.userChoice;
                 deferredPrompt = null;
             } else {
-                alert("Para instalar la app, también puedes usar la opción 'Agregar a la pantalla de inicio' en el menú de tu navegador.");
+                // Si el navegador aún no lo dispara, cambiamos el texto del modal para guiarlo visualmente en lugar de tirar un alert feo
+                const contenidoModal = document.querySelector('#modal-instalar .generic-modal-content');
+                if (contenidoModal) {
+                    contenidoModal.innerHTML = `
+                        <div style="width:32px; position:absolute; top:12px; right:12px;"></div>
+                        <button class="close-generic-btn interactive" onclick="cerrarModal('modal-instalar')" style="position:absolute; top:12px; right:12px;">
+                            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                        </button>
+                        <div style="width: 48px; height: 48px; background: var(--input-bg); border-radius: 50%; display: flex; justify-content: center; align-items: center; color: var(--neutral-accent); margin: 0 auto;">
+                            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                        </div>
+                        <h3 style="margin:4px 0 2px 0; font-size:18px; font-weight:900;">Instalación manual</h3>
+                        <p style="font-size:13px; color:var(--text-gray); font-weight:600; line-height:1.5; margin:0 0 16px 0;">Abre el menú de opciones de tu navegador (los tres puntos <strong>⋮</strong> arriba a la derecha) y selecciona <strong>"Instalar aplicación"</strong> o <strong>"Agregar a la pantalla principal"</strong>.</p>
+                        <button class="cotizar-btn interactive" style="padding:14px; font-size:14px; margin-top:0;" onclick="cerrarModal('modal-instalar')">Entendido</button>
+                    `;
+                }
             }
         };
 
