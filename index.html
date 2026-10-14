@@ -11,100 +11,184 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     
+    <!-- Fuente Moderna de Movilidad: DM Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400..900;1,9..40,400..900&display=swap" rel="stylesheet">
+
     <!-- Librería de Mapas Leaflet -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     
     <!-- Estilos de la Aplicación -->
     <style>
-/* ================= RAPIDITO PWA - SISTEMA DE ESTILOS ================= */
+/* ==========================================================================
+   RAPIDITO PWA - SISTEMA DE DISEÑO DE ALTO RENDIMIENTO (TASTE FRAMEWORK)
+   Inspirado en la precisión editorial y utilitaria de Transit App y Apple Maps
+   ========================================================================== */
+
 :root {
-    --bg-white: #ffffff;
-    --bg-light: #f1f5f9;
-    --primary-brand: #000080;
-    --neutral-accent: #305CDE;
-    --accent-success: #10b981;
-    --accent-warning: #f59e0b;
-    --accent-danger: #ef4444;
-    --text-dark: #0f172a;
-    --text-gray: #64748b;
-    --border-color: rgba(15, 23, 42, 0.08);
-    --card-bg: rgba(255, 255, 255, 0.88);
-    --input-bg: rgba(226, 232, 240, 0.75);
-    --shadow-color: rgba(0, 0, 128, 0.07); 
-    --glass-bg: rgba(255, 255, 255, 0.82);
+    /* Paleta Base - Modo Claro */
+    --bg-canvas: #f8fafc;
+    --bg-surface: rgba(255, 255, 255, 0.88);
+    --bg-surface-elevated: #ffffff;
+    --bg-subtle: #f1f5f9;
+    --bg-input: #f1f5f9;
+    
+    /* Jerarquía de Color */
+    --brand-primary: #0f256e;
+    --brand-accent: #2563eb;
+    --brand-accent-soft: rgba(37, 99, 235, 0.08);
+    
+    /* Texto & Contraste */
+    --text-primary: #090d16;
+    --text-secondary: #475569;
+    --text-muted: #64748b;
+    --text-inverse: #ffffff;
+
+    /* Bordes & Vidrio */
+    --border-subtle: rgba(15, 23, 42, 0.07);
+    --border-strong: rgba(15, 23, 42, 0.12);
+    --glass-fill: rgba(255, 255, 255, 0.84);
     --glass-border: rgba(255, 255, 255, 0.7);
-    --dashboard-glass: rgba(248, 250, 252, 0.7);
-    --blur-effect: blur(12px) saturate(160%);
-    --transition-fast: 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    --glass-blur: blur(16px) saturate(180%);
+
+    /* Sombras Direccionales */
+    --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.05);
+    --shadow-md: 0 4px 12px -2px rgba(15, 23, 42, 0.06), 0 2px 4px -2px rgba(15, 23, 42, 0.03);
+    --shadow-lg: 0 12px 28px -6px rgba(15, 23, 42, 0.1), 0 4px 10px -4px rgba(15, 23, 42, 0.04);
+    --shadow-sheet: 0 -8px 30px -4px rgba(15, 23, 42, 0.12);
+
+    /* Estados & Semántica */
+    --status-success: #059669;
+    --status-warning: #d97706;
+    --status-danger: #dc2626;
+
+    /* Compatibilidad y Unificación de Colores */
+    --text-dark: var(--text-primary);
+    --text-gray: var(--text-secondary);
+    --neutral-accent: var(--brand-accent);
+    --primary-brand: var(--brand-accent);
+
+    /* Geometría & Animación */
+    --radius-sm: 8px;
+    --radius-md: 14px;
+    --radius-lg: 18px;
+    --radius-pill: 9999px;
+    --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+    --transition-standard: 0.22s var(--ease-out-expo);
     --safe-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 body.dark-mode {
-    --bg-white: #000000;
-    --bg-light: #0b1120;
-    --primary-brand: #3b6cff; 
-    --neutral-accent: #6084f7;
-    --accent-success: #34d399;
-    --accent-warning: #fbbf24;
-    --accent-danger: #f87171;
-    --text-dark: #f8fafc;
-    --text-gray: #94a3b8;
-    --border-color: rgba(255, 255, 255, 0.09);
-    --card-bg: rgba(21, 29, 47, 0.88);
-    --input-bg: rgba(30, 41, 59, 0.85);
-    --shadow-color: rgba(0, 0, 0, 0.4);
-    --glass-bg: rgba(15, 23, 42, 0.86); 
-    --glass-border: rgba(255, 255, 255, 0.09);
-    --dashboard-glass: rgba(11, 17, 32, 0.72);
+    --bg-canvas: #070a12;
+    --bg-surface: rgba(15, 23, 42, 0.86);
+    --bg-surface-elevated: #111827;
+    --bg-subtle: #1e293b;
+    --bg-input: #172033;
+
+    --brand-primary: #3b82f6;
+    --brand-accent: #60a5fa;
+    --brand-accent-soft: rgba(96, 165, 250, 0.12);
+
+    --text-primary: #f8fafc;
+    --text-secondary: #cbd5e1;
+    --text-muted: #94a3b8;
+    --text-inverse: #070a12;
+
+    --text-dark: var(--text-primary);
+    --text-gray: var(--text-secondary);
+    --neutral-accent: var(--brand-accent);
+    --primary-brand: var(--brand-accent);
+
+    --border-subtle: rgba(255, 255, 255, 0.08);
+    --border-strong: rgba(255, 255, 255, 0.14);
+    --glass-fill: rgba(11, 17, 32, 0.82);
+    --glass-border: rgba(255, 255, 255, 0.08);
+
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 14px -2px rgba(0, 0, 0, 0.45);
+    --shadow-lg: 0 14px 32px -6px rgba(0, 0, 0, 0.55);
+    --shadow-sheet: 0 -8px 32px rgba(0, 0, 0, 0.6);
+
+    --status-success: #10b981;
+    --status-warning: #f59e0b;
+    --status-danger: #ef4444;
 }
 
+/* ================= RESET Y BASE ================= */
 * {
     box-sizing: border-box;
     -webkit-tap-highlight-color: transparent;
 }
 
-body, html { 
-    margin: 0; padding: 0; height: 100dvh; 
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
-    background-color: var(--bg-light); color: var(--text-dark); 
-    overflow-x: hidden; transition: background-color 0.25s ease, color 0.25s ease;
-    padding-bottom: var(--safe-bottom);
-    -webkit-touch-callout: none;
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100dvh;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background-color: var(--bg-canvas);
+    color: var(--text-primary);
+    overflow-x: hidden;
     font-size: 14px;
+    line-height: 1.45;
+    transition: background-color 0.28s var(--ease-out-expo), color 0.28s var(--ease-out-expo);
+    padding-bottom: var(--safe-bottom);
 }
 
-/* Indicador de conexión offline */
+.tabular-numbers, strong {
+    font-variant-numeric: tabular-nums;
+}
+
+svg {
+    display: block;
+    flex-shrink: 0;
+}
+
+.interactive {
+    cursor: pointer;
+    user-select: none;
+    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.18s ease, background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.interactive:active {
+    transform: scale(0.955);
+    opacity: 0.92;
+}
+
+/* ================= BANNER Y NOTIFICACIONES ================= */
 #offline-banner {
     position: fixed;
-    top: -50px;
+    top: -55px;
     left: 50%;
     transform: translateX(-50%);
-    background: #e11d48;
-    color: #ffffff;
+    background: #0f172a;
+    color: #f8fafc;
+    border: 1px solid rgba(255, 255, 255, 0.15);
     font-size: 12px;
-    font-weight: 700;
-    padding: 7px 18px;
-    border-radius: 30px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    padding: 8px 18px;
+    border-radius: var(--radius-pill);
     z-index: 10000;
-    box-shadow: 0 4px 15px rgba(225, 29, 72, 0.35);
+    box-shadow: var(--shadow-lg);
     display: flex;
     align-items: center;
     gap: 8px;
-    transition: top 0.3s ease;
+    transition: top 0.35s var(--ease-out-expo);
     pointer-events: none;
 }
 #offline-banner.active {
     top: 14px;
 }
 #offline-banner.online-recovered {
-    background: #10b981;
-    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.35);
+    background: #047857;
 }
 
-/* Toast flotante */
 #toast-container {
     position: fixed;
-    bottom: calc(24px + var(--safe-bottom));
+    bottom: calc(22px + var(--safe-bottom));
     left: 50%;
     transform: translateX(-50%);
     z-index: 9999;
@@ -113,503 +197,1306 @@ body, html {
     gap: 8px;
     pointer-events: none;
     width: 90%;
-    max-width: 360px;
+    max-width: 380px;
 }
 .toast {
-    background: var(--glass-bg);
-    backdrop-filter: var(--blur-effect);
-    -webkit-backdrop-filter: var(--blur-effect);
-    border: 1px solid var(--border-color);
-    box-shadow: 0 10px 25px var(--shadow-color);
+    background: var(--bg-surface-elevated);
+    border: 1px solid var(--border-strong);
+    box-shadow: var(--shadow-lg);
     padding: 12px 16px;
-    border-radius: 16px;
-    color: var(--text-dark);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
     font-size: 13px;
     font-weight: 600;
     display: flex;
     align-items: center;
     gap: 10px;
     opacity: 0;
-    transform: translateY(16px);
-    transition: opacity 0.25s ease, transform 0.25s ease;
+    transform: translateY(14px) scale(0.98);
+    transition: opacity 0.24s var(--ease-out-expo), transform 0.24s var(--ease-out-expo);
 }
 .toast.show {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
 }
-.toast.success { border-left: 4px solid var(--accent-success); }
-.toast.warning { border-left: 4px solid var(--accent-warning); }
-.toast.info { border-left: 4px solid var(--neutral-accent); }
-
-.interactive { cursor: pointer; user-select: none; transition: transform 0.15s ease, opacity 0.15s ease; }
-.interactive:active { transform: scale(0.97); opacity: 0.88; }
-
-svg { display: block; flex-shrink: 0; }
-.chevron-icon { transition: transform var(--transition-fast); }
-.chevron-icon.up { transform: rotate(180deg); }
+.toast.success { border-left: 3.5px solid var(--status-success); }
+.toast.warning { border-left: 3.5px solid var(--status-warning); }
+.toast.info { border-left: 3.5px solid var(--brand-accent); }
 
 /* ================= PANTALLA DE CARGA ================= */
 #splash-screen {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100dvh;
-    background: var(--bg-light); z-index: 9999; display: flex; flex-direction: column;
-    justify-content: center; align-items: center; gap: 10px; visibility: visible; opacity: 1;
-    transition: opacity 0.35s ease, visibility 0.35s;
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100dvh;
+    background: var(--bg-canvas);
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    transition: opacity 0.4s ease, visibility 0.4s;
 }
-#splash-screen.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
-.splash-logo { 
-    font-size: 32px; font-weight: 900; color: var(--primary-brand); 
-    letter-spacing: -0.03em; text-transform: uppercase; 
-    animation: pulseLogo 1.1s infinite alternate ease-in-out; 
+#splash-screen.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
 }
-.splash-subtitle { 
-    font-size: 11px; font-weight: 700; color: var(--text-gray); 
-    text-transform: uppercase; letter-spacing: 0.12em; 
+.splash-logo {
+    font-size: 34px;
+    font-weight: 900;
+    color: var(--brand-primary);
+    letter-spacing: -0.04em;
+    text-transform: uppercase;
 }
-@keyframes pulseLogo { 
-    0% { transform: scale(0.96); opacity: 0.82; } 
-    100% { transform: scale(1.04); opacity: 1; } 
+.splash-progress-track {
+    width: 160px;
+    height: 4px;
+    background: rgba(15, 23, 42, 0.08);
+    border-radius: var(--radius-pill);
+    overflow: hidden;
+    position: relative;
+    margin: 4px 0 2px 0;
+}
+body.dark-mode .splash-progress-track {
+    background: rgba(255, 255, 255, 0.14);
+}
+.splash-progress-bar {
+    width: 0%;
+    height: 100%;
+    background: var(--brand-accent);
+    border-radius: var(--radius-pill);
+    animation: splashFill 5s linear forwards;
+}
+@keyframes splashFill {
+    0% {
+        width: 0%;
+    }
+    100% {
+        width: 100%;
+    }
+}
+.splash-subtitle {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
 }
 
-/* ================= MAPA DE FONDO ================= */
-#map { position: fixed; top: 0; left: 0; width: 100%; height: 100dvh; z-index: 1; pointer-events: auto; }
-.leaflet-tile-pane { filter: grayscale(25%) contrast(1.05); }
-body.dark-mode .leaflet-tile-pane { filter: grayscale(40%) invert(100%) hue-rotate(180deg) brightness(0.85); }
+/* ================= MAPA BASE ================= */
+#map {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100dvh;
+    z-index: 1;
+}
+.leaflet-tile-pane {
+    filter: grayscale(18%) contrast(1.04);
+}
+body.dark-mode .leaflet-tile-pane {
+    filter: grayscale(40%) invert(100%) hue-rotate(185deg) brightness(0.82) contrast(1.1);
+}
 
-/* Pulsador GPS en tiempo real */
+/* Marcador GPS En Vivo */
 .user-live-marker {
     position: relative;
-    width: 22px;
-    height: 22px;
+    width: 24px;
+    height: 24px;
 }
 .user-live-dot {
     width: 14px;
     height: 14px;
-    background: #305CDE;
-    border: 3px solid #ffffff;
+    background: #2563eb;
+    border: 2.5px solid #ffffff;
     border-radius: 50%;
     position: absolute;
-    top: 50%;
-    left: 50%;
+    top: 50%; left: 50%;
     transform: translate(-50%, -50%);
-    box-shadow: 0 0 8px rgba(48, 92, 222, 0.6);
+    box-shadow: 0 0 10px rgba(37, 99, 235, 0.65);
     z-index: 2;
 }
 .user-live-pulse {
-    width: 28px;
-    height: 28px;
-    background: rgba(48, 92, 222, 0.35);
+    width: 26px;
+    height: 26px;
+    background: rgba(37, 99, 235, 0.28);
     border-radius: 50%;
     position: absolute;
-    top: 50%;
-    left: 50%;
+    top: 50%; left: 50%;
     transform: translate(-50%, -50%);
-    animation: livePulse 2s infinite ease-out;
+    animation: liveRadar 2.2s infinite ease-out;
     z-index: 1;
 }
-@keyframes livePulse {
-    0% { transform: translate(-50%, -50%) scale(0.6); opacity: 1; }
-    100% { transform: translate(-50%, -50%) scale(2.4); opacity: 0; }
+@keyframes liveRadar {
+    0% { transform: translate(-50%, -50%) scale(0.5); opacity: 1; }
+    100% { transform: translate(-50%, -50%) scale(2.6); opacity: 0; }
 }
 
-/* ================= VISTA 1: DASHBOARD COMPACTO ================= */
+/* ================= VISTA 1: DASHBOARD ================= */
 #dashboard-wrapper {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100dvh;
-    overflow-y: auto; background: var(--dashboard-glass);
-    backdrop-filter: var(--blur-effect); -webkit-backdrop-filter: var(--blur-effect); z-index: 10;
-    opacity: 1; visibility: visible; transform: translateY(0); pointer-events: auto;
-    will-change: transform, opacity;
-    transition: opacity var(--transition-fast), transform var(--transition-fast), visibility var(--transition-fast);
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100dvh;
+    overflow-y: auto;
+    background: linear-gradient(180deg, var(--bg-canvas) 0%, rgba(248, 250, 252, 0.88) 100%);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    z-index: 10;
+    transition: opacity var(--transition-standard), transform var(--transition-standard), visibility var(--transition-standard);
 }
-#dashboard-wrapper.hidden { opacity: 0; visibility: hidden; transform: translateY(8px); pointer-events: none; }
-#dashboard-view { 
-    min-height: 100dvh; padding: 14px 16px; box-sizing: border-box; 
-    display: flex; flex-direction: column; width: 100%; max-width: 540px; margin: 0 auto; position: relative; 
+body.dark-mode #dashboard-wrapper {
+    background: linear-gradient(180deg, var(--bg-canvas) 0%, rgba(7, 10, 18, 0.9) 100%);
+}
+#dashboard-wrapper.hidden {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(8px);
+    pointer-events: none;
+}
+#dashboard-view {
+    min-height: 100dvh;
+    padding: 16px 18px calc(24px + var(--safe-bottom)) 18px;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 520px;
+    margin: 0 auto;
+    position: relative;
 }
 
-.header-dash { 
-    display: flex; justify-content: space-between; align-items: center; 
-    margin: -14px -16px 16px -16px; padding: 18px 16px 12px 16px; 
-    position: sticky; top: 0; z-index: 100; 
-    background: var(--glass-bg); backdrop-filter: var(--blur-effect); -webkit-backdrop-filter: var(--blur-effect); 
-    border-bottom: 1px solid var(--border-color); 
+/* Cabecera Principal */
+.header-dash {
+    display: grid;
+    grid-template-columns: 38px 1fr 38px;
+    align-items: center;
+    margin: -16px -18px 18px -18px;
+    padding: 16px 18px 14px 18px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--glass-fill);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border-bottom: 1px solid var(--border-subtle);
 }
-.app-title-container { flex-grow: 1; display: flex; align-items: center; justify-content: center; gap: 8px; }
-.app-title { margin: 0; font-size: 21px; font-weight: 900; color: var(--primary-brand); letter-spacing: -0.03em; text-transform: uppercase; }
-.city-pill-badge {
-    font-size: 10.5px;
-    font-weight: 700;
-    color: var(--neutral-accent);
-    background: var(--input-bg);
-    padding: 3px 8px;
-    border-radius: 12px;
-    cursor: pointer;
+.app-title-container {
     display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    width: 100%;
+}
+.app-title {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 900;
+    color: var(--brand-primary);
+    letter-spacing: -0.04em;
+    text-transform: uppercase;
+    text-align: center;
+}
+.city-pill-badge {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--brand-accent);
+    background: var(--brand-accent-soft);
+    border: 1px solid rgba(37, 99, 235, 0.16);
+    padding: 4px 10px;
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+}
+.profile-container {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.avatar-dash {
+    width: 38px;
+    height: 38px;
+    background: var(--brand-primary);
+    color: #ffffff;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 14px;
+    font-weight: 800;
+    box-shadow: var(--shadow-sm);
+    flex-shrink: 0;
+}
+
+/* Buscador Spotlight */
+.search-trigger {
+    background: var(--bg-surface-elevated);
+    border: 1px solid var(--border-strong);
+    color: var(--text-primary);
+    border-radius: var(--radius-pill);
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: var(--shadow-md);
+    margin-bottom: 18px;
+}
+.search-trigger .icon {
+    background: var(--bg-subtle);
+    color: var(--brand-accent);
+    padding: 7px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.search-trigger .text {
+    flex-grow: 1;
+    color: var(--text-muted);
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+}
+
+/* Módulo Financiero Sincronizado */
+.dash-finance-section {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 22px;
+}
+.dash-finance-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+.dash-finance-pill {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    padding: 13px 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    box-shadow: var(--shadow-sm);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    transition: border-color var(--transition-standard), background-color var(--transition-standard);
+}
+.dash-finance-pill.active {
+    border-color: var(--brand-accent);
+    background: var(--bg-surface-elevated);
+}
+.dash-finance-pill > span {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 10px;
+    font-weight: 800;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+.dash-finance-pill > strong {
+    font-size: 16.5px;
+    font-weight: 800;
+    color: var(--text-primary);
+    letter-spacing: -0.02em;
+}
+
+/* Bandeja de detalles que se expande a ancho completo debajo de ambos botones */
+.finance-tray {
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    pointer-events: none;
+    background: var(--bg-surface-elevated);
+    border: 1px solid transparent;
+    border-radius: var(--radius-md);
+    margin-top: 0;
+    padding: 0 16px;
+    box-shadow: var(--shadow-sm);
+    transition: max-height 0.26s var(--ease-out-expo), opacity 0.2s ease, margin-top 0.26s var(--ease-out-expo), padding 0.26s var(--ease-out-expo), border-color 0.26s var(--ease-out-expo);
+    display: flex;
+    flex-direction: column;
+}
+.finance-tray.open {
+    max-height: 240px;
+    opacity: 1;
+    pointer-events: auto;
+    margin-top: 10px;
+    padding: 12px 16px;
+    border-color: var(--border-subtle);
+}
+.tray-panel {
+    display: none;
+    flex-direction: column;
+    gap: 7px;
+}
+.tray-panel.active {
+    display: flex;
+}
+.tray-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12.5px;
+    font-weight: 700;
+}
+.tray-label {
+    color: var(--text-secondary);
+    font-weight: 600;
+}
+.tray-row strong {
+    color: var(--text-primary);
+}
+.tray-action-link {
+    color: var(--brand-accent);
+    font-size: 11.5px;
+    font-weight: 700;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
     align-items: center;
     gap: 4px;
 }
 
-.avatar-dash { 
-    width: 36px; height: 36px; background: var(--primary-brand); color: #ffffff; 
-    border-radius: 50%; display: flex; justify-content: center; align-items: center; 
-    font-size: 14px; font-weight: 800; box-shadow: 0 3px 10px var(--shadow-color); 
-    cursor: pointer; flex-shrink: 0; 
-}
-
-.search-trigger { 
-    background: var(--card-bg); border: 1px solid var(--border-color); color: var(--text-dark); 
-    border-radius: 40px; padding: 11px 14px; display: flex; align-items: center; gap: 12px; 
-    box-shadow: 0 4px 14px var(--shadow-color); margin-bottom: 16px; 
-}
-.search-trigger .icon { 
-    background: var(--input-bg); color: var(--primary-brand); padding: 8px; 
-    border-radius: 50%; display: flex; align-items: center; justify-content: center; 
-}
-.search-trigger .text { flex-grow: 1; color: var(--text-gray); font-size: 14px; font-weight: 600; }
-
-.dash-finance { display: flex; gap: 10px; margin-bottom: 20px; align-items: flex-start; }
-.dash-finance-pill { 
-    background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 16px; 
-    padding: 12px 14px; flex: 1; display: flex; flex-direction: column; gap: 4px; 
-    box-shadow: 0 3px 10px var(--shadow-color); 
-}
-.dash-finance-pill > span { 
-    display: flex; justify-content: space-between; align-items: center; 
-    font-size: 10px; font-weight: 700; color: var(--text-gray); text-transform: uppercase; letter-spacing: 0.03em; 
-}
-.dash-finance-pill > strong { font-size: 16px; font-weight: 800; color: var(--text-dark); }
-
-.finance-details, .map-finance-details, .rutas-list { 
-    max-height: 0; opacity: 0; overflow: hidden; pointer-events: none; 
-    transition: max-height var(--transition-fast), opacity 0.18s ease, padding var(--transition-fast); 
-    display: flex; flex-direction: column; gap: 6px; 
-}
-.finance-details.active, .map-finance-details.active, .rutas-list.active { 
-    max-height: 380px; opacity: 1; pointer-events: auto; margin-top: 6px; 
-    padding-top: 8px; border-top: 1px solid var(--border-color); 
-}
-
-/* Quick Action Bar */
-.quick-actions-bar {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
-    margin-bottom: 22px;
-}
-.quick-btn {
-    background: var(--card-bg);
-    border: 1px solid var(--border-color);
-    border-radius: 14px;
-    padding: 10px 8px;
+.map-finance-details, .rutas-list {
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    pointer-events: none;
+    transition: max-height 0.26s var(--ease-out-expo), opacity 0.2s ease, padding 0.26s var(--ease-out-expo);
     display: flex;
     flex-direction: column;
-    align-items: center;
     gap: 6px;
-    box-shadow: 0 2px 8px var(--shadow-color);
-    color: var(--text-dark);
 }
-.quick-btn-icon {
+.map-finance-details.active, .rutas-list.active {
+    max-height: 420px;
+    opacity: 1;
+    pointer-events: auto;
+    margin-top: 8px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border-subtle);
+}
+
+.section-header {
+    font-size: 11px;
+    font-weight: 800;
+    margin-bottom: 12px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Catálogo de Transporte */
+.transport-options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 24px;
+}
+.transport-card {
+    background: var(--bg-surface);
+    color: var(--text-primary);
+    border: 1px solid var(--border-subtle);
+    padding: 14px 16px;
+    border-radius: var(--radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: var(--shadow-sm);
+}
+.transport-card.disabled {
+    background: var(--bg-subtle);
+    color: var(--text-muted);
+    border-color: transparent;
+    box-shadow: none;
+    cursor: default;
+}
+.t-card-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.t-card-info h3 {
+    margin: 0;
+    font-size: 14.5px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+}
+
+.ruta-item {
+    background: var(--bg-surface-elevated);
+    border-radius: var(--radius-md);
+    padding: 12px 14px;
+    border: 1px solid var(--border-subtle);
+    font-size: 13px;
+    color: var(--text-primary);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: var(--shadow-sm);
+}
+.ruta-item .icon {
+    color: #ffffff;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    flex-shrink: 0;
+}
+
+/* ================= PANEL LATERAL ================= */
+.panel-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100dvh;
+    background: rgba(15, 23, 42, 0.45);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 4999;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity var(--transition-standard), visibility var(--transition-standard);
+}
+.panel-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.side-panel {
+    position: fixed;
+    top: 0; right: 0; width: 84%; max-width: 330px; height: 100dvh;
+    background: var(--glass-fill);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    z-index: 5000;
+    box-shadow: var(--shadow-sheet);
+    border-left: 1px solid var(--glass-border);
+    transform: translateX(100%);
+    transition: transform var(--transition-standard);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    padding-bottom: calc(20px + var(--safe-bottom));
+}
+.side-panel.active {
+    transform: translateX(0);
+}
+
+.side-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 18px;
+    border-bottom: 1px solid var(--border-subtle);
+    position: sticky;
+    top: 0;
+    background: var(--glass-fill);
+    z-index: 10;
+}
+.side-panel-close {
+    background: var(--bg-subtle);
+    border: none;
     width: 32px;
     height: 32px;
     border-radius: 50%;
-    background: var(--input-bg);
-    color: var(--primary-brand);
     display: flex;
-    align-items: center;
     justify-content: center;
+    align-items: center;
+    color: var(--text-primary);
+    cursor: pointer;
 }
-.quick-btn span {
-    font-size: 11px;
-    font-weight: 700;
+.side-panel-title {
+    font-size: 14.5px;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin: 0;
+    flex-grow: 1;
     text-align: center;
 }
 
-.section-header { 
-    font-size: 11px; font-weight: 700; margin-bottom: 10px; 
-    color: var(--text-gray); text-transform: uppercase; letter-spacing: 0.06em; 
-    display: flex; justify-content: space-between; align-items: center;
-}
-.transport-options { display: flex; flex-direction: column; gap: 10px; margin-bottom: 28px; }
-.transport-card { 
-    background: var(--card-bg); color: var(--text-dark); border: 1px solid var(--border-color); 
-    padding: 13px 16px; border-radius: 16px; display: flex; align-items: center; 
-    justify-content: space-between; box-shadow: 0 2px 8px var(--shadow-color); 
-}
-.transport-card.disabled { background: var(--input-bg); color: var(--text-gray); border-color: var(--border-color); box-shadow: none; cursor: default; }
-.t-card-info { display: flex; align-items: center; gap: 12px; }
-.t-card-info h3 { margin: 0; font-size: 14px; font-weight: 700; }
-
-.ruta-item { 
-    background: var(--card-bg); border-radius: 14px; padding: 11px 14px; 
-    border: 1px solid var(--border-color); font-size: 13px; color: var(--text-dark); 
-    font-weight: 600; display: flex; align-items: center; gap: 12px; 
-}
-.ruta-item .icon { 
-    background: var(--primary-brand); color: #ffffff; width: 34px; height: 34px; 
-    border-radius: 10px; display: flex; justify-content: center; align-items: center; 
-    font-size: 11px; font-weight: 800; flex-shrink: 0; 
-}
-.fav-btn {
-    background: none;
-    border: none;
-    color: var(--text-gray);
-    padding: 6px;
-    border-radius: 50%;
+.sp-user-info {
+    padding: 18px;
     display: flex;
     align-items: center;
+    gap: 14px;
+    border-bottom: 1px solid var(--border-subtle);
+}
+.sp-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--brand-primary);
+    color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 18px;
+    font-weight: 800;
+    box-shadow: var(--shadow-sm);
+    flex-shrink: 0;
+}
+.sp-name {
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+.sp-edit-btn {
+    background: var(--bg-subtle);
+    border: none;
+    color: var(--text-secondary);
+    padding: 5px;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.sp-menu-list {
+    display: flex;
+    flex-direction: column;
+    padding: 8px 0 80px 0;
+}
+.sp-menu-item {
+    padding: 13px 18px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--text-primary);
+    border-bottom: 1px solid var(--border-subtle);
+    text-decoration: none;
+    cursor: pointer;
+}
+.sp-menu-item:last-child {
+    border-bottom: none;
+}
+.sp-menu-icon {
+    color: var(--text-muted);
+    width: 20px;
+    display: flex;
     justify-content: center;
 }
-.fav-btn.active {
-    color: #f59e0b;
-}
-
-/* ================= PANEL LATERAL DE PERFIL ================= */
-.panel-overlay {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100dvh;
-    background: rgba(0,0,0,0.48); z-index: 4999; opacity: 0; visibility: hidden;
-    transition: opacity var(--transition-fast), visibility var(--transition-fast);
-}
-.panel-overlay.active { opacity: 1; visibility: visible; }
-
-.side-panel {
-    position: fixed; top: 0; right: 0; width: 82%; max-width: 320px; height: 100dvh;
-    background: var(--glass-bg); backdrop-filter: var(--blur-effect); -webkit-backdrop-filter: var(--blur-effect);
-    z-index: 5000; box-shadow: -8px 0 30px rgba(0,0,0,0.2); border-left: 1px solid var(--glass-border);
-    transform: translateX(100%); will-change: transform;
-    transition: transform var(--transition-fast);
-    display: flex; flex-direction: column; overflow-y: auto; padding-bottom: calc(16px + var(--safe-bottom));
-}
-.side-panel.active { transform: translateX(0); }
-
-.side-panel-header { 
-    display: flex; align-items: center; justify-content: space-between; 
-    padding: 14px 16px; border-bottom: 1px solid var(--border-color); 
-    position: sticky; top: 0; background: var(--glass-bg); z-index: 10; 
-}
-.side-panel-close { 
-    background: var(--input-bg); border: none; width: 32px; height: 32px; 
-    border-radius: 50%; display: flex; justify-content: center; align-items: center; 
-    color: var(--text-dark); cursor: pointer; 
-}
-.side-panel-title { font-size: 14px; font-weight: 800; color: var(--text-dark); margin: 0; flex-grow: 1; text-align: center; }
-
-.sp-user-info { padding: 16px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border-color); }
-.sp-avatar { 
-    width: 46px; height: 46px; border-radius: 50%; background: var(--primary-brand); 
-    color: #fff; display: flex; justify-content: center; align-items: center; 
-    font-size: 18px; font-weight: 800; box-shadow: 0 3px 10px var(--shadow-color); flex-shrink: 0; 
-}
-.sp-details { flex-grow: 1; min-width: 0; }
-.sp-name { font-size: 15px; font-weight: 800; color: var(--text-dark); margin: 0; display: flex; align-items: center; justify-content: space-between; gap: 6px; width: 100%; }
-.sp-name-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.sp-edit-btn { background: none; border: none; color: var(--text-gray); cursor: pointer; padding: 4px; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
-
-.sp-menu-list { display: flex; flex-direction: column; padding: 6px 0 80px 0; }
-.sp-menu-item { padding: 13px 16px; display: flex; align-items: center; gap: 14px; font-size: 13.5px; font-weight: 700; color: var(--text-dark); border-bottom: 1px solid var(--border-color); text-decoration: none; cursor: pointer; }
-.sp-menu-item:last-child { border-bottom: none; }
-.sp-menu-icon { color: var(--text-gray); width: 20px; display: flex; justify-content: center; }
 
 .panel-theme-btn-bottom {
-    position: absolute; bottom: calc(36px + var(--safe-bottom)); right: 20px; 
-    width: 44px; height: 44px; border-radius: 50%;
-    background: rgba(15, 23, 42, 0.9); border: 1px solid rgba(255, 255, 255, 0.15); 
-    color: #ffffff; display: flex; justify-content: center; align-items: center; 
-    cursor: pointer; box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3); z-index: 100;
-}
-body:not(.dark-mode) .panel-theme-btn-bottom {
-    background: #ffffff; border: 1px solid var(--border-color); color: var(--text-dark);
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
-}
-
-/* ================= VISTA INTERMEDIA: "TU VIAJE" ================= */
-#trip-view { 
-    opacity: 0; visibility: hidden; transform: translateX(-50%) translateY(14px); pointer-events: none;
-    position: fixed; top: 0; left: 50%; width: 100%; height: 100dvh; max-width: 540px; z-index: 500; 
-    padding: 16px; box-sizing: border-box; display: flex; flex-direction: column; overflow-y: auto; 
-    background: var(--glass-bg); backdrop-filter: var(--blur-effect); -webkit-backdrop-filter: var(--blur-effect);
-    will-change: transform, opacity;
-    transition: opacity var(--transition-fast), transform var(--transition-fast), visibility var(--transition-fast);
-}
-#trip-view.active { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); pointer-events: auto; }
-
-.trip-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; margin-top: 4px; }
-.trip-header h2 { margin: 0; font-size: 16px; font-weight: 800; text-align: center; flex-grow: 1; color: var(--text-dark); }
-.close-trip-btn { background: var(--input-bg); border: none; color: var(--text-dark); width: 32px; height: 32px; border-radius: 50%; display: flex; justify-content: center; align-items: center; }
-
-.trip-inputs-container { 
-    background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 18px; 
-    padding: 14px; box-shadow: 0 6px 24px var(--shadow-color); display: flex; gap: 12px; 
-    margin-bottom: 18px; position: relative; 
-}
-.trip-indicators-col { display: flex; flex-direction: column; align-items: center; position: relative; width: 16px; flex-shrink: 0; }
-.trip-vertical-line { position: absolute; top: 19px; height: 48px; width: 2px; left: 50%; transform: translateX(-50%); background-color: var(--border-color); z-index: 1; }
-.trip-dot-node { width: 8px; height: 8px; border-radius: 50%; background-color: var(--primary-brand); position: absolute; left: 50%; transform: translate(-50%, -50%); z-index: 2; box-shadow: 0 0 0 3px var(--card-bg); }
-.trip-dot-node.origin { background-color: var(--neutral-accent); top: 19px; }
-.trip-dot-node.destination { top: 67px; }
-
-.trip-fields-col { display: flex; flex-direction: column; gap: 10px; flex-grow: 1; }
-.trip-pill-input { 
-    width: 100%; background: var(--input-bg); border: 1.5px solid transparent; 
-    border-radius: 12px; padding: 10px 14px; font-size: 13.5px; font-weight: 600; 
-    color: var(--text-dark); outline: none; box-sizing: border-box; 
-}
-.trip-pill-input:focus { background: var(--card-bg); border-color: var(--neutral-accent); }
-
-.trip-autocomplete-dropdown { 
-    display: none; background: var(--card-bg); border: 1px solid var(--border-color); 
-    border-radius: 14px; max-height: 190px; overflow-y: auto; box-shadow: 0 8px 25px var(--shadow-color); 
-    margin-top: 6px; position: absolute; left: 0; right: 0; z-index: 200; 
-}
-.trip-auto-item { padding: 12px 14px; border-bottom: 1px solid var(--border-color); font-size: 13px; font-weight: 600; color: var(--text-dark); display: flex; align-items: center; gap: 10px; cursor: pointer; }
-.map-picker-link { color: var(--neutral-accent); font-weight: 700; font-size: 12px; text-align: right; text-decoration: none; margin-top: 2px; display: block; cursor: pointer; }
-
-.recent-destinations { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
-.recent-item { 
-    background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 14px; 
-    padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; 
-    box-shadow: 0 2px 8px var(--shadow-color); cursor: pointer; 
-}
-.recent-info { display: flex; align-items: center; gap: 12px; min-width: 0; flex-grow: 1; }
-.recent-icon { background: var(--input-bg); color: var(--primary-brand); width: 34px; height: 34px; border-radius: 50%; display: flex; justify-content: center; align-items: center; flex-shrink: 0; }
-.recent-text h4 { margin: 0 0 2px 0; font-size: 13px; font-weight: 700; color: var(--text-dark); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.recent-text p { margin: 0; font-size: 11px; color: var(--text-gray); }
-.delete-recent { color: var(--text-gray); font-size: 14px; flex-shrink: 0; margin-left: 8px; width: 28px; height: 28px; border-radius: 50%; display: flex; justify-content: center; align-items: center; }
-
-.cotizar-btn { 
-    width: 100%; background: var(--primary-brand); color: #ffffff; border: none; 
-    border-radius: 40px; padding: 14px; font-size: 13.5px; font-weight: 800; 
-    text-transform: uppercase; letter-spacing: 0.02em; box-shadow: 0 6px 20px var(--shadow-color); 
-    margin-top: auto; cursor: pointer; 
+    position: absolute;
+    bottom: calc(24px + var(--safe-bottom));
+    right: 18px;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: var(--bg-surface-elevated);
+    border: 1px solid var(--border-strong);
+    color: var(--text-primary);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    box-shadow: var(--shadow-sm);
+    z-index: 100;
+    transition: all 0.2s var(--ease-out-expo);
 }
 
-/* ================= VISTA 2: UI DEL MAPA COMPACTA ================= */
-#map-ui-view { 
-    opacity: 0; visibility: hidden; pointer-events: none; 
-    position: fixed; top: 0; left: 0; width: 100%; height: 100dvh; 
-    z-index: 200; transition: opacity var(--transition-fast), visibility var(--transition-fast); 
-}
-#map-ui-view.active { opacity: 1; visibility: visible; }
-#map-ui-view.active .back-btn, 
-#map-ui-view.active .top-widget-container, 
-#map-ui-view.active .map-bottom-sheet { pointer-events: auto; }
-
-.back-btn { 
-    position: absolute; top: 14px; left: 14px; 
-    background: var(--glass-bg); backdrop-filter: var(--blur-effect); -webkit-backdrop-filter: var(--blur-effect); 
-    border: 1px solid var(--glass-border); color: var(--text-dark); border-radius: 50%; 
-    width: 38px; height: 38px; box-shadow: 0 4px 14px var(--shadow-color); z-index: 1000; 
-    display: flex; justify-content: center; align-items: center; cursor: pointer; 
+.panel-theme-btn-bottom:hover {
+    border-color: var(--brand-accent);
+    color: var(--brand-accent);
+    transform: scale(1.04);
 }
 
-.top-widget-container { 
-    position: absolute; top: 14px; right: 14px; 
-    display: flex; flex-direction: column; gap: 6px; z-index: 1000; width: 155px; 
-}
-.map-rate-pill { 
-    background: var(--glass-bg); backdrop-filter: var(--blur-effect); -webkit-backdrop-filter: var(--blur-effect); 
-    border: 1px solid var(--glass-border); padding: 9px 12px; border-radius: 14px; 
-    box-shadow: 0 4px 14px var(--shadow-color); font-size: 11px; font-weight: 700; 
-    color: var(--text-dark); display: flex; flex-direction: column; gap: 4px; user-select: none; cursor: pointer; 
-}
-.map-rate-pill > span { 
-    display: flex; justify-content: space-between; align-items: center; 
-    font-size: 9.5px; font-weight: 700; color: var(--text-gray); text-transform: uppercase; 
-}
-.map-rate-pill > strong { color: var(--neutral-accent); font-weight: 800; font-size: 13.5px; }
-
-.map-bottom-sheet { 
-    position: absolute; bottom: 0; left: 0; width: 100%; 
-    background: var(--glass-bg); backdrop-filter: var(--blur-effect); -webkit-backdrop-filter: var(--blur-effect); 
-    border-top-left-radius: 24px; border-top-right-radius: 24px; border-top: 1px solid var(--glass-border); 
-    box-shadow: 0 -6px 25px var(--shadow-color); padding: 12px 16px; 
-    padding-bottom: calc(14px + var(--safe-bottom)); box-sizing: border-box; 
-    z-index: 1000; display: flex; flex-direction: column; max-height: 64vh; 
-}
-.sheet-drag-handle { width: 36px; height: 4px; background: var(--text-gray); border-radius: 4px; margin: 0 auto 12px auto; opacity: 0.35; }
-
-.trip-container-map { position: relative; display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
-.trip-line-map { position: absolute; left: 4px; top: 14px; bottom: 14px; width: 2px; background-color: var(--border-color); z-index: 1; }
-.input-row-map { display: flex; align-items: center; gap: 10px; position: relative; z-index: 2; }
-.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--primary-brand); flex-shrink: 0; box-shadow: 0 0 0 3px var(--glass-bg); }
-.dot.origin { background: var(--neutral-accent); }
-.trip-input-map { 
-    flex-grow: 1; padding: 9px 12px; border: 1.5px solid transparent; border-radius: 12px; 
-    font-size: 13px; background-color: var(--input-bg); color: var(--text-dark); 
-    outline: none; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; 
+.panel-theme-btn-bottom:active {
+    transform: scale(0.95);
 }
 
-#autocomplete-container { 
-    display: none; background: var(--card-bg); border-radius: 12px; 
-    margin-bottom: 8px; max-height: 160px; overflow-y: auto; 
-    box-shadow: 0 6px 20px var(--shadow-color); border: 1px solid var(--border-color); 
+body.dark-mode .panel-theme-btn-bottom {
+    background: var(--bg-surface-elevated);
+    border: 1px solid var(--border-strong);
+    color: var(--text-primary);
+    box-shadow: var(--shadow-sm);
+}
+
+body.dark-mode .panel-theme-btn-bottom:hover {
+    border-color: var(--brand-accent);
+    color: var(--brand-accent);
+}
+
+.theme-spinning {
+    animation: themeRotateSpring 0.65s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes themeRotateSpring {
+    0% {
+        transform: rotate(0deg) scale(0.85);
+    }
+    45% {
+        transform: rotate(210deg) scale(1.22);
+    }
+    75% {
+        transform: rotate(340deg) scale(0.95);
+    }
+    100% {
+        transform: rotate(360deg) scale(1);
+    }
+}
+
+/* ================= VISTA INTERMEDIA: TU VIAJE ================= */
+#trip-view {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateX(-50%) translateY(16px);
+    pointer-events: none;
+    position: fixed;
+    top: 0;
+    left: 50%;
+    width: 100%;
+    height: 100dvh;
+    max-width: 520px;
+    z-index: 500;
+    padding: 16px 18px;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    background: var(--glass-fill);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    transition: opacity var(--transition-standard), transform var(--transition-standard), visibility var(--transition-standard);
+}
+#trip-view.active {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+    pointer-events: auto;
+}
+
+.trip-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 18px;
+}
+.trip-header h2 {
+    margin: 0;
+    font-size: 16.5px;
+    font-weight: 800;
+    text-align: center;
+    flex-grow: 1;
+    color: var(--text-primary);
+    letter-spacing: -0.02em;
+}
+.close-trip-btn {
+    background: var(--bg-subtle);
+    border: none;
+    color: var(--text-primary);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.trip-inputs-container {
+    background: var(--bg-surface-elevated);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-lg);
+    padding: 16px;
+    box-shadow: var(--shadow-md);
+    display: flex;
+    gap: 14px;
+    margin-bottom: 20px;
+    position: relative;
+}
+.trip-indicators-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    width: 16px;
+    flex-shrink: 0;
+}
+.trip-vertical-line {
+    position: absolute;
+    top: 19px;
+    height: 52px;
+    width: 2px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: var(--border-strong);
+    z-index: 1;
+}
+.trip-dot-node {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background-color: var(--brand-primary);
+    position: absolute;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 2;
+    box-shadow: 0 0 0 3px var(--bg-surface-elevated);
+}
+.trip-dot-node.origin {
+    background-color: var(--brand-accent);
+    top: 20px;
+}
+.trip-dot-node.destination {
+    top: 72px;
+}
+
+.trip-fields-col {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    flex-grow: 1;
+}
+.trip-pill-input {
+    width: 100%;
+    background: var(--bg-input);
+    border: 1.5px solid transparent;
+    border-radius: var(--radius-md);
+    padding: 11px 14px;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--text-primary);
+    outline: none;
+    box-sizing: border-box;
+    transition: border-color var(--transition-standard), background-color var(--transition-standard);
+}
+.trip-pill-input:focus {
+    background: var(--bg-surface-elevated);
+    border-color: var(--brand-accent);
+}
+
+.trip-autocomplete-dropdown {
+    display: none;
+    background: var(--bg-surface-elevated);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-md);
+    max-height: 200px;
+    overflow-y: auto;
+    box-shadow: var(--shadow-lg);
+    margin-top: 6px;
+    position: absolute;
+    left: 0;
+    right: 0;
+    z-index: 200;
+}
+.trip-auto-item {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border-subtle);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+}
+.map-picker-link {
+    color: var(--brand-accent);
+    font-weight: 700;
+    font-size: 12px;
+    text-align: right;
+    text-decoration: none;
+    margin-top: 4px;
+    display: block;
+    cursor: pointer;
+}
+
+.recent-destinations {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 24px;
+}
+.recent-item {
+    background: var(--bg-surface-elevated);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: 11px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: var(--shadow-sm);
+    cursor: pointer;
+}
+.recent-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+    flex-grow: 1;
+}
+.recent-icon {
+    background: var(--bg-subtle);
+    color: var(--brand-primary);
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-shrink: 0;
+}
+.recent-text h4 {
+    margin: 0 0 2px 0;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.recent-text p {
+    margin: 0;
+    font-size: 11px;
+    color: var(--text-muted);
+}
+.delete-recent {
+    color: var(--text-muted);
+    font-size: 14px;
+    flex-shrink: 0;
+    margin-left: 8px;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.cotizar-btn {
+    width: 100%;
+    background: var(--brand-primary);
+    color: #ffffff;
+    border: none;
+    border-radius: var(--radius-pill);
+    padding: 14px;
+    font-size: 13.5px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    box-shadow: var(--shadow-md);
+    margin-top: auto;
+    cursor: pointer;
+}
+
+/* ================= VISTA 2: UI DEL MAPA ================= */
+#map-ui-view {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100dvh;
+    z-index: 200;
+    transition: opacity var(--transition-standard), visibility var(--transition-standard);
+}
+#map-ui-view.active {
+    opacity: 1;
+    visibility: visible;
+}
+#map-ui-view.active .back-btn,
+#map-ui-view.active .top-widget-container,
+#map-ui-view.active .map-bottom-sheet {
+    pointer-events: auto;
+}
+
+.back-btn {
+    position: absolute;
+    top: 16px; left: 16px;
+    background: var(--glass-fill);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    color: var(--text-primary);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    box-shadow: var(--shadow-md);
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+
+.top-widget-container {
+    position: absolute;
+    top: 16px; right: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    z-index: 1000;
+    width: 160px;
+}
+.map-rate-pill {
+    background: var(--glass-fill);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    padding: 9px 12px;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-md);
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-primary);
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    user-select: none;
+    cursor: pointer;
+}
+.map-rate-pill > span {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 9.5px;
+    font-weight: 800;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+.map-rate-pill > strong {
+    color: var(--brand-accent);
+    font-weight: 800;
+    font-size: 13.5px;
+}
+
+/* Bottom Sheet */
+.map-bottom-sheet {
+    position: absolute;
+    bottom: 0; left: 0; width: 100%;
+    background: var(--glass-fill);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border-top-left-radius: 26px;
+    border-top-right-radius: 26px;
+    border-top: 1px solid var(--glass-border);
+    box-shadow: var(--shadow-sheet);
+    padding: 12px 18px;
+    padding-bottom: calc(14px + var(--safe-bottom));
+    box-sizing: border-box;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    max-height: 64vh;
+}
+.sheet-drag-handle {
+    width: 38px;
+    height: 4px;
+    background: var(--text-muted);
+    border-radius: var(--radius-pill);
+    margin: 0 auto 14px auto;
+    opacity: 0.35;
+}
+
+.trip-container-map {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+.trip-line-map {
+    position: absolute;
+    left: 4px; top: 14px; bottom: 14px;
+    width: 2px;
+    background-color: var(--border-strong);
+    z-index: 1;
+}
+.input-row-map {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    position: relative;
+    z-index: 2;
+}
+.dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--brand-primary);
+    flex-shrink: 0;
+    box-shadow: 0 0 0 3px var(--bg-surface);
+}
+.dot.origin {
+    background: var(--brand-accent);
+}
+.trip-input-map {
+    flex-grow: 1;
+    padding: 10px 12px;
+    border: 1.5px solid transparent;
+    border-radius: var(--radius-md);
+    font-size: 13px;
+    background-color: var(--bg-input);
+    color: var(--text-primary);
+    outline: none;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: border-color var(--transition-standard), background-color var(--transition-standard);
+}
+
+#autocomplete-container {
+    display: none;
+    background: var(--bg-surface-elevated);
+    border-radius: var(--radius-md);
+    margin-bottom: 10px;
+    max-height: 160px;
+    overflow-y: auto;
+    box-shadow: var(--shadow-lg);
+    border: 1px solid var(--border-strong);
 }
 
 .map-buttons-row {
     display: flex;
     gap: 8px;
-    margin-bottom: 6px;
+    margin-bottom: 8px;
 }
-.gps-button { 
-    flex: 1; background: var(--input-bg); border: none; border-radius: 10px; 
-    color: var(--primary-brand); font-weight: 700; font-size: 12px; 
-    display: flex; justify-content: center; align-items: center; gap: 6px; 
-    padding: 10px; cursor: pointer; 
+.gps-button {
+    flex: 1;
+    background: var(--bg-input);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    color: var(--brand-accent);
+    font-weight: 700;
+    font-size: 12px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    padding: 10px;
+    cursor: pointer;
 }
 .gps-button.active-tracking {
-    background: var(--neutral-accent);
+    background: var(--brand-accent);
     color: #ffffff;
+    border-color: transparent;
 }
 
-#route-results { display: none; flex-grow: 1; overflow-y: auto; padding-top: 6px; padding-bottom: 8px; }
-.result-title { font-size: 11px; color: var(--text-gray); margin-bottom: 8px; font-weight: 700; text-transform: uppercase; }
-.route-option { 
-    background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 14px; 
-    padding: 10px 12px; margin-bottom: 8px; display: flex; align-items: center; gap: 12px; 
-    box-shadow: 0 2px 8px var(--shadow-color); cursor: pointer; 
+#route-results {
+    display: none;
+    flex-grow: 1;
+    overflow-y: auto;
+    padding-top: 6px;
+    padding-bottom: 8px;
 }
-.route-badge { 
-    background: var(--primary-brand); color: #ffffff; font-weight: 800; 
-    width: 42px; height: 42px; border-radius: 10px; display: flex; 
-    justify-content: center; align-items: center; font-size: 11px; text-align: center; flex-shrink: 0; 
+.result-title {
+    font-size: 10.5px;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
 }
-.route-info { flex-grow: 1; min-width: 0; }
-.route-info h4 { margin: 0 0 2px 0; font-size: 13.5px; color: var(--text-dark); display: flex; justify-content: space-between; align-items: center; font-weight: 800; }
-.route-info p { margin: 0; font-size: 11.5px; color: var(--text-gray); font-weight: 600; }
-.badge-cercana { background: var(--input-bg); color: var(--text-dark); padding: 3px 6px; border-radius: 6px; font-size: 9.5px; font-weight: 800; text-transform: uppercase; }
-
-/* ================= MODALES GENÉRICOS ================= */
-.generic-modal { 
-    opacity: 0; visibility: hidden; pointer-events: none; 
-    position: fixed; top: 0; left: 0; width: 100%; height: 100dvh; 
-    background: rgba(0,0,0,0.5); z-index: 6000; justify-content: center; 
-    align-items: center; padding: 16px; box-sizing: border-box; display: flex; 
-    transition: opacity var(--transition-fast), visibility var(--transition-fast); 
+.route-option {
+    background: var(--bg-surface-elevated);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: 11px 13px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: var(--shadow-sm);
+    cursor: pointer;
 }
-.generic-modal.active { opacity: 1; visibility: visible; pointer-events: auto; }
-.generic-modal-content { 
-    background: var(--glass-bg); backdrop-filter: var(--blur-effect); -webkit-backdrop-filter: var(--blur-effect); 
-    border: 1px solid var(--glass-border); border-radius: 22px; padding: 20px; 
-    width: 100%; max-width: 340px; box-shadow: 0 15px 40px rgba(0,0,0,0.25); 
-    display: flex; flex-direction: column; gap: 12px; color: var(--text-dark); position: relative; 
+.route-badge {
+    background: var(--brand-primary);
+    color: #ffffff;
+    font-weight: 800;
+    width: 44px;
+    height: 44px;
+    border-radius: 11px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 11px;
+    text-align: center;
+    flex-shrink: 0;
 }
-.generic-modal-header { 
-    display: flex; justify-content: space-between; align-items: center; 
-    border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom: 4px; 
+.route-info {
+    flex-grow: 1;
+    min-width: 0;
 }
-.generic-modal-header h3 { margin: 0; font-size: 16px; font-weight: 800; }
-.close-generic-btn { 
-    background: var(--input-bg); color: var(--text-dark); border: none; 
-    width: 30px; height: 30px; border-radius: 50%; display: flex; 
-    justify-content: center; align-items: center; cursor: pointer; 
-}
-
-/* Modal Calculadora de Pasajes */
-.calc-counter-row {
+.route-info h4 {
+    margin: 0 0 2px 0;
+    font-size: 13.5px;
+    color: var(--text-primary);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: var(--input-bg);
+    font-weight: 800;
+}
+.route-info p {
+    margin: 0;
+    font-size: 11.5px;
+    color: var(--text-muted);
+    font-weight: 600;
+}
+.badge-cercana {
+    background: var(--brand-accent-soft);
+    color: var(--brand-accent);
+    padding: 3px 7px;
+    border-radius: var(--radius-sm);
+    font-size: 9.5px;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+/* ================= MODALES ================= */
+.generic-modal {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100dvh;
+    background: rgba(15, 23, 42, 0.5);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 6000;
+    justify-content: center;
+    align-items: center;
+    padding: 16px;
+    display: flex;
+    transition: opacity var(--transition-standard), visibility var(--transition-standard);
+}
+.generic-modal.active {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+.generic-modal-content {
+    background: var(--bg-surface-elevated);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-lg);
+    padding: 22px;
+    width: 100%;
+    max-width: 380px;
+    box-shadow: var(--shadow-lg);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    color: var(--text-primary);
+    position: relative;
+    transform: translateY(16px) scale(0.96);
+    transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.generic-modal.active .generic-modal-content {
+    transform: translateY(0) scale(1);
+}
+.generic-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border-subtle);
+    padding-bottom: 10px;
+}
+.generic-modal-header h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+}
+.close-generic-btn {
+    background: var(--bg-subtle);
+    color: var(--text-primary);
+    border: none;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+
+/* Modal Calculadora */
+.calc-service-toggle {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    background: var(--bg-input);
+    padding: 4px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-subtle);
+    margin-bottom: 8px;
+}
+.calc-service-pill {
+    background: transparent;
+    border: none;
+    border-radius: 10px;
+    padding: 8px 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.calc-service-pill.active {
+    background: var(--bg-surface-elevated);
+    color: var(--brand-accent);
+    box-shadow: var(--shadow-sm);
+    font-weight: 800;
+}
+.calc-passenger-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--bg-subtle);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
     padding: 10px 14px;
-    border-radius: 12px;
+    gap: 10px;
+}
+.calc-passenger-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+.calc-passenger-title {
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+.calc-passenger-rate {
+    font-size: 11.5px;
+    font-weight: 700;
+    color: var(--brand-accent);
+}
+.calc-passenger-sub {
+    font-size: 10.5px;
+    font-weight: 500;
+    color: var(--text-muted);
+}
+.calc-counter-num {
+    font-size: 16px;
+    font-weight: 800;
+    min-width: 20px;
+    text-align: center;
+    color: var(--text-primary);
+}
+.calc-rapidito-quick-adjust {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--bg-subtle);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: 9px 12px;
+    gap: 8px;
 }
 .calc-btn-group {
     display: flex;
@@ -620,22 +1507,22 @@ body:not(.dark-mode) .panel-theme-btn-bottom {
     width: 32px;
     height: 32px;
     border-radius: 50%;
-    border: none;
-    background: var(--card-bg);
-    color: var(--text-dark);
-    font-size: 18px;
+    border: 1px solid var(--border-strong);
+    background: var(--bg-surface-elevated);
+    color: var(--text-primary);
+    font-size: 17px;
     font-weight: 800;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    box-shadow: 0 2px 6px var(--shadow-color);
+    box-shadow: var(--shadow-sm);
 }
 .calc-results-card {
-    background: var(--card-bg);
-    border: 1px solid var(--border-color);
-    border-radius: 14px;
-    padding: 12px 14px;
+    background: var(--bg-subtle);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: 14px;
     display: flex;
     flex-direction: column;
     gap: 8px;
@@ -648,22 +1535,169 @@ body:not(.dark-mode) .panel-theme-btn-bottom {
     font-weight: 700;
 }
 .calc-res-item span {
-    color: var(--text-gray);
+    color: var(--text-secondary);
 }
 .calc-res-item strong {
-    color: var(--text-dark);
+    color: var(--text-primary);
 }
 
 /* Modal Selector Ciudad */
-.cities-grid { display: flex; flex-direction: column; gap: 6px; max-height: 250px; overflow-y: auto; }
-.city-option { 
-    padding: 11px 14px; background: var(--card-bg); border: 1px solid var(--border-color); 
-    border-radius: 12px; font-weight: 700; font-size: 13px; display: flex; 
-    align-items: center; gap: 10px; cursor: pointer; 
+.cities-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-height: 250px;
+    overflow-y: auto;
 }
-.city-option.selected {
-    border-color: var(--neutral-accent);
-    color: var(--neutral-accent);
+.city-option {
+    padding: 12px 14px;
+    background: var(--bg-subtle);
+    border: 1px solid transparent;
+    border-radius: var(--radius-md);
+    font-weight: 700;
+    font-size: 13.5px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+.city-option:hover, .city-option:active {
+    border-color: var(--brand-accent);
+    color: var(--brand-accent);
+}
+
+/* Formulario de Perfil Extendido */
+.profile-form-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-height: 60vh;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+.profile-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.profile-form-label {
+    font-size: 10.5px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+.profile-input-field {
+    width: 100%;
+    background: var(--bg-input);
+    border: 1.5px solid var(--border-subtle);
+    border-radius: 12px;
+    padding: 9px 12px;
+    font-size: 13px;
+    font-family: inherit;
+    font-weight: 600;
+    color: var(--text-primary);
+    outline: none;
+    box-sizing: border-box;
+    transition: border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+}
+.profile-input-field:focus {
+    background: var(--bg-surface-elevated);
+    border-color: var(--brand-accent);
+    box-shadow: 0 0 0 3px var(--brand-accent-soft);
+}
+.profile-select-field {
+    width: 100%;
+    background: var(--bg-input);
+    border: 1.5px solid var(--border-subtle);
+    border-radius: 12px;
+    padding: 9px 12px;
+    font-size: 13px;
+    font-family: inherit;
+    font-weight: 600;
+    color: var(--text-primary);
+    outline: none;
+    box-sizing: border-box;
+    cursor: pointer;
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+.profile-select-field:focus {
+    background: var(--bg-surface-elevated);
+    border-color: var(--brand-accent);
+}
+.profile-switch-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--bg-input);
+    border: 1px solid var(--border-subtle);
+    border-radius: 12px;
+    padding: 10px 12px;
+}
+.switch-control {
+    position: relative;
+    display: inline-block;
+    width: 42px;
+    height: 24px;
+    flex-shrink: 0;
+}
+.switch-control input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+.switch-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: var(--border-strong);
+    transition: 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    border-radius: 24px;
+}
+.switch-slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    border-radius: 50%;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+}
+.switch-control input:checked + .switch-slider {
+    background-color: var(--brand-accent);
+}
+.switch-control input:checked + .switch-slider:before {
+    transform: translateX(18px);
+}
+.sp-badge-pill {
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    padding: 2px 7px;
+    border-radius: 10px;
+    background: var(--brand-accent-soft);
+    color: var(--brand-accent);
+    letter-spacing: 0.04em;
+    display: inline-block;
+}
+.saved-place-chip {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 5px 10px;
+    border-radius: var(--radius-pill);
+    background: var(--bg-subtle);
+    border: 1px solid var(--border-subtle);
+    color: var(--brand-accent);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+}
+.saved-place-chip:hover {
+    background: var(--brand-accent-soft);
+    border-color: var(--brand-accent);
 }
 
     </style>
@@ -672,7 +1706,7 @@ body:not(.dark-mode) .panel-theme-btn-bottom {
 
     <!-- BANNER DE CONEXIÓN OFFLINE -->
     <div id="offline-banner">
-        <span>⚡ Modo sin conexión (datos en caché)</span>
+        <span>Modo sin conexión (datos en caché)</span>
     </div>
 
     <!-- CONTENEDOR DE TOASTS FLOTANTES -->
@@ -681,6 +1715,9 @@ body:not(.dark-mode) .panel-theme-btn-bottom {
     <!-- PANTALLA DE CARGA -->
     <div id="splash-screen">
         <div class="splash-logo">Rapidito</div>
+        <div class="splash-progress-track">
+            <div class="splash-progress-bar"></div>
+        </div>
         <div class="splash-subtitle">Transporte Urbano</div>
     </div>
 
@@ -707,6 +1744,10 @@ body:not(.dark-mode) .panel-theme-btn-bottom {
                         <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
                     </button>
                 </h2>
+                <div id="sp-user-sub" style="display: flex; align-items: center; gap: 6px; margin-top: 4px;">
+                    <span id="sp-category-badge" class="sp-badge-pill">Estándar</span>
+                    <span id="sp-city-badge" style="font-size: 12px; color: var(--text-gray); font-weight: 600;">Barquisimeto</span>
+                </div>
             </div>
         </div>
 
@@ -736,13 +1777,15 @@ body:not(.dark-mode) .panel-theme-btn-bottom {
                 Contactar Soporte
             </a>
             <a class="sp-menu-item interactive" onclick="AppManager.abrirDesdePanel('modal-acerca')">
-                <div class="sp-menu-icon"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg></div>
+                <div class="sp-menu-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><circle cx="12" cy="8" r="1" fill="currentColor"></circle></svg></div>
                 Acerca de Rapidito
             </a>
         </div>
         
         <button class="panel-theme-btn-bottom interactive" id="theme-toggle-btn" onclick="AppManager.toggleDarkMode()" title="Cambiar tema">
-            <svg id="theme-icon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+            <div id="theme-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+            </div>
         </button>
 
         <div style="text-align: center; margin-top: auto; padding-top: 14px; font-size: 10px; font-weight: 700; color: var(--text-gray); opacity: 0.6; text-transform: uppercase; letter-spacing: 0.05em;">
@@ -754,11 +1797,9 @@ body:not(.dark-mode) .panel-theme-btn-bottom {
     <div id="dashboard-wrapper">
         <div id="dashboard-view">
             <div class="header-dash">
+                <div style="width: 38px;"></div>
                 <div class="app-title-container">
                     <h1 class="app-title">Rapidito</h1>
-                    <span id="header-city-badge" class="city-pill-badge interactive" onclick="AppManager.openCitySelector('dashboard')" title="Cambiar ciudad">
-                        Barquisimeto ▾
-                    </span>
                 </div>
                 
                 <div class="profile-container">
@@ -774,47 +1815,57 @@ body:not(.dark-mode) .panel-theme-btn-bottom {
                 <div class="text">¿A dónde vas hoy?</div>
             </div>
 
-            <!-- Accesos Rápidos -->
-            <div class="quick-actions-bar">
-                <div class="quick-btn interactive" onclick="AppManager.abrirModal('modal-calculadora')">
-                    <div class="quick-btn-icon">
-                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"></rect><line x1="8" y1="6" x2="16" y2="6"></line><line x1="16" y1="14" x2="16" y2="18"></line><path d="M16 10h.01M12 10h.01M8 10h.01M12 14h.01M8 14h.01M12 18h.01M8 18h.01"></path></svg>
+            <!-- Modulo Financiero Sincronizado -->
+            <div class="dash-finance-section">
+                <div class="dash-finance-row">
+                    <div class="dash-finance-pill interactive" id="pill-divisas" onclick="AppManager.toggleFinanceModule('divisas')">
+                        <span>TASAS BCV 
+                            <svg id="flecha-divisas" class="chevron-icon" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                        </span>
+                        <div style="display: flex; flex-direction: column; gap: 1px;">
+                            <strong id="dash-tasa-bcv" style="color: var(--brand-accent);">--</strong>
+                            <span id="dash-sub-divisas" style="font-size: 11px; font-weight: 600; color: var(--text-muted);">Oficial Venezuela</span>
+                        </div>
                     </div>
-                    <span>Calculadora</span>
-                </div>
-                <div class="quick-btn interactive" onclick="AppManager.toggleRutasList()">
-                    <div class="quick-btn-icon">
-                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"></rect><path d="M6 21v-4M18 21v-4M2 9h20"></path></svg>
+                    <div class="dash-finance-pill interactive" id="pill-pasaje" onclick="AppManager.toggleFinanceModule('pasaje')">
+                        <span>PASAJES 
+                            <svg id="flecha-pasaje" class="chevron-icon" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                        </span>
+                        <div style="display: flex; flex-direction: column; gap: 2px;">
+                            <strong id="dash-tarifa-normal" style="font-size: 13px; color: var(--text-primary); white-space: nowrap;">-- Bs ($0.25)</strong>
+                            <span id="dash-tarifa-pref-pill" style="font-size: 11px; font-weight: 700; color: var(--neutral-accent); white-space: nowrap;">Pref: -- Bs ($0.125)</span>
+                        </div>
                     </div>
-                    <span>Ver Rutas</span>
                 </div>
-                <div class="quick-btn interactive" onclick="AppManager.abrirMapaDesdeVistaViaje(); AppManager.ubicarConGPS();">
-                    <div class="quick-btn-icon">
-                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>
-                    </div>
-                    <span>Localizarme</span>
-                </div>
-            </div>
 
-            <!-- Tasas Financieras -->
-            <div class="dash-finance">
-                <div class="dash-finance-pill interactive" onclick="toggleDivisas()">
-                    <span>TASAS BCV 
-                        <svg id="flecha-divisas" class="chevron-icon" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                    </span>
-                    <strong id="dash-tasa-bcv" style="color: var(--neutral-accent);">--</strong>
-                    <div id="detalles-divisas" class="finance-details">
-                        <strong id="dash-tasa-euro" style="font-size: 12.5px; color: var(--text-dark); font-weight: 700;">--</strong>
-                        <strong id="dash-tasa-paralelo" style="font-size: 12.5px; color: var(--text-dark); font-weight: 700;">--</strong>
+                <!-- Bandeja de detalles que se expande a ancho completo debajo de ambos botones -->
+                <div id="finance-tray" class="finance-tray">
+                    <div id="tray-divisas" class="tray-panel">
+                        <div class="tray-row">
+                            <span class="tray-label">Euro oficial:</span>
+                            <strong id="dash-tasa-euro">--</strong>
+                        </div>
+                        <div class="tray-row">
+                            <span class="tray-label">Dólar paralelo:</span>
+                            <strong id="dash-tasa-paralelo">--</strong>
+                        </div>
                     </div>
-                </div>
-                <div class="dash-finance-pill interactive" onclick="togglePasaje()">
-                    <span>PASAJE NORMAL 
-                        <svg id="flecha-pasaje" class="chevron-icon" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                    </span>
-                    <strong id="dash-tarifa-normal">--</strong>
-                    <div id="detalles-pasaje" class="finance-details">
-                        <strong id="dash-tarifa-pref" style="font-size: 12.5px; color: var(--neutral-accent); font-weight: 700;">--</strong>
+                    <div id="tray-pasaje" class="tray-panel">
+                        <div class="tray-row">
+                            <span class="tray-label">Ruta Urbana (Regulado):</span>
+                            <strong id="dash-tray-urbana">-- Bs ($0.25)</strong>
+                        </div>
+                        <div class="tray-row">
+                            <span class="tray-label">Urbana Preferencial (50%):</span>
+                            <strong id="dash-tarifa-pref">-- Bs ($0.125)</strong>
+                        </div>
+                        <div class="tray-row" style="border-top: 1px dashed var(--border-subtle); padding-top: 5px; margin-top: 2px;">
+                            <span class="tray-label" style="color: var(--brand-accent); font-weight: 700;">Rapidito (Independiente):</span>
+                            <strong id="dash-tray-rapidito" style="color: var(--text-primary);">500 Bs ($0.57)</strong>
+                        </div>
+                        <div style="font-size: 10.5px; color: var(--text-muted); font-weight: 600; line-height: 1.35;">
+                            Tarifa de rapiditos indexada a ~0.57 USD (500 Bs aprox.). No se rigen por regulaciones urbanas ni medio pasaje.
+                        </div>
                     </div>
                 </div>
             </div>
@@ -822,26 +1873,33 @@ body:not(.dark-mode) .panel-theme-btn-bottom {
             <!-- Servicios de Transporte -->
             <h2 class="section-header">
                 <span>Servicios</span>
-                <span class="interactive" onclick="AppManager.openCitySelector('dashboard')" style="font-size:10px; color:var(--neutral-accent); text-transform:none;">Cambiar ciudad</span>
             </h2>
             <div class="transport-options">
                 <div class="transport-card interactive" onclick="AppManager.toggleRutasList()">
                     <div class="t-card-info">
                         <svg width="22" height="22" fill="none" stroke="var(--primary-brand)" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"></rect><path d="M6 21v-4M18 21v-4M2 9h20M6 9v4M10 9v4M14 9v4M18 9v4"></path></svg>
-                        <h3>Rutas Urbanas</h3>
+                        <div>
+                            <h3>Rutas Urbanas</h3>
+                            <span style="font-size: 11px; color: var(--text-muted); font-weight: 600;">Regulado BCV (~0.25$)</span>
+                        </div>
                     </div>
                     <svg id="flecha-rutas" class="chevron-icon" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"></polyline></svg>
                 </div>
                 
                 <div id="rutas-list-container" class="rutas-list"></div>
 
-                <div class="transport-card disabled">
+                <div class="transport-card interactive" onclick="AppManager.toggleRapiditosList()">
                     <div class="t-card-info">
-                        <svg width="22" height="22" fill="none" stroke="var(--text-gray)" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="10" rx="2"></rect><path d="M5 17v2a1 1 0 0 0 1 1h1a1 1 0 0 0 1-1v-2M16 17v2a1 1 0 0 0 1 1h1a1 1 0 0 0 1-1v-2M2 12h20M6 7l1-4h10l1 4"></path></svg>
-                        <h3 style="color: var(--text-gray)">Rapiditos (Taxis Compartidos)</h3>
+                        <svg width="22" height="22" fill="none" stroke="var(--primary-brand)" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="10" rx="2"></rect><path d="M5 17v2a1 1 0 0 0 1 1h1a1 1 0 0 0 1-1v-2M16 17v2a1 1 0 0 0 1 1h1a1 1 0 0 0 1-1v-2M2 12h20M6 7l1-4h10l1 4"></path></svg>
+                        <div>
+                            <h3>Rapiditos</h3>
+                            <span id="card-rapidito-sub" style="font-size: 11px; color: var(--brand-accent); font-weight: 700;">Pasaje actual: 500 Bs (Tarifa plana)</span>
+                        </div>
                     </div>
-                    <span style="font-size: 10px; font-weight: 700; background: var(--border-color); padding: 3px 7px; border-radius: 6px; color: var(--text-gray); text-transform: uppercase;">Próximamente</span>
+                    <svg id="flecha-rapiditos" class="chevron-icon" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"></polyline></svg>
                 </div>
+                
+                <div id="rapiditos-list-container" class="rutas-list"></div>
             </div>
         </div>
     </div>
@@ -872,6 +1930,7 @@ body:not(.dark-mode) .panel-theme-btn-bottom {
                     <div id="trip-auto-destino" class="trip-autocomplete-dropdown"></div>
                 </div>
                 <a class="map-picker-link interactive" onclick="AppManager.abrirMapaDesdeVistaViaje()">Escoger dirección en el mapa ></a>
+                <div id="trip-saved-chips" style="display: none; align-items: center; gap: 6px; margin-top: 8px; flex-wrap: wrap;"></div>
             </div>
         </div>
 
@@ -900,12 +1959,17 @@ body:not(.dark-mode) .panel-theme-btn-bottom {
             </div>
 
             <div class="map-rate-pill interactive" onclick="toggleMapPasaje()">
-                <span>PASAJE NORMAL 
+                <span>PASAJES 
                     <svg id="map-flecha-pasaje" class="chevron-icon" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"></polyline></svg>
                 </span>
-                <strong id="tarifa-normal" style="color: var(--text-dark);">--</strong>
+                <div style="display: flex; flex-direction: column; gap: 1px;">
+                    <strong id="tarifa-normal" style="color: var(--text-dark); font-size: 11px; white-space: nowrap;">-- Bs ($0.25)</strong>
+                    <span id="map-tarifa-pref-pill" style="font-size: 10px; font-weight: 700; color: var(--neutral-accent); white-space: nowrap;">Pref: -- Bs ($0.125)</span>
+                </div>
                 <div id="map-detalles-pasaje" class="map-finance-details">
-                    <span id="map-tarifa-pref" style="font-size: 11px; color: var(--neutral-accent); font-weight: 700;">Pref: --</span>
+                    <span id="map-tarifa-urb-row" style="font-size: 11px; color: var(--text-dark); font-weight: 700;">Urbana: -- Bs ($0.25)</span>
+                    <span id="map-tarifa-pref" style="font-size: 11px; color: var(--neutral-accent); font-weight: 700;">Preferencial (50%): -- Bs ($0.125)</span>
+                    <span id="map-tarifa-rap-row" style="font-size: 11px; color: var(--brand-accent); font-weight: 700; border-top: 1px dashed var(--border-subtle); padding-top: 3px;">Rapidito: 500 Bs ($0.57)</span>
                 </div>
             </div>
         </div>
@@ -930,10 +1994,7 @@ body:not(.dark-mode) .panel-theme-btn-bottom {
             <div class="map-buttons-row">
                 <button class="gps-button interactive" onclick="AppManager.ubicarConGPS()">
                     <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>
-                    Mi ubicación
-                </button>
-                <button id="gps-live-btn" class="gps-button interactive" onclick="GeoManager.toggleLiveTracking()">
-                    Seguimiento en vivo
+                    Mi ubicación actual
                 </button>
             </div>
 
@@ -951,34 +2012,97 @@ body:not(.dark-mode) .panel-theme-btn-bottom {
                 </button>
             </div>
             
-            <div class="calc-counter-row">
-                <span style="font-weight:700; font-size:13px;">Número de pasajeros:</span>
-                <div class="calc-btn-group">
-                    <button class="calc-step-btn interactive" id="calc-minus-btn">−</button>
-                    <strong id="calc-count" style="font-size:17px; min-width:20px; text-align:center;">1</strong>
-                    <button class="calc-step-btn interactive" id="calc-plus-btn">+</button>
+            <!-- Selector de Servicio -->
+            <div class="calc-service-toggle">
+                <button type="button" class="calc-service-pill active interactive" id="calc-tab-urbana" onclick="RatesManager.setServicioCalculadora('urbana')">
+                    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"></rect><path d="M6 21v-4M18 21v-4M2 9h20"></path></svg>
+                    <span>Ruta Urbana</span>
+                </button>
+                <button type="button" class="calc-service-pill interactive" id="calc-tab-rapidito" onclick="RatesManager.setServicioCalculadora('rapidito')">
+                    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="10" rx="2"></rect><path d="M5 17v2M16 17v2M2 12h20M6 7l1-4h10l1 4"></path></svg>
+                    <span id="calc-tab-rapidito-lbl">Rapidito (500 Bs)</span>
+                </button>
+            </div>
+
+            <!-- Modalidad Urbana: Contadores independientes para normal y preferencial -->
+            <div id="calc-sec-urbana" style="display: flex; flex-direction: column; gap: 8px;">
+                <div class="calc-passenger-row">
+                    <div class="calc-passenger-info">
+                        <span class="calc-passenger-title">Pasajeros Normales / Regulares</span>
+                        <span class="calc-passenger-rate" id="calc-rate-regular-label">-- Bs ($0.25)</span>
+                    </div>
+                    <div class="calc-btn-group">
+                        <button type="button" class="calc-step-btn interactive" onclick="RatesManager.cambiarPasajeros('regular', -1)">−</button>
+                        <strong id="calc-count-regular" class="calc-counter-num">1</strong>
+                        <button type="button" class="calc-step-btn interactive" onclick="RatesManager.cambiarPasajeros('regular', 1)">+</button>
+                    </div>
+                </div>
+
+                <div class="calc-passenger-row">
+                    <div class="calc-passenger-info">
+                        <span class="calc-passenger-title">Pasajeros Preferenciales (50%)</span>
+                        <span class="calc-passenger-rate" id="calc-rate-pref-label">-- Bs ($0.125)</span>
+                        <span class="calc-passenger-sub">Estudiantes y adultos mayores</span>
+                    </div>
+                    <div class="calc-btn-group">
+                        <button type="button" class="calc-step-btn interactive" onclick="RatesManager.cambiarPasajeros('preferencial', -1)">−</button>
+                        <strong id="calc-count-pref" class="calc-counter-num">0</strong>
+                        <button type="button" class="calc-step-btn interactive" onclick="RatesManager.cambiarPasajeros('preferencial', 1)">+</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modalidad Rapidito -->
+            <div id="calc-sec-rapidito" style="display: none; flex-direction: column; gap: 8px;">
+                <div class="calc-passenger-row">
+                    <div class="calc-passenger-info">
+                        <span class="calc-passenger-title">Pasajeros Rapidito</span>
+                        <span class="calc-passenger-rate" id="calc-rate-rapidito-label">-- Bs ($0.57)</span>
+                        <span class="calc-passenger-sub">Tarifa plana por puesto (no aplica medio pasaje)</span>
+                    </div>
+                    <div class="calc-btn-group">
+                        <button type="button" class="calc-step-btn interactive" onclick="RatesManager.cambiarPasajeros('rapidito', -1)">−</button>
+                        <strong id="calc-count-rapidito" class="calc-counter-num">1</strong>
+                        <button type="button" class="calc-step-btn interactive" onclick="RatesManager.cambiarPasajeros('rapidito', 1)">+</button>
+                    </div>
+                </div>
+
+                <div class="calc-rapidito-quick-adjust">
+                    <span style="font-size: 11px; font-weight: 600; color: var(--text-secondary);">¿Ajustar pasaje de rapiditos?</span>
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        <input type="number" id="calc-rapidito-quick-input" class="profile-input-field" style="width: 75px; padding: 4px 8px; font-size: 12px; height: 28px;" value="500" min="1" step="25">
+                        <button type="button" class="interactive" style="height: 28px; padding: 0 10px; border-radius: 8px; border: none; font-size: 11.5px; font-weight: 700; background: var(--brand-accent); color: #fff; cursor: pointer;" onclick="RatesManager.actualizarTarifaRapDesdeCalc()">Fijar</button>
+                    </div>
                 </div>
             </div>
 
             <div class="calc-results-card">
                 <div class="calc-res-item">
-                    <span>Total a pagar en Bolívares:</span>
-                    <strong id="calc-total-bs" style="font-size:16px; color:var(--primary-brand);">--</strong>
+                    <span>Pasajeros totales:</span>
+                    <strong id="calc-total-passengers" style="font-size:13px; color:var(--text-primary);">1 pasajero</strong>
+                </div>
+                <div class="calc-res-item" id="calc-res-breakdown-row">
+                    <span>Desglose:</span>
+                    <strong id="calc-res-breakdown" style="font-size:12px; color:var(--text-secondary); text-align:right;">1 normal</strong>
+                </div>
+                <div class="calc-res-item" style="border-top: 1px dashed var(--border-subtle); padding-top: 6px; margin-top: 2px;">
+                    <span>Total en Bolívares:</span>
+                    <strong id="calc-total-bs" style="font-size:17px; color:var(--text-primary);">--</strong>
                 </div>
                 <div class="calc-res-item">
                     <span>Equivalente en Dólares (BCV):</span>
-                    <strong id="calc-total-usd" style="color:var(--text-gray);">--</strong>
+                    <strong id="calc-total-usd" style="color:var(--brand-accent); font-size:13px;">--</strong>
                 </div>
             </div>
 
             <div>
-                <label style="font-size: 11px; font-weight: 700; color: var(--text-gray); margin-bottom: 4px; display: block; text-transform: uppercase;">¿Con cuánto pagas? (Bs)</label>
-                <input type="number" id="calc-paga-con" class="trip-pill-input" placeholder="Ej: 50, 100, 200">
+                <label style="font-size: 11px; font-weight: 700; color: var(--text-secondary); margin-bottom: 4px; display: block; text-transform: uppercase;">¿Con cuánto pagas? (Bs)</label>
+                <input type="number" id="calc-paga-con" class="trip-pill-input" placeholder="Ej: 50, 100, 200, 500">
             </div>
 
             <div class="calc-res-item" style="padding: 4px 6px;">
                 <span>Vuelto estimado:</span>
-                <strong id="calc-vuelto-bs" style="font-size:15px;">--</strong>
+                <strong id="calc-vuelto-bs" style="font-size:15px; color:var(--text-primary);">--</strong>
             </div>
 
             <button class="cotizar-btn interactive" style="padding:12px; font-size:13px; margin-top:0;" onclick="AppManager.cerrarModal('modal-calculadora')">Listo</button>
@@ -987,27 +2111,87 @@ body:not(.dark-mode) .panel-theme-btn-bottom {
 
     <!-- MODAL: EDITAR PERFIL -->
     <div id="modal-editar-perfil" class="generic-modal" onclick="if(event.target === this) AppManager.cerrarModal('modal-editar-perfil')">
-        <div class="generic-modal-content">
+        <div class="generic-modal-content" style="max-height: 85vh;">
             <div class="generic-modal-header">
                 <h3>Editar Perfil</h3>
                 <button class="close-generic-btn interactive" onclick="AppManager.cerrarModal('modal-editar-perfil')">
                     <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                 </button>
             </div>
-            <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 6px;">
-                <div>
-                    <label style="font-size: 11px; font-weight: 700; color: var(--text-gray); margin-bottom: 4px; display: block; text-transform: uppercase;">Nombre Completo</label>
-                    <input type="text" id="edit-nombre" class="trip-pill-input" style="background: var(--input-bg); border-radius: 10px; padding: 10px 12px;">
+            
+            <div class="profile-form-container">
+                <div class="profile-form-group">
+                    <label class="profile-form-label">Nombre Completo</label>
+                    <input type="text" id="edit-nombre" class="profile-input-field" placeholder="Tu nombre">
                 </div>
-                <div>
-                    <label style="font-size: 11px; font-weight: 700; color: var(--text-gray); margin-bottom: 4px; display: block; text-transform: uppercase;">Ciudad Principal</label>
-                    <div class="interactive" onclick="AppManager.cerrarModal('modal-editar-perfil'); setTimeout(()=> AppManager.openCitySelector('profile'), 150)" style="background: var(--input-bg); border-radius: 10px; padding: 10px 12px; display: flex; justify-content: space-between; align-items: center; cursor: pointer;">
-                        <span id="edit-ciudad-display" style="font-size: 13.5px; font-weight: 600; color: var(--text-dark);">Barquisimeto</span>
+                
+                <div class="profile-form-group">
+                    <label class="profile-form-label">Ciudad Principal</label>
+                    <div class="interactive" onclick="AppManager.cerrarModal('modal-editar-perfil'); setTimeout(()=> AppManager.openCitySelector('profile'), 150)" style="background: var(--bg-input); border: 1.5px solid var(--border-subtle); border-radius: 12px; padding: 9px 12px; display: flex; justify-content: space-between; align-items: center; cursor: pointer;">
+                        <span id="edit-ciudad-display" style="font-size: 13px; font-weight: 600; color: var(--text-primary);">Barquisimeto</span>
                         <input type="hidden" id="edit-ciudad-value" value="Barquisimeto">
-                        <svg style="color: var(--text-gray);" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                        <svg style="color: var(--text-muted);" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"></polyline></svg>
                     </div>
                 </div>
+
+                <div class="profile-form-group">
+                    <label class="profile-form-label">Tipo de Pasajero (Tarifa)</label>
+                    <select id="edit-categoria" class="profile-select-field">
+                        <option value="estandar">General / Estándar (Tarifa completa)</option>
+                        <option value="estudiante">Estudiante (50% Medio Pasaje)</option>
+                        <option value="adulto_mayor">Tercera Edad (50% Medio Pasaje)</option>
+                    </select>
+                </div>
+
+                <div class="profile-form-group">
+                    <label class="profile-form-label">Preferencia de Transporte</label>
+                    <select id="edit-transporte" class="profile-select-field">
+                        <option value="todos">Todas las opciones</option>
+                        <option value="urbana">Rutas Urbanas</option>
+                        <option value="rapidito">Rapiditos</option>
+                    </select>
+                </div>
+
+                <div class="profile-form-group">
+                    <label class="profile-form-label">Tarifa Pasaje Rapidito (Bs)</label>
+                    <div style="position: relative;">
+                        <input type="number" id="edit-tarifa-rapidito" class="profile-input-field" placeholder="500" min="1" step="25">
+                        <span style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-size: 12px; font-weight: 700; color: var(--text-muted); pointer-events: none;">Bs</span>
+                    </div>
+                    <span style="font-size: 10.5px; color: var(--text-muted); font-weight: 500; margin-top: 2px;">Tarifa independiente de carritos por puesto (actualmente 500 Bs).</span>
+                </div>
+
+                <div class="profile-form-group">
+                    <label class="profile-form-label">Moneda de Referencia</label>
+                    <select id="edit-moneda" class="profile-select-field">
+                        <option value="ambas">Ambas divisas (Bs. y USD)</option>
+                        <option value="bs">Bolívares (Bs.)</option>
+                        <option value="usd">Dólares (USD)</option>
+                    </select>
+                </div>
+
+                <div class="profile-form-group">
+                    <label class="profile-form-label">Lugar Frecuente: Casa</label>
+                    <input type="text" id="edit-casa" class="profile-input-field" placeholder="Ej: Urb. Las Trinitarias">
+                </div>
+
+                <div class="profile-form-group">
+                    <label class="profile-form-label">Lugar Frecuente: Trabajo / Estudio</label>
+                    <input type="text" id="edit-trabajo" class="profile-input-field" placeholder="Ej: Centro / Av. 20">
+                </div>
+
+                <div class="profile-switch-card">
+                    <div>
+                        <div style="font-size: 12.5px; font-weight: 700; color: var(--text-primary);">Alerta de Llegada GPS</div>
+                        <div style="font-size: 11px; color: var(--text-muted); font-weight: 500;">Vibrar al estar a 500m del destino</div>
+                    </div>
+                    <label class="switch-control">
+                        <input type="checkbox" id="edit-alerta-gps" checked>
+                        <span class="switch-slider"></span>
+                    </label>
+                </div>
             </div>
+
             <button class="cotizar-btn interactive" style="padding:12px; font-size:13px; margin-top:0;" onclick="AppManager.guardarPerfil()">Guardar Cambios</button>
         </div>
     </div>
@@ -1118,8 +2302,8 @@ body:not(.dark-mode) .panel-theme-btn-bottom {
     <!-- SCRIPTS DE LA APLICACIÓN -->
     <script>
 /**
- * Rapidito PWA - Base de datos de Rutas de Transporte Urbano
- * Cobertura: Barquisimeto, Cabudare, Caracas
+ * Rapidito PWA - Base de datos de Rutas de Transporte Urbano y Rapiditos
+ * Cobertura geográfica y definición de rutas
  */
 
 const CIUDADES_CONFIG = {
@@ -1131,161 +2315,38 @@ const CIUDADES_CONFIG = {
     "Mérida": { lat: 8.5983, lon: -71.1450, zoom: 13 }
 };
 
-const RUTAS_DATA = {
-    // ---------------- BARQUISIMETO ----------------
-    "ruta_av_venezuela": {
-        "ciudad": "Barquisimeto",
-        "tipo": "Troncal",
-        "color": "#305CDE",
-        "type": "FeatureCollection",
-        "features": [{
-            "type": "Feature",
-            "properties": { 
-                "nombre": "Ruta Av. Venezuela", 
-                "origen": "Oeste (Av. Fuerzas Armadas)", 
-                "destino": "Este (Sambil / Branger)",
-                "paradas_clave": ["Terminal Oeste", "Calle 42", "C.C. Metrópolis", "Av. Vargas", "C.C. Sambil"],
-                "frecuencia": "5 - 8 min"
-            },
-            "geometry": { 
-                "type": "LineString", 
-                "coordinates": [
-                    [-69.3550, 10.0680],
-                    [-69.3450, 10.0695],
-                    [-69.3333, 10.0714],
-                    [-69.3265, 10.0719],
-                    [-69.3218, 10.0723],
-                    [-69.3141, 10.0729],
-                    [-69.3041, 10.0737],
-                    [-69.2970, 10.0739],
-                    [-69.2906, 10.0731],
-                    [-69.2847, 10.0727],
-                    [-69.2807, 10.0717],
-                    [-69.2745, 10.0702]
-                ] 
-            }
-        }]
-    },
-    "ruta_carrera_19": {
-        "ciudad": "Barquisimeto",
-        "tipo": "Urbana",
-        "color": "#0ea5e9",
-        "type": "FeatureCollection",
-        "features": [{
-            "type": "Feature",
-            "properties": { 
-                "nombre": "Ruta 5 - Carrera 19 / Centro", 
-                "origen": "El Obelisco", 
-                "destino": "Redoma del Sol Naciente",
-                "paradas_clave": ["El Obelisco", "Calle 50", "Calle 42", "Plaza Bolívar", "Rectorado UCLA", "Parque Macuto"],
-                "frecuencia": "6 - 10 min"
-            },
-            "geometry": { 
-                "type": "LineString", 
-                "coordinates": [
-                    [-69.3582, 10.0673],
-                    [-69.3480, 10.0665],
-                    [-69.3385, 10.0661],
-                    [-69.3280, 10.0660],
-                    [-69.3175, 10.0662],
-                    [-69.3070, 10.0668],
-                    [-69.2960, 10.0675],
-                    [-69.2850, 10.0682],
-                    [-69.2780, 10.0690]
-                ] 
-            }
-        }]
-    },
-    "ruta_transbarca_l1": {
-        "ciudad": "Barquisimeto",
-        "tipo": "BRT Masivo",
-        "color": "#e11d48",
-        "type": "FeatureCollection",
-        "features": [{
-            "type": "Feature",
-            "properties": { 
-                "nombre": "Transbarca Línea 1 (Troncal)", 
-                "origen": "Estación Central Simón Bolívar", 
-                "destino": "Redoma de la Estrella del Sur",
-                "paradas_clave": ["Terminal Central", "Metrópolis", "Cementerio", "Av. Vargas", "Plaza Miranda", "La Campiña"],
-                "frecuencia": "10 - 15 min"
-            },
-            "geometry": { 
-                "type": "LineString", 
-                "coordinates": [
-                    [-69.3780, 10.0600],
-                    [-69.3620, 10.0645],
-                    [-69.3450, 10.0695],
-                    [-69.3300, 10.0716],
-                    [-69.3150, 10.0728],
-                    [-69.3000, 10.0740],
-                    [-69.2880, 10.0725],
-                    [-69.2760, 10.0700],
-                    [-69.2670, 10.0650]
-                ] 
-            }
-        }]
-    },
-    "ruta_cabudare_centro": {
-        "ciudad": "Barquisimeto",
-        "tipo": "Suburbana",
-        "color": "#10b981",
-        "type": "FeatureCollection",
-        "features": [{
-            "type": "Feature",
-            "properties": { 
-                "nombre": "Ruta 12 (Cabudare - Barquisimeto)", 
-                "origen": "Cabudare Centro (Plaza Bolívar)", 
-                "destino": "Terminal de Pasajeros de Bqto",
-                "paradas_clave": ["Plaza Cabudare", "La Mata", "Distribuidor Valle Hondo", "El Ujano", "Terminal Central"],
-                "frecuencia": "8 - 12 min"
-            },
-            "geometry": { 
-                "type": "LineString", 
-                "coordinates": [
-                    [-69.2612, 10.0305],
-                    [-69.2680, 10.0430],
-                    [-69.2740, 10.0550],
-                    [-69.2850, 10.0682],
-                    [-69.3000, 10.0700],
-                    [-69.3180, 10.0685],
-                    [-69.3333, 10.0670],
-                    [-69.3450, 10.0650]
-                ] 
-            }
-        }]
-    },
-
-    // ---------------- CARACAS ----------------
-    "ruta_caracas_plaza_vzla": {
-        "ciudad": "Caracas",
-        "tipo": "Troncal",
-        "color": "#8b5cf6",
-        "type": "FeatureCollection",
-        "features": [{
-            "type": "Feature",
-            "properties": { 
-                "nombre": "Troncal Plaza Venezuela - Chacao - Petare", 
-                "origen": "Plaza Venezuela", 
-                "destino": "Redoma de Petare",
-                "paradas_clave": ["Plaza Venezuela", "Chacaíto", "Chacao", "Altamira", "Los Dos Caminos", "Petare"],
-                "frecuencia": "4 - 7 min"
-            },
-            "geometry": { 
-                "type": "LineString", 
-                "coordinates": [
-                    [-66.8830, 10.4965],
-                    [-66.8720, 10.4950],
-                    [-66.8580, 10.4940],
-                    [-66.8480, 10.4970],
-                    [-66.8350, 10.4960],
-                    [-66.8200, 10.4900],
-                    [-66.8080, 10.4810]
-                ] 
-            }
-        }]
-    }
-};
+/**
+ * RUTAS_DATA
+ * Estructura GeoJSON lista para recibir las rutas reales de Rutas Urbanas y Rapiditos.
+ * 
+ * Plantilla de ejemplo para incorporar rutas en el futuro:
+ * 
+ * "id_unico_ruta": {
+ *     "ciudad": "Barquisimeto",            // Ciudad (Barquisimeto, Caracas, etc.)
+ *     "categoria": "urbana",               // "urbana" para Rutas Urbanas o "rapidito" para Rapiditos
+ *     "tipo": "Ruta Urbana",               // "Ruta Urbana" o "Rapidito"
+ *     "color": "#305CDE",                  // Color hexadecimal para trazo en mapa
+ *     "type": "FeatureCollection",
+ *     "features": [{
+ *         "type": "Feature",
+ *         "properties": {
+ *             "nombre": "Nombre de la Línea",
+ *             "origen": "Cabecera de salida",
+ *             "destino": "Destino final",
+ *             "paradas_clave": ["Parada A", "Parada B", "Parada C"],
+ *             "frecuencia": "5 - 10 min"
+ *         },
+ *         "geometry": {
+ *             "type": "LineString",
+ *             "coordinates": [
+ *                 [longitud1, latitud1],
+ *                 [longitud2, latitud2]
+ *             ]
+ *         }
+ *     }]
+ * }
+ */
+const RUTAS_DATA = {};
 
 window.CIUDADES_CONFIG = CIUDADES_CONFIG;
 window.RUTAS_DATA = RUTAS_DATA;
@@ -1301,10 +2362,20 @@ const RatesManager = {
     tasaParalelo: 0,
     pasajeNormalBs: 0,
     pasajePrefBs: 0,
-    pasajerosCount: 1,
+    pasajeRapiditoBs: 500,
+    refDolarUrbano: 0.25,
+    refDolarPref: 0.125,
+    refDolarRapidito: 0.57,
+    servicioCalculadora: 'urbana', // 'urbana' | 'rapidito'
+    
+    // Contadores de pasajeros independientes
+    pasajerosRegular: 1,
+    pasajerosPref: 0,
+    pasajerosRapidito: 1,
 
     // Claves de localStorage
     STORAGE_KEY: 'rapidito_tasas_cache',
+    STORAGE_RAPIDITO_KEY: 'rapidito_tarifa_rapidito',
 
     init() {
         this.cargarDesdeCache();
@@ -1320,6 +2391,9 @@ const RatesManager = {
                 this.tasaEuro = cache.tasaEuro || 0;
                 this.tasaParalelo = cache.tasaParalelo || 0;
                 this.calcularPasajes(this.tasaBCV);
+                this.actualizarUI(true);
+            } else {
+                this.calcularPasajes(0);
                 this.actualizarUI(true);
             }
         } catch (e) {
@@ -1342,10 +2416,50 @@ const RatesManager = {
     },
 
     calcularPasajes(precioOficial) {
-        // Tarifa estimada de 0.25 USD oficial
-        const base = precioOficial * 0.25;
-        this.pasajeNormalBs = base > 0 ? base : 15.0; // fallback mínimo razonable
-        this.pasajePrefBs = this.pasajeNormalBs / 2;
+        if (precioOficial > 0) {
+            this.pasajeNormalBs = precioOficial * this.refDolarUrbano;
+            this.pasajePrefBs = precioOficial * this.refDolarPref;
+
+            // Indexado a ~0.57 USD (500 Bs aprox con la tasa oficial BCV)
+            const rapCalculado = precioOficial * this.refDolarRapidito;
+            
+            // Si el usuario fijó una tarifa personalizada manual en localStorage, se respeta si existe
+            const rapGuardado = localStorage.getItem(this.STORAGE_RAPIDITO_KEY);
+            if (rapGuardado && !isNaN(parseFloat(rapGuardado)) && parseFloat(rapGuardado) > 0) {
+                this.pasajeRapiditoBs = parseFloat(rapGuardado);
+            } else {
+                this.pasajeRapiditoBs = rapCalculado;
+            }
+        } else {
+            // Valores de referencia inicial
+            this.pasajeNormalBs = 219.48;
+            this.pasajePrefBs = 109.74;
+            this.pasajeRapiditoBs = 500.00;
+        }
+    },
+
+    setPasajeRapidito(monto) {
+        const val = parseFloat(monto);
+        if (!isNaN(val) && val > 0) {
+            this.pasajeRapiditoBs = val;
+            if (this.tasaBCV > 0) {
+                this.refDolarRapidito = val / this.tasaBCV;
+            }
+            localStorage.setItem(this.STORAGE_RAPIDITO_KEY, val.toString());
+            this.actualizarUI(false);
+            return true;
+        }
+        return false;
+    },
+
+    actualizarTarifaRapDesdeCalc() {
+        const input = document.getElementById('calc-rapidito-quick-input');
+        if (input) {
+            const ok = this.setPasajeRapidito(input.value);
+            if (ok && window.AppManager) {
+                window.AppManager.showToast(`Tarifa de Rapidito fijada en ${this.pasajeRapiditoBs.toFixed(2)} Bs ($${this.refDolarRapidito.toFixed(2)})`, 'success');
+            }
+        }
     },
 
     async actualizarTasas() {
@@ -1397,34 +2511,73 @@ const RatesManager = {
     actualizarUI(esDesdeCache = false) {
         const sufijo = esDesdeCache ? ' (offline)' : '';
         const bcvText = this.tasaBCV ? `$ = ${this.tasaBCV.toFixed(2)} Bs` : '--';
-        const tarifaText = this.pasajeNormalBs ? `${this.pasajeNormalBs.toFixed(2)} Bs` : '--';
-        const tarifaPrefText = this.pasajePrefBs ? `Preferencial: ${this.pasajePrefBs.toFixed(2)} Bs` : '--';
+        
+        const normalText = `${this.pasajeNormalBs.toFixed(2)} Bs ($0.25)`;
+        const prefText = `${this.pasajePrefBs.toFixed(2)} Bs ($0.125)`;
+        const rapText = `${this.pasajeRapiditoBs.toFixed(2)} Bs ($0.57)`;
 
         // Elementos Dashboard
         const dashBCV = document.getElementById('dash-tasa-bcv');
         const dashNormal = document.getElementById('dash-tarifa-normal');
+        const dashPrefPill = document.getElementById('dash-tarifa-pref-pill');
+        const dashTrayUrbana = document.getElementById('dash-tray-urbana');
         const dashPref = document.getElementById('dash-tarifa-pref');
+        const dashTrayRapidito = document.getElementById('dash-tray-rapidito');
         const dashEuro = document.getElementById('dash-tasa-euro');
         const dashParalelo = document.getElementById('dash-tasa-paralelo');
+        const cardRapiditoSub = document.getElementById('card-rapidito-sub');
 
         if (dashBCV) dashBCV.innerText = bcvText + sufijo;
-        if (dashNormal) dashNormal.innerText = tarifaText;
-        if (dashPref) dashPref.innerText = tarifaPrefText;
+        if (dashNormal) dashNormal.innerText = normalText;
+        if (dashPrefPill) dashPrefPill.innerText = `Pref: ${prefText}`;
+        if (dashTrayUrbana) dashTrayUrbana.innerText = normalText;
+        if (dashPref) dashPref.innerText = prefText;
+        if (dashTrayRapidito) dashTrayRapidito.innerText = rapText;
         if (dashEuro && this.tasaEuro) dashEuro.innerText = `€ = ${this.tasaEuro.toFixed(2)} Bs`;
         if (dashParalelo && this.tasaParalelo) dashParalelo.innerText = `USD₮ = ${this.tasaParalelo.toFixed(2)} Bs`;
+        if (cardRapiditoSub) cardRapiditoSub.innerText = `Pasaje actual: ${this.pasajeRapiditoBs.toFixed(0)} Bs (~$0.57 USD)`;
 
         // Elementos Mapa
         const mapBCV = document.getElementById('tasa-bcv');
         const mapNormal = document.getElementById('tarifa-normal');
+        const mapPrefPill = document.getElementById('map-tarifa-pref-pill');
+        const mapTarifaUrbRow = document.getElementById('map-tarifa-urb-row');
         const mapPref = document.getElementById('map-tarifa-pref');
+        const mapTarifaRapRow = document.getElementById('map-tarifa-rap-row');
         const mapEuro = document.getElementById('map-tasa-euro');
         const mapParalelo = document.getElementById('map-tasa-paralelo');
 
         if (mapBCV) mapBCV.innerText = bcvText;
-        if (mapNormal) mapNormal.innerText = tarifaText;
-        if (mapPref) mapPref.innerText = `Pref: ${this.pasajePrefBs.toFixed(2)} Bs`;
+        if (mapNormal) mapNormal.innerText = normalText;
+        if (mapPrefPill) mapPrefPill.innerText = `Pref: ${prefText}`;
+        if (mapTarifaUrbRow) mapTarifaUrbRow.innerText = `Urbana: ${normalText}`;
+        if (mapPref) mapPref.innerText = `Preferencial (50%): ${prefText}`;
+        if (mapTarifaRapRow) mapTarifaRapRow.innerText = `Rapidito: ${rapText}`;
         if (mapEuro && this.tasaEuro) mapEuro.innerText = `€ = ${this.tasaEuro.toFixed(2)} Bs`;
         if (mapParalelo && this.tasaParalelo) mapParalelo.innerText = `USD₮ = ${this.tasaParalelo.toFixed(2)} Bs`;
+
+        // Campos de inputs y badges en calculadora
+        const calcTabRapiditoLbl = document.getElementById('calc-tab-rapidito-lbl');
+        if (calcTabRapiditoLbl) calcTabRapiditoLbl.innerText = `Rapidito (~$0.57)`;
+
+        const rateRegularLabel = document.getElementById('calc-rate-regular-label');
+        if (rateRegularLabel) rateRegularLabel.innerText = normalText;
+
+        const ratePrefLabel = document.getElementById('calc-rate-pref-label');
+        if (ratePrefLabel) ratePrefLabel.innerText = prefText;
+
+        const rateRapiditoLabel = document.getElementById('calc-rate-rapidito-label');
+        if (rateRapiditoLabel) rateRapiditoLabel.innerText = rapText;
+
+        const calcQuickInput = document.getElementById('calc-rapidito-quick-input');
+        if (calcQuickInput && document.activeElement !== calcQuickInput) {
+            calcQuickInput.value = this.pasajeRapiditoBs.toFixed(0);
+        }
+
+        const editTarifaRap = document.getElementById('edit-tarifa-rapidito');
+        if (editTarifaRap && document.activeElement !== editTarifaRap) {
+            editTarifaRap.value = this.pasajeRapiditoBs.toFixed(0);
+        }
 
         this.actualizarResultadosCalculadora();
     },
@@ -1437,26 +2590,7 @@ const RatesManager = {
     },
 
     setupCalculadora() {
-        const minusBtn = document.getElementById('calc-minus-btn');
-        const plusBtn = document.getElementById('calc-plus-btn');
         const pagaConInput = document.getElementById('calc-paga-con');
-
-        if (minusBtn) {
-            minusBtn.addEventListener('click', () => {
-                if (this.pasajerosCount > 1) {
-                    this.pasajerosCount--;
-                    this.actualizarResultadosCalculadora();
-                }
-            });
-        }
-        if (plusBtn) {
-            plusBtn.addEventListener('click', () => {
-                if (this.pasajerosCount < 20) {
-                    this.pasajerosCount++;
-                    this.actualizarResultadosCalculadora();
-                }
-            });
-        }
         if (pagaConInput) {
             pagaConInput.addEventListener('input', () => {
                 this.actualizarResultadosCalculadora();
@@ -1464,16 +2598,93 @@ const RatesManager = {
         }
     },
 
+    cambiarPasajeros(tipo, delta) {
+        if (tipo === 'regular') {
+            const nuevo = this.pasajerosRegular + delta;
+            if (nuevo >= 0 && (nuevo + this.pasajerosPref > 0) && nuevo <= 30) {
+                this.pasajerosRegular = nuevo;
+                this.actualizarResultadosCalculadora();
+            }
+        } else if (tipo === 'preferencial') {
+            const nuevo = this.pasajerosPref + delta;
+            if (nuevo >= 0 && (nuevo + this.pasajerosRegular > 0) && nuevo <= 30) {
+                this.pasajerosPref = nuevo;
+                this.actualizarResultadosCalculadora();
+            }
+        } else if (tipo === 'rapidito') {
+            const nuevo = this.pasajerosRapidito + delta;
+            if (nuevo >= 1 && nuevo <= 25) {
+                this.pasajerosRapidito = nuevo;
+                this.actualizarResultadosCalculadora();
+            }
+        }
+    },
+
+    setServicioCalculadora(servicio) {
+        this.servicioCalculadora = servicio;
+        const tabUrbana = document.getElementById('calc-tab-urbana');
+        const tabRapidito = document.getElementById('calc-tab-rapidito');
+        const secUrbana = document.getElementById('calc-sec-urbana');
+        const secRapidito = document.getElementById('calc-sec-rapidito');
+
+        if (servicio === 'rapidito') {
+            tabUrbana?.classList.remove('active');
+            tabRapidito?.classList.add('active');
+            if (secUrbana) secUrbana.style.display = 'none';
+            if (secRapidito) secRapidito.style.display = 'flex';
+        } else {
+            tabUrbana?.classList.add('active');
+            tabRapidito?.classList.remove('active');
+            if (secUrbana) secUrbana.style.display = 'flex';
+            if (secRapidito) secRapidito.style.display = 'none';
+        }
+        this.actualizarResultadosCalculadora();
+    },
+
     actualizarResultadosCalculadora() {
-        const countEl = document.getElementById('calc-count');
+        const countRegularEl = document.getElementById('calc-count-regular');
+        const countPrefEl = document.getElementById('calc-count-pref');
+        const countRapiditoEl = document.getElementById('calc-count-rapidito');
+        const totalPassengersEl = document.getElementById('calc-total-passengers');
+        const breakdownEl = document.getElementById('calc-res-breakdown');
         const totalBsEl = document.getElementById('calc-total-bs');
         const totalUsdEl = document.getElementById('calc-total-usd');
         const vueltoBsEl = document.getElementById('calc-vuelto-bs');
         const pagaConInput = document.getElementById('calc-paga-con');
 
-        if (countEl) countEl.innerText = this.pasajerosCount;
+        if (countRegularEl) countRegularEl.innerText = this.pasajerosRegular;
+        if (countPrefEl) countPrefEl.innerText = this.pasajerosPref;
+        if (countRapiditoEl) countRapiditoEl.innerText = this.pasajerosRapidito;
 
-        const totalBs = this.pasajeNormalBs * this.pasajerosCount;
+        let totalBs = 0;
+        let totalPax = 0;
+        let desgloseTexto = '';
+
+        if (this.servicioCalculadora === 'rapidito') {
+            totalPax = this.pasajerosRapidito;
+            totalBs = this.pasajerosRapidito * this.pasajeRapiditoBs;
+            desgloseTexto = `${this.pasajerosRapidito} puesto(s) rapidito (${this.pasajeRapiditoBs.toFixed(2)} Bs c/u)`;
+        } else {
+            totalPax = this.pasajerosRegular + this.pasajerosPref;
+            totalBs = (this.pasajerosRegular * this.pasajeNormalBs) + (this.pasajerosPref * this.pasajePrefBs);
+            
+            const partes = [];
+            if (this.pasajerosRegular > 0) {
+                partes.push(`${this.pasajerosRegular} normal${this.pasajerosRegular > 1 ? 'es' : ''}`);
+            }
+            if (this.pasajerosPref > 0) {
+                partes.push(`${this.pasajerosPref} preferencial${this.pasajerosPref > 1 ? 'es' : ''}`);
+            }
+            desgloseTexto = partes.join(' + ') || '1 pasajero';
+        }
+
+        if (totalPassengersEl) {
+            totalPassengersEl.innerText = `${totalPax} pasajero${totalPax > 1 ? 's' : ''}`;
+        }
+        if (breakdownEl) {
+            breakdownEl.innerText = desgloseTexto;
+        }
+
         if (totalBsEl) totalBsEl.innerText = `${totalBs.toFixed(2)} Bs`;
 
         if (totalUsdEl && this.tasaBCV > 0) {
@@ -1487,14 +2698,14 @@ const RatesManager = {
                 const vuelto = montoPaga - totalBs;
                 if (vuelto >= 0) {
                     vueltoBsEl.innerText = `${vuelto.toFixed(2)} Bs`;
-                    vueltoBsEl.style.color = 'var(--accent-success)';
+                    vueltoBsEl.style.color = 'var(--status-success)';
                 } else {
                     vueltoBsEl.innerText = `Faltan ${Math.abs(vuelto).toFixed(2)} Bs`;
-                    vueltoBsEl.style.color = 'var(--accent-danger)';
+                    vueltoBsEl.style.color = 'var(--status-danger)';
                 }
             } else {
                 vueltoBsEl.innerText = '--';
-                vueltoBsEl.style.color = 'var(--text-dark)';
+                vueltoBsEl.style.color = 'var(--text-primary)';
             }
         }
     }
@@ -1668,7 +2879,7 @@ const GeoManager = {
             this.isLiveTracking = true;
             if (liveBtn) {
                 liveBtn.classList.add('active-tracking');
-                liveBtn.innerHTML = '🔴 En vivo (activo)';
+                liveBtn.innerHTML = 'En vivo (activo)';
             }
             window.AppManager?.showToast('Seguimiento GPS en tiempo real activado', 'success');
 
@@ -1729,7 +2940,7 @@ const GeoManager = {
             if (dist < 120 && this.lastProximityAlertStop !== rutaKey) {
                 this.lastProximityAlertStop = rutaKey;
                 const nombre = ruta.features[0].properties.nombre;
-                window.AppManager?.showToast(`🔔 Estás muy cerca de la ruta: ${nombre}`, 'success');
+                window.AppManager?.showToast(`Estás cerca de la ruta: ${nombre}`, 'success');
                 // Vibración háptica en móvil si está soportado
                 if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
                 break;
@@ -1908,15 +3119,16 @@ const GeoManager = {
                 origen: props.origen, 
                 destino: props.destino, 
                 colorLinea: datosRuta.color || '#305CDE',
-                frecuencia: props.frecuencia || '5-10 min'
+                frecuencia: props.frecuencia || '5-10 min',
+                categoria: datosRuta.categoria || datosRuta.tipo || 'urbana'
             });
         }
 
         if (opciones.length === 0) {
             if (rutasDescartadas > 0) {
-                resultsContainer.innerHTML = `<div class="result-title" style="text-align:center; padding: 12px 8px; color: var(--text-gray); line-height: 1.45; text-transform:none;">❌ Ninguna ruta directa te sirve.<br>Las opciones cercanas van en <strong style="color:var(--text-dark);">sentido contrario</strong> a tu destino.</div>`;
+                resultsContainer.innerHTML = `<div class="result-title" style="text-align:center; padding: 12px 8px; color: var(--text-gray); line-height: 1.45; text-transform:none;">Ninguna ruta directa te sirve.<br>Las opciones cercanas van en <strong style="color:var(--text-dark);">sentido contrario</strong> a tu destino.</div>`;
             } else {
-                resultsContainer.innerHTML = `<div class="result-title" style="text-align:center; padding: 8px; color: var(--text-gray); text-transform:none;">No se encontraron rutas para este tramo en ${ciudadActual}.</div>`;
+                resultsContainer.innerHTML = `<div class="result-title" style="text-align:center; padding: 12px 8px; color: var(--text-muted); text-transform:none; font-size:12px; line-height:1.4;">No se encontraron rutas registradas para este tramo en ${ciudadActual}.<br><span style="font-size:11px; opacity:0.75;">Próximamente se integrarán nuevas rutas a la base de datos.</span></div>`;
             }
             this.centrarMapaConMenu(L.latLngBounds([origenLatlng, destinoLatlng]));
             return;
@@ -1935,13 +3147,18 @@ const GeoManager = {
                 : ruta.distanciaDestino + ' m';
             let etiquetaGanadora = index === 0 ? `<span class="badge-cercana">Más óptima</span>` : '';
             
+            const esRapidito = ruta.categoria === 'rapidito' || ruta.categoria === 'Rapidito';
+            const tarifaItem = esRapidito
+                ? `${(window.RatesManager?.pasajeRapiditoBs || 500).toFixed(0)} Bs (Rapidito)`
+                : tarifaStr;
+
             htmlContent += `
                 <div class="route-option interactive" onclick='GeoManager.dibujarRutaYPasos("${ruta.nombre}", "${ruta.colorLinea}", "${ruta.idVar}")'>
                     <div class="route-badge" style="background:${ruta.colorLinea};">${ruta.nombre.substring(0, 4).toUpperCase()}</div>
                     <div class="route-info">
                         <h4>${ruta.nombre} ${etiquetaGanadora}</h4>
                         <p style="margin-bottom: 2px; font-size: 11.5px; color: var(--neutral-accent); font-weight: 700;">${ruta.origen} → ${ruta.destino}</p>
-                        <p>Caminando: <span style="color:var(--text-dark); font-weight:800;">${textoDist}</span> • Tarifa: ${tarifaStr} • Frec: ${ruta.frecuencia}</p>
+                        <p>Caminando: <span style="color:var(--text-dark); font-weight:800;">${textoDist}</span> • Tarifa: ${tarifaItem} • Frec: ${ruta.frecuencia}</p>
                     </div>
                 </div>
             `;
@@ -1975,10 +3192,15 @@ const AppManager = {
         this.renderizarHistorial();
         this.setupPWA();
 
-        // Ocultar pantalla de carga
+        // Ocultar pantalla de carga: siempre dura 5 segundos completos sincronizado con la barra de carga
         const splash = document.getElementById('splash-screen');
         if (splash) {
-            setTimeout(() => splash.classList.add('hidden'), 350);
+            setTimeout(() => {
+                splash.classList.add('hidden');
+                setTimeout(() => {
+                    splash.style.display = 'none';
+                }, 450);
+            }, 5000);
         }
     },
 
@@ -2029,12 +3251,12 @@ const AppManager = {
 
         const updateStatus = () => {
             if (!navigator.onLine) {
-                banner.innerText = '⚡ Modo sin conexión (rutas y tarifas en caché)';
+                banner.innerText = 'Modo sin conexión (rutas y tarifas en caché)';
                 banner.classList.remove('online-recovered');
                 banner.classList.add('active');
             } else {
                 if (banner.classList.contains('active')) {
-                    banner.innerText = '✅ Conexión restablecida';
+                    banner.innerText = 'Conexión restablecida';
                     banner.classList.add('online-recovered');
                     setTimeout(() => {
                         banner.classList.remove('active');
@@ -2103,6 +3325,13 @@ const AppManager = {
     },
 
     toggleDarkMode() {
+        const btn = document.getElementById('theme-toggle-btn');
+        if (btn) {
+            btn.classList.remove('theme-spinning');
+            void btn.offsetWidth; // forzar reflow para reiniciar animación
+            btn.classList.add('theme-spinning');
+            setTimeout(() => btn.classList.remove('theme-spinning'), 650);
+        }
         document.body.classList.toggle('dark-mode');
         const isDark = document.body.classList.contains('dark-mode');
         localStorage.setItem('rapidito_theme', isDark ? 'dark' : 'light');
@@ -2113,15 +3342,23 @@ const AppManager = {
         const iconContainer = document.getElementById('theme-icon');
         if (!iconContainer) return;
         if (document.body.classList.contains('dark-mode')) {
-            iconContainer.innerHTML = `<circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>`;
+            // Icono minimalista de Sol (para cambiar a modo claro)
+            iconContainer.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>`;
         } else {
-            iconContainer.innerHTML = `<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>`;
+            // Icono minimalista de Luna (para cambiar a modo oscuro)
+            iconContainer.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>`;
         }
     },
 
     cargarPerfil() {
         const nombre = localStorage.getItem('rapidito_nombre') || 'Jesús Vásquez';
         const ciudad = localStorage.getItem('rapidito_ciudad') || 'Barquisimeto';
+        const categoria = localStorage.getItem('rapidito_categoria') || 'estandar';
+        const transporte = localStorage.getItem('rapidito_transporte') || 'todos';
+        const moneda = localStorage.getItem('rapidito_moneda') || 'ambas';
+        const casa = localStorage.getItem('rapidito_casa') || '';
+        const trabajo = localStorage.getItem('rapidito_trabajo') || '';
+        const alertaGPS = localStorage.getItem('rapidito_alerta_gps') !== 'false';
         const inicial = nombre.charAt(0).toUpperCase();
 
         const nameEl = document.getElementById('sp-name-text');
@@ -2130,28 +3367,140 @@ const AppManager = {
         const editCityEl = document.getElementById('edit-ciudad-display');
         if (editCityEl) editCityEl.innerText = ciudad;
 
+        const editCityVal = document.getElementById('edit-ciudad-value');
+        if (editCityVal) editCityVal.value = ciudad;
+
         const badgeCity = document.getElementById('header-city-badge');
         if (badgeCity) badgeCity.innerText = ciudad;
 
+        const spCityBadge = document.getElementById('sp-city-badge');
+        if (spCityBadge) spCityBadge.innerText = ciudad;
+
+        const spCatBadge = document.getElementById('sp-category-badge');
+        if (spCatBadge) {
+            const catLabels = {
+                estandar: 'General',
+                estudiante: 'Estudiante (50%)',
+                adulto_mayor: 'Tercera Edad (50%)'
+            };
+            spCatBadge.innerText = catLabels[categoria] || 'General';
+        }
+
         document.querySelectorAll('.avatar-dash, .sp-avatar').forEach(el => el.innerText = inicial);
 
+        // Poblar campos del formulario modal de perfil
         const inputNombre = document.getElementById('edit-nombre');
         if (inputNombre) inputNombre.value = nombre;
+
+        const selectCategoria = document.getElementById('edit-categoria');
+        if (selectCategoria) selectCategoria.value = categoria;
+
+        const selectTransporte = document.getElementById('edit-transporte');
+        if (selectTransporte) selectTransporte.value = transporte;
+
+        const selectMoneda = document.getElementById('edit-moneda');
+        if (selectMoneda) selectMoneda.value = moneda;
+
+        const inputCasa = document.getElementById('edit-casa');
+        if (inputCasa) inputCasa.value = casa;
+
+        const inputTrabajo = document.getElementById('edit-trabajo');
+        if (inputTrabajo) inputTrabajo.value = trabajo;
+
+        const checkAlerta = document.getElementById('edit-alerta-gps');
+        if (checkAlerta) checkAlerta.checked = alertaGPS;
+
+        const inputTarifaRap = document.getElementById('edit-tarifa-rapidito');
+        const tarifaRap = localStorage.getItem('rapidito_tarifa_rapidito') || '500';
+        if (inputTarifaRap) inputTarifaRap.value = tarifaRap;
+
+        this.actualizarChipsLugares(casa, trabajo);
     },
 
     guardarPerfil() {
         const inputNombre = document.getElementById('edit-nombre');
         const inputCiudad = document.getElementById('edit-ciudad-value');
+        const selectCategoria = document.getElementById('edit-categoria');
+        const selectTransporte = document.getElementById('edit-transporte');
+        const selectMoneda = document.getElementById('edit-moneda');
+        const inputCasa = document.getElementById('edit-casa');
+        const inputTrabajo = document.getElementById('edit-trabajo');
+        const checkAlerta = document.getElementById('edit-alerta-gps');
+        const inputTarifaRap = document.getElementById('edit-tarifa-rapidito');
+
         if (inputNombre && inputNombre.value.trim()) {
             localStorage.setItem('rapidito_nombre', inputNombre.value.trim());
         }
         if (inputCiudad && inputCiudad.value.trim()) {
             localStorage.setItem('rapidito_ciudad', inputCiudad.value.trim());
         }
+        if (selectCategoria) {
+            localStorage.setItem('rapidito_categoria', selectCategoria.value);
+        }
+        if (selectTransporte) {
+            localStorage.setItem('rapidito_transporte', selectTransporte.value);
+        }
+        if (selectMoneda) {
+            localStorage.setItem('rapidito_moneda', selectMoneda.value);
+        }
+        if (inputCasa) {
+            localStorage.setItem('rapidito_casa', inputCasa.value.trim());
+        }
+        if (inputTrabajo) {
+            localStorage.setItem('rapidito_trabajo', inputTrabajo.value.trim());
+        }
+        if (checkAlerta) {
+            localStorage.setItem('rapidito_alerta_gps', checkAlerta.checked ? 'true' : 'false');
+        }
+        if (inputTarifaRap && !isNaN(parseFloat(inputTarifaRap.value)) && parseFloat(inputTarifaRap.value) > 0) {
+            const valRap = parseFloat(inputTarifaRap.value);
+            localStorage.setItem('rapidito_tarifa_rapidito', valRap.toString());
+            if (window.RatesManager) {
+                window.RatesManager.setPasajeRapidito(valRap);
+            }
+        }
+
         this.cargarPerfil();
         this.cerrarModal('modal-editar-perfil');
         this.showToast('Perfil actualizado correctamente', 'success');
         setTimeout(() => this.abrirPanelPerfil(), 150);
+    },
+
+    actualizarChipsLugares(casa, trabajo) {
+        const container = document.getElementById('trip-saved-chips');
+        if (!container) return;
+        container.innerHTML = '';
+        if (!casa && !trabajo) {
+            container.style.display = 'none';
+            return;
+        }
+        container.style.display = 'flex';
+        if (casa) {
+            const chip = document.createElement('div');
+            chip.className = 'saved-place-chip interactive';
+            chip.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg> <span>Casa: ${casa}</span>`;
+            chip.onclick = () => {
+                const destInput = document.getElementById('trip-destino-input');
+                if (destInput) {
+                    destInput.value = casa;
+                    this.cotizarViajeDesdeVista();
+                }
+            };
+            container.appendChild(chip);
+        }
+        if (trabajo) {
+            const chip = document.createElement('div');
+            chip.className = 'saved-place-chip interactive';
+            chip.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="7" width="20" height="14" rx="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg> <span>Trabajo: ${trabajo}</span>`;
+            chip.onclick = () => {
+                const destInput = document.getElementById('trip-destino-input');
+                if (destInput) {
+                    destInput.value = trabajo;
+                    this.cotizarViajeDesdeVista();
+                }
+            };
+            container.appendChild(chip);
+        }
     },
 
     abrirPanelPerfil() {
@@ -2173,6 +3522,23 @@ const AppManager = {
     },
 
     abrirModal(id) {
+        if (id === 'modal-calculadora' && window.RatesManager) {
+            const prefTransporte = localStorage.getItem('rapidito_transporte');
+            if (prefTransporte === 'rapidito') {
+                window.RatesManager.setServicioCalculadora('rapidito');
+            } else {
+                window.RatesManager.setServicioCalculadora('urbana');
+            }
+            const cat = localStorage.getItem('rapidito_categoria');
+            if (cat === 'estudiante' || cat === 'adulto_mayor') {
+                window.RatesManager.pasajerosRegular = 0;
+                window.RatesManager.pasajerosPref = 1;
+            } else {
+                window.RatesManager.pasajerosRegular = 1;
+                window.RatesManager.pasajerosPref = 0;
+            }
+            window.RatesManager.actualizarResultadosCalculadora();
+        }
         document.getElementById(id)?.classList.add('active');
     },
 
@@ -2180,7 +3546,54 @@ const AppManager = {
         document.getElementById(id)?.classList.remove('active');
     },
 
+    // Módulo Financiero Unificado (Bandeja sin espacios vacíos)
+    activeFinanceTab: null,
+    toggleFinanceModule(tipo) {
+        const tray = document.getElementById('finance-tray');
+        const trayDivisas = document.getElementById('tray-divisas');
+        const trayPasaje = document.getElementById('tray-pasaje');
+        const pillDivisas = document.getElementById('pill-divisas');
+        const pillPasaje = document.getElementById('pill-pasaje');
+        const flechaDivisas = document.getElementById('flecha-divisas');
+        const flechaPasaje = document.getElementById('flecha-pasaje');
+
+        if (!tray) return;
+
+        const isCurrentlyOpen = (this.activeFinanceTab === tipo && tray.classList.contains('open'));
+
+        if (isCurrentlyOpen) {
+            tray.classList.remove('open');
+            this.activeFinanceTab = null;
+            pillDivisas?.classList.remove('active');
+            pillPasaje?.classList.remove('active');
+            flechaDivisas?.classList.remove('up');
+            flechaPasaje?.classList.remove('up');
+        } else {
+            this.activeFinanceTab = tipo;
+            tray.classList.add('open');
+
+            if (tipo === 'divisas') {
+                trayDivisas?.classList.add('active');
+                trayPasaje?.classList.remove('active');
+                pillDivisas?.classList.add('active');
+                pillPasaje?.classList.remove('active');
+                flechaDivisas?.classList.add('up');
+                flechaPasaje?.classList.remove('up');
+            } else {
+                trayPasaje?.classList.add('active');
+                trayDivisas?.classList.remove('active');
+                pillPasaje?.classList.add('active');
+                pillDivisas?.classList.remove('active');
+                flechaPasaje?.classList.add('up');
+                flechaDivisas?.classList.remove('up');
+            }
+        }
+    },
+
     // Vistas principales
+    lastGpsCoords: null,
+    lastGpsAddress: null,
+
     abrirVistaViaje() {
         window.GeoManager?.limpiarMapa();
         document.getElementById('dashboard-wrapper')?.classList.add('hidden');
@@ -2188,9 +3601,29 @@ const AppManager = {
         if (tripView) tripView.classList.add('active');
 
         const tripOrigenInput = document.getElementById('trip-origen-input');
-        if (tripOrigenInput && !tripOrigenInput.value) {
-            tripOrigenInput.value = "Ubicación actual";
+        if (tripOrigenInput) {
+            tripOrigenInput.value = this.lastGpsAddress || "Mi ubicación actual";
         }
+
+        // Obtener GPS en segundo plano de inmediato
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                async (pos) => {
+                    this.lastGpsCoords = L.latLng(pos.coords.latitude, pos.coords.longitude);
+                    const addr = await window.GeoManager?.reverseGeocode(pos.coords.latitude, pos.coords.longitude);
+                    if (addr) {
+                        this.lastGpsAddress = addr;
+                        const inputOrig = document.getElementById('trip-origen-input');
+                        if (inputOrig && (inputOrig.value === "Mi ubicación actual" || inputOrig.value === "Ubicación actual")) {
+                            inputOrig.value = addr;
+                        }
+                    }
+                },
+                () => {},
+                { enableHighAccuracy: true, timeout: 6000 }
+            );
+        }
+
         this.renderizarHistorial();
         document.getElementById('trip-destino-input')?.focus();
     },
@@ -2233,13 +3666,19 @@ const AppManager = {
             return;
         }
         const destStr = destinoInput.value.trim();
-        const origStr = (origenInput?.value === "Ubicación actual") ? null : origenInput?.value?.trim();
-
         this.guardarEnHistorial(destStr);
-        this.abrirMapaConRutasPersonalizadas(origStr, destStr, false);
+
+        const origVal = origenInput?.value?.trim();
+        const esGps = (!origVal || origVal === "Ubicación actual" || origVal === "Mi ubicación actual" || origVal === this.lastGpsAddress);
+
+        if (esGps) {
+            this.abrirMapaConRutasPersonalizadas(null, destStr, false, this.lastGpsCoords);
+        } else {
+            this.abrirMapaConRutasPersonalizadas(origVal, destStr, false, null);
+        }
     },
 
-    abrirMapaConRutasPersonalizadas(origenStr, destinoStr, desdeDirectorio = false) {
+    abrirMapaConRutasPersonalizadas(origenStr, destinoStr, desdeDirectorio = false, coordsGps = null) {
         this.vistaAnteriorMapa = desdeDirectorio ? 'dashboard' : 'viaje';
         document.getElementById('dashboard-wrapper')?.classList.add('hidden');
         document.getElementById('trip-view')?.classList.remove('active');
@@ -2251,7 +3690,7 @@ const AppManager = {
 
         const originInput = document.getElementById('input-origen');
         const searchInput = document.getElementById('map-search-input');
-        if (originInput) originInput.value = origenStr || "⏳ Obteniendo GPS...";
+        if (originInput) originInput.value = origenStr || this.lastGpsAddress || "Mi ubicación actual";
         if (searchInput) searchInput.value = destinoStr || "";
 
         this.inputActivo = 'destino';
@@ -2260,6 +3699,21 @@ const AppManager = {
         const ciudadActual = localStorage.getItem('rapidito_ciudad') || "Barquisimeto";
         let bounds = L.latLngBounds();
         let tieneDestino = false;
+
+        // Fijar origen por GPS en automático si fue solicitado
+        if (coordsGps && window.GeoManager?.map) {
+            if (window.GeoManager.marcadorOrigen && window.GeoManager.map.hasLayer(window.GeoManager.marcadorOrigen)) {
+                window.GeoManager.map.removeLayer(window.GeoManager.marcadorOrigen);
+            }
+            window.GeoManager.marcadorOrigen = L.circleMarker(coordsGps, {
+                radius: 7,
+                fillColor: "var(--brand-primary)",
+                color: "#fff",
+                weight: 2,
+                fillOpacity: 1
+            }).addTo(window.GeoManager.map);
+            bounds.extend(coordsGps);
+        }
 
         if (destinoStr) {
             fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(destinoStr + ", " + ciudadActual)}&limit=1`)
@@ -2277,12 +3731,15 @@ const AppManager = {
                         if (window.GeoManager.marcadorOrigen) {
                             window.GeoManager.centrarMapaConMenu(bounds, 15);
                             window.GeoManager.procesarIntersecciones();
+                        } else if (!origenStr && !coordsGps && !desdeDirectorio) {
+                            this.inputActivo = 'origen';
+                            this.ubicarConGPS();
                         }
                     }
                 }).catch(() => {});
         }
 
-        if (origenStr && origenStr !== "Ubicación actual") {
+        if (origenStr && origenStr !== "Ubicación actual" && origenStr !== "Mi ubicación actual") {
             fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(origenStr + ", " + ciudadActual)}&limit=1`)
                 .then(res => res.json())
                 .then(data => {
@@ -2293,7 +3750,7 @@ const AppManager = {
                         }
                         window.GeoManager.marcadorOrigen = L.circleMarker(latlngOrig, {
                             radius: 7,
-                            fillColor: "var(--primary-brand)",
+                            fillColor: "var(--brand-primary)",
                             color: "#fff",
                             weight: 2,
                             fillOpacity: 1
@@ -2311,7 +3768,7 @@ const AppManager = {
                     this.inputActivo = 'origen';
                     this.ubicarConGPS();
                 });
-        } else if (!desdeDirectorio) {
+        } else if (!coordsGps && !desdeDirectorio) {
             this.inputActivo = 'origen';
             this.ubicarConGPS();
         }
@@ -2583,7 +4040,7 @@ const AppManager = {
             const safe = this.escapeHTML(dest);
             html += `<div style="padding:10px 14px; background:var(--input-bg); border-radius:12px; font-weight:600; font-size:12.5px; color:var(--text-dark); display:flex; justify-content:space-between; align-items:center;">
                 <span>${safe}</span>
-                <span class="interactive" onclick="AppManager.eliminarDelHistorial(event, '${safe.replace(/'/g, "\\'")}')" style="color:var(--text-gray); padding:4px;">✕</span>
+                <span class="interactive" onclick="AppManager.eliminarDelHistorial(event, '${safe.replace(/'/g, "\\'")}')" style="color:var(--text-gray); padding:4px; font-size:15px; line-height:1;">&times;</span>
             </div>`;
         });
         contenedor.innerHTML = html;
@@ -2601,24 +4058,52 @@ const AppManager = {
         } else {
             list.classList.add('active');
             arrow.classList.add('up');
-            list.innerHTML = '<div class="ruta-item" style="color: var(--text-gray); justify-content: center; font-size: 12px;">Calculando rutas...</div>';
+            list.innerHTML = '<div class="ruta-item" style="color: var(--text-gray); justify-content: center; font-size: 12px;">Buscando rutas urbanas...</div>';
 
             if (window.GeoManager?.marcadorOrigen) {
-                this.renderizarListaRutas(window.GeoManager.marcadorOrigen.getLatLng());
+                this.renderizarListaRutas(window.GeoManager.marcadorOrigen.getLatLng(), 'urbana', 'rutas-list-container');
             } else if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
-                    (pos) => this.renderizarListaRutas(L.latLng(pos.coords.latitude, pos.coords.longitude)),
-                    () => this.renderizarListaRutas(null),
+                    (pos) => this.renderizarListaRutas(L.latLng(pos.coords.latitude, pos.coords.longitude), 'urbana', 'rutas-list-container'),
+                    () => this.renderizarListaRutas(null, 'urbana', 'rutas-list-container'),
                     { timeout: 4000 }
                 );
             } else {
-                this.renderizarListaRutas(null);
+                this.renderizarListaRutas(null, 'urbana', 'rutas-list-container');
             }
         }
     },
 
-    renderizarListaRutas(userLatlng) {
-        const list = document.getElementById('rutas-list-container');
+    // Toggle de Líneas de Rapiditos en Dashboard
+    toggleRapiditosList() {
+        const list = document.getElementById('rapiditos-list-container');
+        const arrow = document.getElementById('flecha-rapiditos');
+        if (!list || !arrow) return;
+
+        if (list.classList.contains('active')) {
+            list.classList.remove('active');
+            arrow.classList.remove('up');
+        } else {
+            list.classList.add('active');
+            arrow.classList.add('up');
+            list.innerHTML = '<div class="ruta-item" style="color: var(--text-gray); justify-content: center; font-size: 12px;">Buscando líneas de rapiditos...</div>';
+
+            if (window.GeoManager?.marcadorOrigen) {
+                this.renderizarListaRutas(window.GeoManager.marcadorOrigen.getLatLng(), 'rapidito', 'rapiditos-list-container');
+            } else if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (pos) => this.renderizarListaRutas(L.latLng(pos.coords.latitude, pos.coords.longitude), 'rapidito', 'rapiditos-list-container'),
+                    () => this.renderizarListaRutas(null, 'rapidito', 'rapiditos-list-container'),
+                    { timeout: 4000 }
+                );
+            } else {
+                this.renderizarListaRutas(null, 'rapidito', 'rapiditos-list-container');
+            }
+        }
+    },
+
+    renderizarListaRutas(userLatlng, categoriaFiltro = 'urbana', contenedorId = 'rutas-list-container') {
+        const list = document.getElementById(contenedorId);
         if (!list) return;
 
         const ciudadActual = localStorage.getItem('rapidito_ciudad') || "Barquisimeto";
@@ -2626,6 +4111,8 @@ const AppManager = {
 
         for (const [id, ruta] of Object.entries(window.RUTAS_DATA || {})) {
             if (ruta.ciudad && ruta.ciudad !== ciudadActual) continue;
+            const catRuta = ruta.categoria || (ruta.tipo === 'Rapidito' ? 'rapidito' : 'urbana');
+            if (categoriaFiltro && catRuta !== categoriaFiltro) continue;
 
             const props = ruta.features[0].properties;
             const dist = userLatlng ? window.GeoManager?.calcularDistanciaMinima(userLatlng, ruta) : null;
@@ -2636,12 +4123,18 @@ const AppManager = {
                 acronimo: props.nombre.substring(0, 3).toUpperCase(),
                 origen: props.origen,
                 destino: props.destino,
-                color: ruta.color || '#305CDE'
+                color: ruta.color || (catRuta === 'rapidito' ? '#f59e0b' : '#305CDE')
             });
         }
 
         if (opciones.length === 0) {
-            list.innerHTML = `<div class="ruta-item" style="color: var(--text-gray); justify-content: center; font-size: 12px;">No hay rutas disponibles para ${ciudadActual}.</div>`;
+            const labelTipo = categoriaFiltro === 'rapidito' ? 'líneas de rapiditos' : 'rutas urbanas';
+            list.innerHTML = `
+                <div class="ruta-item" style="color: var(--text-muted); justify-content: center; font-size: 12px; text-align: center; padding: 16px 12px; flex-direction: column; gap: 4px; border: none; background: transparent;">
+                    <span style="font-weight: 700; color: var(--text-secondary);">No hay ${labelTipo} registradas aún en ${ciudadActual}</span>
+                    <span style="font-size: 11px; opacity: 0.75;">Próximamente se integrarán nuevas rutas a la base de datos.</span>
+                </div>
+            `;
             return;
         }
 
@@ -2803,12 +4296,10 @@ window.AppManager = AppManager;
 
 
         function toggleDivisas() { 
-            document.getElementById('detalles-divisas')?.classList.toggle('active'); 
-            document.getElementById('flecha-divisas')?.classList.toggle('up'); 
+            AppManager.toggleFinanceModule('divisas');
         }
         function togglePasaje() { 
-            document.getElementById('detalles-pasaje')?.classList.toggle('active'); 
-            document.getElementById('flecha-pasaje')?.classList.toggle('up'); 
+            AppManager.toggleFinanceModule('pasaje');
         }
         function toggleMapDivisas() { 
             document.getElementById('map-detalles-divisas')?.classList.toggle('active'); 

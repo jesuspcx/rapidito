@@ -1,11 +1,12 @@
-const CACHE_NAME = 'rapidito-v3.4';
+const CACHE_NAME = 'rapidito-v4.8';
 const CORE_ASSETS = [
     './',
     './index.html',
     './manifest.json',
     './icono.png',
     'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
-    'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'
+    'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
+    'https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400..900;1,9..40,400..900&display=swap'
 ];
 
 // Instalación: Pre-cachear activos principales
@@ -59,7 +60,27 @@ self.addEventListener('fetch', (event) => {
         return;
     }
 
-    // 2. APIs de tasas y geocodificación: Network-first con fallback a caché
+    // 2. Fuentes web (Google Fonts & gstatic): Cache-first
+    if (request.url.includes('fonts.googleapis.com') || request.url.includes('fonts.gstatic.com')) {
+        event.respondWith(
+            caches.open('rapidito-fonts').then(async (cache) => {
+                const cached = await cache.match(request);
+                if (cached) return cached;
+                try {
+                    const response = await fetch(request);
+                    if (response && response.status === 200) {
+                        cache.put(request, response.clone());
+                    }
+                    return response;
+                } catch (e) {
+                    return cached || new Response('', { status: 408 });
+                }
+            })
+        );
+        return;
+    }
+
+    // 3. APIs de tasas y geocodificación: Network-first con fallback a caché
     if (request.url.includes('dolarapi.com') || request.url.includes('nominatim.openstreetmap.org')) {
         event.respondWith(
             fetch(request).then((networkRes) => {
