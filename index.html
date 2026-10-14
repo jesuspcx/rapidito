@@ -13,8 +13,660 @@
     
     <!-- Librería de Mapas Leaflet -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
     <!-- Estilos de la Aplicación -->
-    <link rel="stylesheet" href="css/styles.css" />
+    <style>
+/* ================= RAPIDITO PWA - SISTEMA DE ESTILOS ================= */
+:root {
+    --bg-white: #ffffff;
+    --bg-light: #f1f5f9;
+    --primary-brand: #000080;
+    --neutral-accent: #305CDE;
+    --accent-success: #10b981;
+    --accent-warning: #f59e0b;
+    --accent-danger: #ef4444;
+    --text-dark: #0f172a;
+    --text-gray: #64748b;
+    --border-color: rgba(15, 23, 42, 0.08);
+    --card-bg: rgba(255, 255, 255, 0.88);
+    --input-bg: rgba(226, 232, 240, 0.75);
+    --shadow-color: rgba(0, 0, 128, 0.07); 
+    --glass-bg: rgba(255, 255, 255, 0.82);
+    --glass-border: rgba(255, 255, 255, 0.7);
+    --dashboard-glass: rgba(248, 250, 252, 0.7);
+    --blur-effect: blur(12px) saturate(160%);
+    --transition-fast: 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+body.dark-mode {
+    --bg-white: #000000;
+    --bg-light: #0b1120;
+    --primary-brand: #3b6cff; 
+    --neutral-accent: #6084f7;
+    --accent-success: #34d399;
+    --accent-warning: #fbbf24;
+    --accent-danger: #f87171;
+    --text-dark: #f8fafc;
+    --text-gray: #94a3b8;
+    --border-color: rgba(255, 255, 255, 0.09);
+    --card-bg: rgba(21, 29, 47, 0.88);
+    --input-bg: rgba(30, 41, 59, 0.85);
+    --shadow-color: rgba(0, 0, 0, 0.4);
+    --glass-bg: rgba(15, 23, 42, 0.86); 
+    --glass-border: rgba(255, 255, 255, 0.09);
+    --dashboard-glass: rgba(11, 17, 32, 0.72);
+}
+
+* {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body, html { 
+    margin: 0; padding: 0; height: 100dvh; 
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+    background-color: var(--bg-light); color: var(--text-dark); 
+    overflow-x: hidden; transition: background-color 0.25s ease, color 0.25s ease;
+    padding-bottom: var(--safe-bottom);
+    -webkit-touch-callout: none;
+    font-size: 14px;
+}
+
+/* Indicador de conexión offline */
+#offline-banner {
+    position: fixed;
+    top: -50px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #e11d48;
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 7px 18px;
+    border-radius: 30px;
+    z-index: 10000;
+    box-shadow: 0 4px 15px rgba(225, 29, 72, 0.35);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: top 0.3s ease;
+    pointer-events: none;
+}
+#offline-banner.active {
+    top: 14px;
+}
+#offline-banner.online-recovered {
+    background: #10b981;
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.35);
+}
+
+/* Toast flotante */
+#toast-container {
+    position: fixed;
+    bottom: calc(24px + var(--safe-bottom));
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    pointer-events: none;
+    width: 90%;
+    max-width: 360px;
+}
+.toast {
+    background: var(--glass-bg);
+    backdrop-filter: var(--blur-effect);
+    -webkit-backdrop-filter: var(--blur-effect);
+    border: 1px solid var(--border-color);
+    box-shadow: 0 10px 25px var(--shadow-color);
+    padding: 12px 16px;
+    border-radius: 16px;
+    color: var(--text-dark);
+    font-size: 13px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+}
+.toast.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+.toast.success { border-left: 4px solid var(--accent-success); }
+.toast.warning { border-left: 4px solid var(--accent-warning); }
+.toast.info { border-left: 4px solid var(--neutral-accent); }
+
+.interactive { cursor: pointer; user-select: none; transition: transform 0.15s ease, opacity 0.15s ease; }
+.interactive:active { transform: scale(0.97); opacity: 0.88; }
+
+svg { display: block; flex-shrink: 0; }
+.chevron-icon { transition: transform var(--transition-fast); }
+.chevron-icon.up { transform: rotate(180deg); }
+
+/* ================= PANTALLA DE CARGA ================= */
+#splash-screen {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100dvh;
+    background: var(--bg-light); z-index: 9999; display: flex; flex-direction: column;
+    justify-content: center; align-items: center; gap: 10px; visibility: visible; opacity: 1;
+    transition: opacity 0.35s ease, visibility 0.35s;
+}
+#splash-screen.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+.splash-logo { 
+    font-size: 32px; font-weight: 900; color: var(--primary-brand); 
+    letter-spacing: -0.03em; text-transform: uppercase; 
+    animation: pulseLogo 1.1s infinite alternate ease-in-out; 
+}
+.splash-subtitle { 
+    font-size: 11px; font-weight: 700; color: var(--text-gray); 
+    text-transform: uppercase; letter-spacing: 0.12em; 
+}
+@keyframes pulseLogo { 
+    0% { transform: scale(0.96); opacity: 0.82; } 
+    100% { transform: scale(1.04); opacity: 1; } 
+}
+
+/* ================= MAPA DE FONDO ================= */
+#map { position: fixed; top: 0; left: 0; width: 100%; height: 100dvh; z-index: 1; pointer-events: auto; }
+.leaflet-tile-pane { filter: grayscale(25%) contrast(1.05); }
+body.dark-mode .leaflet-tile-pane { filter: grayscale(40%) invert(100%) hue-rotate(180deg) brightness(0.85); }
+
+/* Pulsador GPS en tiempo real */
+.user-live-marker {
+    position: relative;
+    width: 22px;
+    height: 22px;
+}
+.user-live-dot {
+    width: 14px;
+    height: 14px;
+    background: #305CDE;
+    border: 3px solid #ffffff;
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 8px rgba(48, 92, 222, 0.6);
+    z-index: 2;
+}
+.user-live-pulse {
+    width: 28px;
+    height: 28px;
+    background: rgba(48, 92, 222, 0.35);
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    animation: livePulse 2s infinite ease-out;
+    z-index: 1;
+}
+@keyframes livePulse {
+    0% { transform: translate(-50%, -50%) scale(0.6); opacity: 1; }
+    100% { transform: translate(-50%, -50%) scale(2.4); opacity: 0; }
+}
+
+/* ================= VISTA 1: DASHBOARD COMPACTO ================= */
+#dashboard-wrapper {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100dvh;
+    overflow-y: auto; background: var(--dashboard-glass);
+    backdrop-filter: var(--blur-effect); -webkit-backdrop-filter: var(--blur-effect); z-index: 10;
+    opacity: 1; visibility: visible; transform: translateY(0); pointer-events: auto;
+    will-change: transform, opacity;
+    transition: opacity var(--transition-fast), transform var(--transition-fast), visibility var(--transition-fast);
+}
+#dashboard-wrapper.hidden { opacity: 0; visibility: hidden; transform: translateY(8px); pointer-events: none; }
+#dashboard-view { 
+    min-height: 100dvh; padding: 14px 16px; box-sizing: border-box; 
+    display: flex; flex-direction: column; width: 100%; max-width: 540px; margin: 0 auto; position: relative; 
+}
+
+.header-dash { 
+    display: flex; justify-content: space-between; align-items: center; 
+    margin: -14px -16px 16px -16px; padding: 18px 16px 12px 16px; 
+    position: sticky; top: 0; z-index: 100; 
+    background: var(--glass-bg); backdrop-filter: var(--blur-effect); -webkit-backdrop-filter: var(--blur-effect); 
+    border-bottom: 1px solid var(--border-color); 
+}
+.app-title-container { flex-grow: 1; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.app-title { margin: 0; font-size: 21px; font-weight: 900; color: var(--primary-brand); letter-spacing: -0.03em; text-transform: uppercase; }
+.city-pill-badge {
+    font-size: 10.5px;
+    font-weight: 700;
+    color: var(--neutral-accent);
+    background: var(--input-bg);
+    padding: 3px 8px;
+    border-radius: 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.avatar-dash { 
+    width: 36px; height: 36px; background: var(--primary-brand); color: #ffffff; 
+    border-radius: 50%; display: flex; justify-content: center; align-items: center; 
+    font-size: 14px; font-weight: 800; box-shadow: 0 3px 10px var(--shadow-color); 
+    cursor: pointer; flex-shrink: 0; 
+}
+
+.search-trigger { 
+    background: var(--card-bg); border: 1px solid var(--border-color); color: var(--text-dark); 
+    border-radius: 40px; padding: 11px 14px; display: flex; align-items: center; gap: 12px; 
+    box-shadow: 0 4px 14px var(--shadow-color); margin-bottom: 16px; 
+}
+.search-trigger .icon { 
+    background: var(--input-bg); color: var(--primary-brand); padding: 8px; 
+    border-radius: 50%; display: flex; align-items: center; justify-content: center; 
+}
+.search-trigger .text { flex-grow: 1; color: var(--text-gray); font-size: 14px; font-weight: 600; }
+
+.dash-finance { display: flex; gap: 10px; margin-bottom: 20px; align-items: flex-start; }
+.dash-finance-pill { 
+    background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 16px; 
+    padding: 12px 14px; flex: 1; display: flex; flex-direction: column; gap: 4px; 
+    box-shadow: 0 3px 10px var(--shadow-color); 
+}
+.dash-finance-pill > span { 
+    display: flex; justify-content: space-between; align-items: center; 
+    font-size: 10px; font-weight: 700; color: var(--text-gray); text-transform: uppercase; letter-spacing: 0.03em; 
+}
+.dash-finance-pill > strong { font-size: 16px; font-weight: 800; color: var(--text-dark); }
+
+.finance-details, .map-finance-details, .rutas-list { 
+    max-height: 0; opacity: 0; overflow: hidden; pointer-events: none; 
+    transition: max-height var(--transition-fast), opacity 0.18s ease, padding var(--transition-fast); 
+    display: flex; flex-direction: column; gap: 6px; 
+}
+.finance-details.active, .map-finance-details.active, .rutas-list.active { 
+    max-height: 380px; opacity: 1; pointer-events: auto; margin-top: 6px; 
+    padding-top: 8px; border-top: 1px solid var(--border-color); 
+}
+
+/* Quick Action Bar */
+.quick-actions-bar {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 22px;
+}
+.quick-btn {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    padding: 10px 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 2px 8px var(--shadow-color);
+    color: var(--text-dark);
+}
+.quick-btn-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--input-bg);
+    color: var(--primary-brand);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.quick-btn span {
+    font-size: 11px;
+    font-weight: 700;
+    text-align: center;
+}
+
+.section-header { 
+    font-size: 11px; font-weight: 700; margin-bottom: 10px; 
+    color: var(--text-gray); text-transform: uppercase; letter-spacing: 0.06em; 
+    display: flex; justify-content: space-between; align-items: center;
+}
+.transport-options { display: flex; flex-direction: column; gap: 10px; margin-bottom: 28px; }
+.transport-card { 
+    background: var(--card-bg); color: var(--text-dark); border: 1px solid var(--border-color); 
+    padding: 13px 16px; border-radius: 16px; display: flex; align-items: center; 
+    justify-content: space-between; box-shadow: 0 2px 8px var(--shadow-color); 
+}
+.transport-card.disabled { background: var(--input-bg); color: var(--text-gray); border-color: var(--border-color); box-shadow: none; cursor: default; }
+.t-card-info { display: flex; align-items: center; gap: 12px; }
+.t-card-info h3 { margin: 0; font-size: 14px; font-weight: 700; }
+
+.ruta-item { 
+    background: var(--card-bg); border-radius: 14px; padding: 11px 14px; 
+    border: 1px solid var(--border-color); font-size: 13px; color: var(--text-dark); 
+    font-weight: 600; display: flex; align-items: center; gap: 12px; 
+}
+.ruta-item .icon { 
+    background: var(--primary-brand); color: #ffffff; width: 34px; height: 34px; 
+    border-radius: 10px; display: flex; justify-content: center; align-items: center; 
+    font-size: 11px; font-weight: 800; flex-shrink: 0; 
+}
+.fav-btn {
+    background: none;
+    border: none;
+    color: var(--text-gray);
+    padding: 6px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.fav-btn.active {
+    color: #f59e0b;
+}
+
+/* ================= PANEL LATERAL DE PERFIL ================= */
+.panel-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100dvh;
+    background: rgba(0,0,0,0.48); z-index: 4999; opacity: 0; visibility: hidden;
+    transition: opacity var(--transition-fast), visibility var(--transition-fast);
+}
+.panel-overlay.active { opacity: 1; visibility: visible; }
+
+.side-panel {
+    position: fixed; top: 0; right: 0; width: 82%; max-width: 320px; height: 100dvh;
+    background: var(--glass-bg); backdrop-filter: var(--blur-effect); -webkit-backdrop-filter: var(--blur-effect);
+    z-index: 5000; box-shadow: -8px 0 30px rgba(0,0,0,0.2); border-left: 1px solid var(--glass-border);
+    transform: translateX(100%); will-change: transform;
+    transition: transform var(--transition-fast);
+    display: flex; flex-direction: column; overflow-y: auto; padding-bottom: calc(16px + var(--safe-bottom));
+}
+.side-panel.active { transform: translateX(0); }
+
+.side-panel-header { 
+    display: flex; align-items: center; justify-content: space-between; 
+    padding: 14px 16px; border-bottom: 1px solid var(--border-color); 
+    position: sticky; top: 0; background: var(--glass-bg); z-index: 10; 
+}
+.side-panel-close { 
+    background: var(--input-bg); border: none; width: 32px; height: 32px; 
+    border-radius: 50%; display: flex; justify-content: center; align-items: center; 
+    color: var(--text-dark); cursor: pointer; 
+}
+.side-panel-title { font-size: 14px; font-weight: 800; color: var(--text-dark); margin: 0; flex-grow: 1; text-align: center; }
+
+.sp-user-info { padding: 16px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border-color); }
+.sp-avatar { 
+    width: 46px; height: 46px; border-radius: 50%; background: var(--primary-brand); 
+    color: #fff; display: flex; justify-content: center; align-items: center; 
+    font-size: 18px; font-weight: 800; box-shadow: 0 3px 10px var(--shadow-color); flex-shrink: 0; 
+}
+.sp-details { flex-grow: 1; min-width: 0; }
+.sp-name { font-size: 15px; font-weight: 800; color: var(--text-dark); margin: 0; display: flex; align-items: center; justify-content: space-between; gap: 6px; width: 100%; }
+.sp-name-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sp-edit-btn { background: none; border: none; color: var(--text-gray); cursor: pointer; padding: 4px; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
+
+.sp-menu-list { display: flex; flex-direction: column; padding: 6px 0 80px 0; }
+.sp-menu-item { padding: 13px 16px; display: flex; align-items: center; gap: 14px; font-size: 13.5px; font-weight: 700; color: var(--text-dark); border-bottom: 1px solid var(--border-color); text-decoration: none; cursor: pointer; }
+.sp-menu-item:last-child { border-bottom: none; }
+.sp-menu-icon { color: var(--text-gray); width: 20px; display: flex; justify-content: center; }
+
+.panel-theme-btn-bottom {
+    position: absolute; bottom: calc(36px + var(--safe-bottom)); right: 20px; 
+    width: 44px; height: 44px; border-radius: 50%;
+    background: rgba(15, 23, 42, 0.9); border: 1px solid rgba(255, 255, 255, 0.15); 
+    color: #ffffff; display: flex; justify-content: center; align-items: center; 
+    cursor: pointer; box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3); z-index: 100;
+}
+body:not(.dark-mode) .panel-theme-btn-bottom {
+    background: #ffffff; border: 1px solid var(--border-color); color: var(--text-dark);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+}
+
+/* ================= VISTA INTERMEDIA: "TU VIAJE" ================= */
+#trip-view { 
+    opacity: 0; visibility: hidden; transform: translateX(-50%) translateY(14px); pointer-events: none;
+    position: fixed; top: 0; left: 50%; width: 100%; height: 100dvh; max-width: 540px; z-index: 500; 
+    padding: 16px; box-sizing: border-box; display: flex; flex-direction: column; overflow-y: auto; 
+    background: var(--glass-bg); backdrop-filter: var(--blur-effect); -webkit-backdrop-filter: var(--blur-effect);
+    will-change: transform, opacity;
+    transition: opacity var(--transition-fast), transform var(--transition-fast), visibility var(--transition-fast);
+}
+#trip-view.active { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); pointer-events: auto; }
+
+.trip-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; margin-top: 4px; }
+.trip-header h2 { margin: 0; font-size: 16px; font-weight: 800; text-align: center; flex-grow: 1; color: var(--text-dark); }
+.close-trip-btn { background: var(--input-bg); border: none; color: var(--text-dark); width: 32px; height: 32px; border-radius: 50%; display: flex; justify-content: center; align-items: center; }
+
+.trip-inputs-container { 
+    background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 18px; 
+    padding: 14px; box-shadow: 0 6px 24px var(--shadow-color); display: flex; gap: 12px; 
+    margin-bottom: 18px; position: relative; 
+}
+.trip-indicators-col { display: flex; flex-direction: column; align-items: center; position: relative; width: 16px; flex-shrink: 0; }
+.trip-vertical-line { position: absolute; top: 19px; height: 48px; width: 2px; left: 50%; transform: translateX(-50%); background-color: var(--border-color); z-index: 1; }
+.trip-dot-node { width: 8px; height: 8px; border-radius: 50%; background-color: var(--primary-brand); position: absolute; left: 50%; transform: translate(-50%, -50%); z-index: 2; box-shadow: 0 0 0 3px var(--card-bg); }
+.trip-dot-node.origin { background-color: var(--neutral-accent); top: 19px; }
+.trip-dot-node.destination { top: 67px; }
+
+.trip-fields-col { display: flex; flex-direction: column; gap: 10px; flex-grow: 1; }
+.trip-pill-input { 
+    width: 100%; background: var(--input-bg); border: 1.5px solid transparent; 
+    border-radius: 12px; padding: 10px 14px; font-size: 13.5px; font-weight: 600; 
+    color: var(--text-dark); outline: none; box-sizing: border-box; 
+}
+.trip-pill-input:focus { background: var(--card-bg); border-color: var(--neutral-accent); }
+
+.trip-autocomplete-dropdown { 
+    display: none; background: var(--card-bg); border: 1px solid var(--border-color); 
+    border-radius: 14px; max-height: 190px; overflow-y: auto; box-shadow: 0 8px 25px var(--shadow-color); 
+    margin-top: 6px; position: absolute; left: 0; right: 0; z-index: 200; 
+}
+.trip-auto-item { padding: 12px 14px; border-bottom: 1px solid var(--border-color); font-size: 13px; font-weight: 600; color: var(--text-dark); display: flex; align-items: center; gap: 10px; cursor: pointer; }
+.map-picker-link { color: var(--neutral-accent); font-weight: 700; font-size: 12px; text-align: right; text-decoration: none; margin-top: 2px; display: block; cursor: pointer; }
+
+.recent-destinations { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
+.recent-item { 
+    background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 14px; 
+    padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; 
+    box-shadow: 0 2px 8px var(--shadow-color); cursor: pointer; 
+}
+.recent-info { display: flex; align-items: center; gap: 12px; min-width: 0; flex-grow: 1; }
+.recent-icon { background: var(--input-bg); color: var(--primary-brand); width: 34px; height: 34px; border-radius: 50%; display: flex; justify-content: center; align-items: center; flex-shrink: 0; }
+.recent-text h4 { margin: 0 0 2px 0; font-size: 13px; font-weight: 700; color: var(--text-dark); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.recent-text p { margin: 0; font-size: 11px; color: var(--text-gray); }
+.delete-recent { color: var(--text-gray); font-size: 14px; flex-shrink: 0; margin-left: 8px; width: 28px; height: 28px; border-radius: 50%; display: flex; justify-content: center; align-items: center; }
+
+.cotizar-btn { 
+    width: 100%; background: var(--primary-brand); color: #ffffff; border: none; 
+    border-radius: 40px; padding: 14px; font-size: 13.5px; font-weight: 800; 
+    text-transform: uppercase; letter-spacing: 0.02em; box-shadow: 0 6px 20px var(--shadow-color); 
+    margin-top: auto; cursor: pointer; 
+}
+
+/* ================= VISTA 2: UI DEL MAPA COMPACTA ================= */
+#map-ui-view { 
+    opacity: 0; visibility: hidden; pointer-events: none; 
+    position: fixed; top: 0; left: 0; width: 100%; height: 100dvh; 
+    z-index: 200; transition: opacity var(--transition-fast), visibility var(--transition-fast); 
+}
+#map-ui-view.active { opacity: 1; visibility: visible; }
+#map-ui-view.active .back-btn, 
+#map-ui-view.active .top-widget-container, 
+#map-ui-view.active .map-bottom-sheet { pointer-events: auto; }
+
+.back-btn { 
+    position: absolute; top: 14px; left: 14px; 
+    background: var(--glass-bg); backdrop-filter: var(--blur-effect); -webkit-backdrop-filter: var(--blur-effect); 
+    border: 1px solid var(--glass-border); color: var(--text-dark); border-radius: 50%; 
+    width: 38px; height: 38px; box-shadow: 0 4px 14px var(--shadow-color); z-index: 1000; 
+    display: flex; justify-content: center; align-items: center; cursor: pointer; 
+}
+
+.top-widget-container { 
+    position: absolute; top: 14px; right: 14px; 
+    display: flex; flex-direction: column; gap: 6px; z-index: 1000; width: 155px; 
+}
+.map-rate-pill { 
+    background: var(--glass-bg); backdrop-filter: var(--blur-effect); -webkit-backdrop-filter: var(--blur-effect); 
+    border: 1px solid var(--glass-border); padding: 9px 12px; border-radius: 14px; 
+    box-shadow: 0 4px 14px var(--shadow-color); font-size: 11px; font-weight: 700; 
+    color: var(--text-dark); display: flex; flex-direction: column; gap: 4px; user-select: none; cursor: pointer; 
+}
+.map-rate-pill > span { 
+    display: flex; justify-content: space-between; align-items: center; 
+    font-size: 9.5px; font-weight: 700; color: var(--text-gray); text-transform: uppercase; 
+}
+.map-rate-pill > strong { color: var(--neutral-accent); font-weight: 800; font-size: 13.5px; }
+
+.map-bottom-sheet { 
+    position: absolute; bottom: 0; left: 0; width: 100%; 
+    background: var(--glass-bg); backdrop-filter: var(--blur-effect); -webkit-backdrop-filter: var(--blur-effect); 
+    border-top-left-radius: 24px; border-top-right-radius: 24px; border-top: 1px solid var(--glass-border); 
+    box-shadow: 0 -6px 25px var(--shadow-color); padding: 12px 16px; 
+    padding-bottom: calc(14px + var(--safe-bottom)); box-sizing: border-box; 
+    z-index: 1000; display: flex; flex-direction: column; max-height: 64vh; 
+}
+.sheet-drag-handle { width: 36px; height: 4px; background: var(--text-gray); border-radius: 4px; margin: 0 auto 12px auto; opacity: 0.35; }
+
+.trip-container-map { position: relative; display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
+.trip-line-map { position: absolute; left: 4px; top: 14px; bottom: 14px; width: 2px; background-color: var(--border-color); z-index: 1; }
+.input-row-map { display: flex; align-items: center; gap: 10px; position: relative; z-index: 2; }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--primary-brand); flex-shrink: 0; box-shadow: 0 0 0 3px var(--glass-bg); }
+.dot.origin { background: var(--neutral-accent); }
+.trip-input-map { 
+    flex-grow: 1; padding: 9px 12px; border: 1.5px solid transparent; border-radius: 12px; 
+    font-size: 13px; background-color: var(--input-bg); color: var(--text-dark); 
+    outline: none; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; 
+}
+
+#autocomplete-container { 
+    display: none; background: var(--card-bg); border-radius: 12px; 
+    margin-bottom: 8px; max-height: 160px; overflow-y: auto; 
+    box-shadow: 0 6px 20px var(--shadow-color); border: 1px solid var(--border-color); 
+}
+
+.map-buttons-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+.gps-button { 
+    flex: 1; background: var(--input-bg); border: none; border-radius: 10px; 
+    color: var(--primary-brand); font-weight: 700; font-size: 12px; 
+    display: flex; justify-content: center; align-items: center; gap: 6px; 
+    padding: 10px; cursor: pointer; 
+}
+.gps-button.active-tracking {
+    background: var(--neutral-accent);
+    color: #ffffff;
+}
+
+#route-results { display: none; flex-grow: 1; overflow-y: auto; padding-top: 6px; padding-bottom: 8px; }
+.result-title { font-size: 11px; color: var(--text-gray); margin-bottom: 8px; font-weight: 700; text-transform: uppercase; }
+.route-option { 
+    background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 14px; 
+    padding: 10px 12px; margin-bottom: 8px; display: flex; align-items: center; gap: 12px; 
+    box-shadow: 0 2px 8px var(--shadow-color); cursor: pointer; 
+}
+.route-badge { 
+    background: var(--primary-brand); color: #ffffff; font-weight: 800; 
+    width: 42px; height: 42px; border-radius: 10px; display: flex; 
+    justify-content: center; align-items: center; font-size: 11px; text-align: center; flex-shrink: 0; 
+}
+.route-info { flex-grow: 1; min-width: 0; }
+.route-info h4 { margin: 0 0 2px 0; font-size: 13.5px; color: var(--text-dark); display: flex; justify-content: space-between; align-items: center; font-weight: 800; }
+.route-info p { margin: 0; font-size: 11.5px; color: var(--text-gray); font-weight: 600; }
+.badge-cercana { background: var(--input-bg); color: var(--text-dark); padding: 3px 6px; border-radius: 6px; font-size: 9.5px; font-weight: 800; text-transform: uppercase; }
+
+/* ================= MODALES GENÉRICOS ================= */
+.generic-modal { 
+    opacity: 0; visibility: hidden; pointer-events: none; 
+    position: fixed; top: 0; left: 0; width: 100%; height: 100dvh; 
+    background: rgba(0,0,0,0.5); z-index: 6000; justify-content: center; 
+    align-items: center; padding: 16px; box-sizing: border-box; display: flex; 
+    transition: opacity var(--transition-fast), visibility var(--transition-fast); 
+}
+.generic-modal.active { opacity: 1; visibility: visible; pointer-events: auto; }
+.generic-modal-content { 
+    background: var(--glass-bg); backdrop-filter: var(--blur-effect); -webkit-backdrop-filter: var(--blur-effect); 
+    border: 1px solid var(--glass-border); border-radius: 22px; padding: 20px; 
+    width: 100%; max-width: 340px; box-shadow: 0 15px 40px rgba(0,0,0,0.25); 
+    display: flex; flex-direction: column; gap: 12px; color: var(--text-dark); position: relative; 
+}
+.generic-modal-header { 
+    display: flex; justify-content: space-between; align-items: center; 
+    border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom: 4px; 
+}
+.generic-modal-header h3 { margin: 0; font-size: 16px; font-weight: 800; }
+.close-generic-btn { 
+    background: var(--input-bg); color: var(--text-dark); border: none; 
+    width: 30px; height: 30px; border-radius: 50%; display: flex; 
+    justify-content: center; align-items: center; cursor: pointer; 
+}
+
+/* Modal Calculadora de Pasajes */
+.calc-counter-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--input-bg);
+    padding: 10px 14px;
+    border-radius: 12px;
+}
+.calc-btn-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.calc-step-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: none;
+    background: var(--card-bg);
+    color: var(--text-dark);
+    font-size: 18px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 6px var(--shadow-color);
+}
+.calc-results-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.calc-res-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+    font-weight: 700;
+}
+.calc-res-item span {
+    color: var(--text-gray);
+}
+.calc-res-item strong {
+    color: var(--text-dark);
+}
+
+/* Modal Selector Ciudad */
+.cities-grid { display: flex; flex-direction: column; gap: 6px; max-height: 250px; overflow-y: auto; }
+.city-option { 
+    padding: 11px 14px; background: var(--card-bg); border: 1px solid var(--border-color); 
+    border-radius: 12px; font-weight: 700; font-size: 13px; display: flex; 
+    align-items: center; gap: 10px; cursor: pointer; 
+}
+.city-option.selected {
+    border-color: var(--neutral-accent);
+    color: var(--neutral-accent);
+}
+
+    </style>
 </head>
 <body>
 
@@ -460,15 +1112,1696 @@
         </div>
     </div>
 
-    <!-- SCRIPTS MODULARES -->
+    <!-- LIBRERÍA LEAFLET -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="js/routes-data.js"></script>
-    <script src="js/rates.js"></script>
-    <script src="js/geo.js"></script>
-    <script src="js/app.js"></script>
 
-    <!-- COMPATIBILIDAD CON FUNCIONES GLOBALES EN LÍNEA -->
+    <!-- SCRIPTS DE LA APLICACIÓN -->
     <script>
+/**
+ * Rapidito PWA - Base de datos de Rutas de Transporte Urbano
+ * Cobertura: Barquisimeto, Cabudare, Caracas
+ */
+
+const CIUDADES_CONFIG = {
+    "Barquisimeto": { lat: 10.0714, lon: -69.3333, zoom: 13 },
+    "Caracas": { lat: 10.4806, lon: -66.9036, zoom: 13 },
+    "Maracaibo": { lat: 10.6549, lon: -71.6437, zoom: 13 },
+    "Valencia": { lat: 10.1623, lon: -68.0077, zoom: 13 },
+    "Barinas": { lat: 8.6226, lon: -70.2075, zoom: 13 },
+    "Mérida": { lat: 8.5983, lon: -71.1450, zoom: 13 }
+};
+
+const RUTAS_DATA = {
+    // ---------------- BARQUISIMETO ----------------
+    "ruta_av_venezuela": {
+        "ciudad": "Barquisimeto",
+        "tipo": "Troncal",
+        "color": "#305CDE",
+        "type": "FeatureCollection",
+        "features": [{
+            "type": "Feature",
+            "properties": { 
+                "nombre": "Ruta Av. Venezuela", 
+                "origen": "Oeste (Av. Fuerzas Armadas)", 
+                "destino": "Este (Sambil / Branger)",
+                "paradas_clave": ["Terminal Oeste", "Calle 42", "C.C. Metrópolis", "Av. Vargas", "C.C. Sambil"],
+                "frecuencia": "5 - 8 min"
+            },
+            "geometry": { 
+                "type": "LineString", 
+                "coordinates": [
+                    [-69.3550, 10.0680],
+                    [-69.3450, 10.0695],
+                    [-69.3333, 10.0714],
+                    [-69.3265, 10.0719],
+                    [-69.3218, 10.0723],
+                    [-69.3141, 10.0729],
+                    [-69.3041, 10.0737],
+                    [-69.2970, 10.0739],
+                    [-69.2906, 10.0731],
+                    [-69.2847, 10.0727],
+                    [-69.2807, 10.0717],
+                    [-69.2745, 10.0702]
+                ] 
+            }
+        }]
+    },
+    "ruta_carrera_19": {
+        "ciudad": "Barquisimeto",
+        "tipo": "Urbana",
+        "color": "#0ea5e9",
+        "type": "FeatureCollection",
+        "features": [{
+            "type": "Feature",
+            "properties": { 
+                "nombre": "Ruta 5 - Carrera 19 / Centro", 
+                "origen": "El Obelisco", 
+                "destino": "Redoma del Sol Naciente",
+                "paradas_clave": ["El Obelisco", "Calle 50", "Calle 42", "Plaza Bolívar", "Rectorado UCLA", "Parque Macuto"],
+                "frecuencia": "6 - 10 min"
+            },
+            "geometry": { 
+                "type": "LineString", 
+                "coordinates": [
+                    [-69.3582, 10.0673],
+                    [-69.3480, 10.0665],
+                    [-69.3385, 10.0661],
+                    [-69.3280, 10.0660],
+                    [-69.3175, 10.0662],
+                    [-69.3070, 10.0668],
+                    [-69.2960, 10.0675],
+                    [-69.2850, 10.0682],
+                    [-69.2780, 10.0690]
+                ] 
+            }
+        }]
+    },
+    "ruta_transbarca_l1": {
+        "ciudad": "Barquisimeto",
+        "tipo": "BRT Masivo",
+        "color": "#e11d48",
+        "type": "FeatureCollection",
+        "features": [{
+            "type": "Feature",
+            "properties": { 
+                "nombre": "Transbarca Línea 1 (Troncal)", 
+                "origen": "Estación Central Simón Bolívar", 
+                "destino": "Redoma de la Estrella del Sur",
+                "paradas_clave": ["Terminal Central", "Metrópolis", "Cementerio", "Av. Vargas", "Plaza Miranda", "La Campiña"],
+                "frecuencia": "10 - 15 min"
+            },
+            "geometry": { 
+                "type": "LineString", 
+                "coordinates": [
+                    [-69.3780, 10.0600],
+                    [-69.3620, 10.0645],
+                    [-69.3450, 10.0695],
+                    [-69.3300, 10.0716],
+                    [-69.3150, 10.0728],
+                    [-69.3000, 10.0740],
+                    [-69.2880, 10.0725],
+                    [-69.2760, 10.0700],
+                    [-69.2670, 10.0650]
+                ] 
+            }
+        }]
+    },
+    "ruta_cabudare_centro": {
+        "ciudad": "Barquisimeto",
+        "tipo": "Suburbana",
+        "color": "#10b981",
+        "type": "FeatureCollection",
+        "features": [{
+            "type": "Feature",
+            "properties": { 
+                "nombre": "Ruta 12 (Cabudare - Barquisimeto)", 
+                "origen": "Cabudare Centro (Plaza Bolívar)", 
+                "destino": "Terminal de Pasajeros de Bqto",
+                "paradas_clave": ["Plaza Cabudare", "La Mata", "Distribuidor Valle Hondo", "El Ujano", "Terminal Central"],
+                "frecuencia": "8 - 12 min"
+            },
+            "geometry": { 
+                "type": "LineString", 
+                "coordinates": [
+                    [-69.2612, 10.0305],
+                    [-69.2680, 10.0430],
+                    [-69.2740, 10.0550],
+                    [-69.2850, 10.0682],
+                    [-69.3000, 10.0700],
+                    [-69.3180, 10.0685],
+                    [-69.3333, 10.0670],
+                    [-69.3450, 10.0650]
+                ] 
+            }
+        }]
+    },
+
+    // ---------------- CARACAS ----------------
+    "ruta_caracas_plaza_vzla": {
+        "ciudad": "Caracas",
+        "tipo": "Troncal",
+        "color": "#8b5cf6",
+        "type": "FeatureCollection",
+        "features": [{
+            "type": "Feature",
+            "properties": { 
+                "nombre": "Troncal Plaza Venezuela - Chacao - Petare", 
+                "origen": "Plaza Venezuela", 
+                "destino": "Redoma de Petare",
+                "paradas_clave": ["Plaza Venezuela", "Chacaíto", "Chacao", "Altamira", "Los Dos Caminos", "Petare"],
+                "frecuencia": "4 - 7 min"
+            },
+            "geometry": { 
+                "type": "LineString", 
+                "coordinates": [
+                    [-66.8830, 10.4965],
+                    [-66.8720, 10.4950],
+                    [-66.8580, 10.4940],
+                    [-66.8480, 10.4970],
+                    [-66.8350, 10.4960],
+                    [-66.8200, 10.4900],
+                    [-66.8080, 10.4810]
+                ] 
+            }
+        }]
+    }
+};
+
+window.CIUDADES_CONFIG = CIUDADES_CONFIG;
+window.RUTAS_DATA = RUTAS_DATA;
+
+
+/**
+ * Rapidito PWA - Módulo de Divisas y Tarifas (DolarAPI + Offline Caching)
+ */
+
+const RatesManager = {
+    tasaBCV: 0,
+    tasaEuro: 0,
+    tasaParalelo: 0,
+    pasajeNormalBs: 0,
+    pasajePrefBs: 0,
+    pasajerosCount: 1,
+
+    // Claves de localStorage
+    STORAGE_KEY: 'rapidito_tasas_cache',
+
+    init() {
+        this.cargarDesdeCache();
+        this.actualizarTasas();
+        this.setupCalculadora();
+    },
+
+    cargarDesdeCache() {
+        try {
+            const cache = JSON.parse(localStorage.getItem(this.STORAGE_KEY));
+            if (cache && cache.tasaBCV) {
+                this.tasaBCV = cache.tasaBCV;
+                this.tasaEuro = cache.tasaEuro || 0;
+                this.tasaParalelo = cache.tasaParalelo || 0;
+                this.calcularPasajes(this.tasaBCV);
+                this.actualizarUI(true);
+            }
+        } catch (e) {
+            console.warn('Error leyendo caché de tasas', e);
+        }
+    },
+
+    guardarEnCache() {
+        try {
+            const data = {
+                tasaBCV: this.tasaBCV,
+                tasaEuro: this.tasaEuro,
+                tasaParalelo: this.tasaParalelo,
+                updatedAt: new Date().toISOString()
+            };
+            localStorage.setItem(this.STORAGE_KEY, JSON.stringify(data));
+        } catch (e) {
+            console.warn('Error guardando caché de tasas', e);
+        }
+    },
+
+    calcularPasajes(precioOficial) {
+        // Tarifa estimada de 0.25 USD oficial
+        const base = precioOficial * 0.25;
+        this.pasajeNormalBs = base > 0 ? base : 15.0; // fallback mínimo razonable
+        this.pasajePrefBs = this.pasajeNormalBs / 2;
+    },
+
+    async actualizarTasas() {
+        let actualizoAlguna = false;
+        try {
+            const resBCV = await fetch('https://ve.dolarapi.com/v1/dolares/oficial');
+            if (resBCV.ok) {
+                const data = await resBCV.json();
+                if (data?.promedio) {
+                    this.tasaBCV = data.promedio;
+                    this.calcularPasajes(this.tasaBCV);
+                    actualizoAlguna = true;
+                }
+            }
+        } catch (e) {
+            console.log('No se pudo conectar con DolarAPI (modo offline activo)');
+        }
+
+        try {
+            const resEuro = await fetch('https://ve.dolarapi.com/v1/euros/oficial');
+            if (resEuro.ok) {
+                const dataEuro = await resEuro.json();
+                if (dataEuro?.promedio) {
+                    this.tasaEuro = dataEuro.promedio;
+                    actualizoAlguna = true;
+                }
+            }
+        } catch (e) {}
+
+        try {
+            const resParalelo = await fetch('https://ve.dolarapi.com/v1/dolares/paralelo');
+            if (resParalelo.ok) {
+                const dataParalelo = await resParalelo.json();
+                if (dataParalelo?.promedio) {
+                    this.tasaParalelo = dataParalelo.promedio;
+                    actualizoAlguna = true;
+                }
+            }
+        } catch (e) {}
+
+        if (actualizoAlguna) {
+            this.guardarEnCache();
+            this.actualizarUI(false);
+        } else if (this.tasaBCV === 0) {
+            this.mostrarErrorTasas();
+        }
+    },
+
+    actualizarUI(esDesdeCache = false) {
+        const sufijo = esDesdeCache ? ' (offline)' : '';
+        const bcvText = this.tasaBCV ? `$ = ${this.tasaBCV.toFixed(2)} Bs` : '--';
+        const tarifaText = this.pasajeNormalBs ? `${this.pasajeNormalBs.toFixed(2)} Bs` : '--';
+        const tarifaPrefText = this.pasajePrefBs ? `Preferencial: ${this.pasajePrefBs.toFixed(2)} Bs` : '--';
+
+        // Elementos Dashboard
+        const dashBCV = document.getElementById('dash-tasa-bcv');
+        const dashNormal = document.getElementById('dash-tarifa-normal');
+        const dashPref = document.getElementById('dash-tarifa-pref');
+        const dashEuro = document.getElementById('dash-tasa-euro');
+        const dashParalelo = document.getElementById('dash-tasa-paralelo');
+
+        if (dashBCV) dashBCV.innerText = bcvText + sufijo;
+        if (dashNormal) dashNormal.innerText = tarifaText;
+        if (dashPref) dashPref.innerText = tarifaPrefText;
+        if (dashEuro && this.tasaEuro) dashEuro.innerText = `€ = ${this.tasaEuro.toFixed(2)} Bs`;
+        if (dashParalelo && this.tasaParalelo) dashParalelo.innerText = `USD₮ = ${this.tasaParalelo.toFixed(2)} Bs`;
+
+        // Elementos Mapa
+        const mapBCV = document.getElementById('tasa-bcv');
+        const mapNormal = document.getElementById('tarifa-normal');
+        const mapPref = document.getElementById('map-tarifa-pref');
+        const mapEuro = document.getElementById('map-tasa-euro');
+        const mapParalelo = document.getElementById('map-tasa-paralelo');
+
+        if (mapBCV) mapBCV.innerText = bcvText;
+        if (mapNormal) mapNormal.innerText = tarifaText;
+        if (mapPref) mapPref.innerText = `Pref: ${this.pasajePrefBs.toFixed(2)} Bs`;
+        if (mapEuro && this.tasaEuro) mapEuro.innerText = `€ = ${this.tasaEuro.toFixed(2)} Bs`;
+        if (mapParalelo && this.tasaParalelo) mapParalelo.innerText = `USD₮ = ${this.tasaParalelo.toFixed(2)} Bs`;
+
+        this.actualizarResultadosCalculadora();
+    },
+
+    mostrarErrorTasas() {
+        const dashBCV = document.getElementById('dash-tasa-bcv');
+        const mapBCV = document.getElementById('tasa-bcv');
+        if (dashBCV) dashBCV.innerText = '$ = Offline';
+        if (mapBCV) mapBCV.innerText = '$ = Offline';
+    },
+
+    setupCalculadora() {
+        const minusBtn = document.getElementById('calc-minus-btn');
+        const plusBtn = document.getElementById('calc-plus-btn');
+        const pagaConInput = document.getElementById('calc-paga-con');
+
+        if (minusBtn) {
+            minusBtn.addEventListener('click', () => {
+                if (this.pasajerosCount > 1) {
+                    this.pasajerosCount--;
+                    this.actualizarResultadosCalculadora();
+                }
+            });
+        }
+        if (plusBtn) {
+            plusBtn.addEventListener('click', () => {
+                if (this.pasajerosCount < 20) {
+                    this.pasajerosCount++;
+                    this.actualizarResultadosCalculadora();
+                }
+            });
+        }
+        if (pagaConInput) {
+            pagaConInput.addEventListener('input', () => {
+                this.actualizarResultadosCalculadora();
+            });
+        }
+    },
+
+    actualizarResultadosCalculadora() {
+        const countEl = document.getElementById('calc-count');
+        const totalBsEl = document.getElementById('calc-total-bs');
+        const totalUsdEl = document.getElementById('calc-total-usd');
+        const vueltoBsEl = document.getElementById('calc-vuelto-bs');
+        const pagaConInput = document.getElementById('calc-paga-con');
+
+        if (countEl) countEl.innerText = this.pasajerosCount;
+
+        const totalBs = this.pasajeNormalBs * this.pasajerosCount;
+        if (totalBsEl) totalBsEl.innerText = `${totalBs.toFixed(2)} Bs`;
+
+        if (totalUsdEl && this.tasaBCV > 0) {
+            const totalUsd = totalBs / this.tasaBCV;
+            totalUsdEl.innerText = `≈ $${totalUsd.toFixed(2)}`;
+        }
+
+        if (pagaConInput && vueltoBsEl) {
+            const montoPaga = parseFloat(pagaConInput.value) || 0;
+            if (montoPaga > 0) {
+                const vuelto = montoPaga - totalBs;
+                if (vuelto >= 0) {
+                    vueltoBsEl.innerText = `${vuelto.toFixed(2)} Bs`;
+                    vueltoBsEl.style.color = 'var(--accent-success)';
+                } else {
+                    vueltoBsEl.innerText = `Faltan ${Math.abs(vuelto).toFixed(2)} Bs`;
+                    vueltoBsEl.style.color = 'var(--accent-danger)';
+                }
+            } else {
+                vueltoBsEl.innerText = '--';
+                vueltoBsEl.style.color = 'var(--text-dark)';
+            }
+        }
+    }
+};
+
+window.RatesManager = RatesManager;
+
+
+/**
+ * Rapidito PWA - Módulo Geográfico y Navegación (Leaflet + GPS + OSRM)
+ */
+
+const GeoManager = {
+    map: null,
+    rutaDibujada: null,
+    marcadorOrigen: null,
+    marcadorDestino: null,
+    marcadorLive: null,
+    circuloPrecisionLive: null,
+    capasCaminata: null,
+    marcadoresRuta: null,
+    watchId: null,
+    isLiveTracking: false,
+    currentLat: 10.0714,
+    currentLon: -69.3333,
+    abortControllerGeo: null,
+    lastProximityAlertStop: null,
+
+    init(mapElementId = 'map') {
+        const ciudadActual = localStorage.getItem('rapidito_ciudad') || 'Barquisimeto';
+        if (window.CIUDADES_CONFIG && window.CIUDADES_CONFIG[ciudadActual]) {
+            this.currentLat = window.CIUDADES_CONFIG[ciudadActual].lat;
+            this.currentLon = window.CIUDADES_CONFIG[ciudadActual].lon;
+        }
+
+        this.map = L.map(mapElementId, { zoomControl: false }).setView([this.currentLat, this.currentLon], 14);
+        this.capasCaminata = L.layerGroup().addTo(this.map);
+        this.marcadoresRuta = L.layerGroup().addTo(this.map);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; OpenStreetMap'
+        }).addTo(this.map);
+
+        this.map.on('click', (e) => this.onMapClick(e));
+    },
+
+    setCenter(lat, lon, zoom = 14) {
+        this.currentLat = lat;
+        this.currentLon = lon;
+        if (this.map) {
+            this.map.setView([lat, lon], zoom);
+        }
+    },
+
+    limpiarMapa() {
+        if (!this.map) return;
+        if (this.rutaDibujada && this.map.hasLayer(this.rutaDibujada)) {
+            this.map.removeLayer(this.rutaDibujada);
+            this.rutaDibujada = null;
+        }
+        if (this.marcadorDestino && this.map.hasLayer(this.marcadorDestino)) {
+            this.map.removeLayer(this.marcadorDestino);
+            this.marcadorDestino = null;
+        }
+        if (this.marcadorOrigen && this.map.hasLayer(this.marcadorOrigen)) {
+            this.map.removeLayer(this.marcadorOrigen);
+            this.marcadorOrigen = null;
+        }
+        if (this.capasCaminata) this.capasCaminata.clearLayers();
+        if (this.marcadoresRuta) this.marcadoresRuta.clearLayers();
+
+        const resultsContainer = document.getElementById('route-results');
+        const autocompleteContainer = document.getElementById('autocomplete-container');
+        const originInput = document.getElementById('input-origen');
+        const searchInput = document.getElementById('map-search-input');
+
+        if (resultsContainer) {
+            resultsContainer.style.display = 'none';
+            resultsContainer.innerHTML = '';
+        }
+        if (autocompleteContainer) autocompleteContainer.style.display = 'none';
+        if (originInput) originInput.value = '';
+        if (searchInput) searchInput.value = '';
+
+        this.map.setView([this.currentLat, this.currentLon], 14);
+    },
+
+    async onMapClick(e) {
+        const esOrigen = (window.AppManager?.inputActivo === 'origen');
+        const targetInput = esOrigen 
+            ? document.getElementById('input-origen') 
+            : document.getElementById('map-search-input');
+
+        if (esOrigen) {
+            if (this.marcadorOrigen && this.map.hasLayer(this.marcadorOrigen)) {
+                this.map.removeLayer(this.marcadorOrigen);
+            }
+            this.marcadorOrigen = L.circleMarker(e.latlng, {
+                radius: 7,
+                fillColor: "var(--primary-brand)",
+                color: "#fff",
+                weight: 2,
+                fillOpacity: 1
+            }).addTo(this.map);
+        } else {
+            if (this.marcadorDestino && this.map.hasLayer(this.marcadorDestino)) {
+                this.map.removeLayer(this.marcadorDestino);
+            }
+            this.marcadorDestino = L.marker(e.latlng).addTo(this.map);
+        }
+
+        this.centrarMapaConMenu(L.latLngBounds([e.latlng, e.latlng]), 15);
+        if (targetInput) targetInput.value = "Identificando lugar...";
+        
+        const auto = document.getElementById('autocomplete-container');
+        if (auto) auto.style.display = 'none';
+
+        try {
+            const dir = await this.reverseGeocode(e.latlng.lat, e.latlng.lng);
+            if (targetInput) targetInput.value = dir || "Punto en el mapa";
+            if (!esOrigen && targetInput && dir) {
+                window.AppManager?.guardarEnHistorial(dir);
+            }
+        } catch (error) {
+            if (targetInput) targetInput.value = "Punto en el mapa";
+        }
+
+        this.procesarIntersecciones();
+    },
+
+    async reverseGeocode(lat, lon) {
+        try {
+            const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18`);
+            if (!res.ok) return null;
+            const data = await res.json();
+            return data?.address?.road || data?.address?.suburb || data?.display_name?.split(',')[0] || null;
+        } catch (e) {
+            return null;
+        }
+    },
+
+    toggleLiveTracking(callbackOnUpdate) {
+        if (!navigator.geolocation) {
+            window.AppManager?.showToast('Tu navegador no soporta geolocalización', 'warning');
+            return;
+        }
+
+        const liveBtn = document.getElementById('gps-live-btn');
+
+        if (this.isLiveTracking) {
+            // Detener seguimiento
+            if (this.watchId !== null) {
+                navigator.geolocation.clearWatch(this.watchId);
+                this.watchId = null;
+            }
+            this.isLiveTracking = false;
+            if (this.marcadorLive && this.map.hasLayer(this.marcadorLive)) {
+                this.map.removeLayer(this.marcadorLive);
+            }
+            if (this.circuloPrecisionLive && this.map.hasLayer(this.circuloPrecisionLive)) {
+                this.map.removeLayer(this.circuloPrecisionLive);
+            }
+            if (liveBtn) {
+                liveBtn.classList.remove('active-tracking');
+                liveBtn.innerHTML = 'Seguimiento en vivo';
+            }
+            window.AppManager?.showToast('Seguimiento GPS detenido', 'info');
+        } else {
+            // Iniciar seguimiento
+            this.isLiveTracking = true;
+            if (liveBtn) {
+                liveBtn.classList.add('active-tracking');
+                liveBtn.innerHTML = '🔴 En vivo (activo)';
+            }
+            window.AppManager?.showToast('Seguimiento GPS en tiempo real activado', 'success');
+
+            this.watchId = navigator.geolocation.watchPosition(
+                (pos) => {
+                    const latlng = L.latLng(pos.coords.latitude, pos.coords.longitude);
+                    this.actualizarMarcadorLive(latlng, pos.coords.accuracy);
+                    this.verificarAlertaProximidad(latlng);
+                    if (callbackOnUpdate) callbackOnUpdate(latlng);
+                },
+                (err) => {
+                    console.warn('Error en GPS watch:', err);
+                    window.AppManager?.showToast('Señal GPS intermitente', 'warning');
+                },
+                { enableHighAccuracy: true, timeout: 10000, maximumAge: 2000 }
+            );
+        }
+    },
+
+    actualizarMarcadorLive(latlng, accuracy) {
+        if (!this.map) return;
+
+        if (!this.marcadorLive) {
+            const liveIcon = L.divIcon({
+                className: 'custom-live-icon',
+                html: `<div class="user-live-marker"><div class="user-live-pulse"></div><div class="user-live-dot"></div></div>`,
+                iconSize: [28, 28],
+                iconAnchor: [14, 14]
+            });
+            this.marcadorLive = L.marker(latlng, { icon: liveIcon, zIndexOffset: 1000 }).addTo(this.map);
+        } else {
+            this.marcadorLive.setLatLng(latlng);
+        }
+
+        if (accuracy && accuracy < 200) {
+            if (!this.circuloPrecisionLive) {
+                this.circuloPrecisionLive = L.circle(latlng, {
+                    radius: accuracy,
+                    color: '#305CDE',
+                    weight: 1,
+                    fillColor: '#305CDE',
+                    fillOpacity: 0.1
+                }).addTo(this.map);
+            } else {
+                this.circuloPrecisionLive.setLatLng(latlng);
+                this.circuloPrecisionLive.setRadius(accuracy);
+            }
+        }
+    },
+
+    verificarAlertaProximidad(userLatlng) {
+        if (!this.rutaDibujada || !window.RUTAS_DATA) return;
+
+        // Comprueba si hay paradas en la ruta activa y si estamos a menos de 120 metros
+        for (const rutaKey of Object.keys(window.RUTAS_DATA)) {
+            const ruta = window.RUTAS_DATA[rutaKey];
+            const dist = this.calcularDistanciaMinima(userLatlng, ruta);
+            if (dist < 120 && this.lastProximityAlertStop !== rutaKey) {
+                this.lastProximityAlertStop = rutaKey;
+                const nombre = ruta.features[0].properties.nombre;
+                window.AppManager?.showToast(`🔔 Estás muy cerca de la ruta: ${nombre}`, 'success');
+                // Vibración háptica en móvil si está soportado
+                if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+                break;
+            }
+        }
+    },
+
+    obtenerPuntoMasCercano(latlngRef, datosGeoJSON) {
+        let minDistancia = Infinity, puntoCercano = null;
+        const coordenadas = datosGeoJSON.features[0].geometry.coordinates;
+        const ptRef = this.map.project(latlngRef, 18);
+
+        for (let i = 0; i < coordenadas.length - 1; i++) {
+            let p1 = this.map.project(L.latLng(coordenadas[i][1], coordenadas[i][0]), 18);
+            let p2 = this.map.project(L.latLng(coordenadas[i+1][1], coordenadas[i+1][0]), 18);
+            let closestPt = L.LineUtil.closestPointOnSegment(ptRef, p1, p2);
+            let closestLatLng = this.map.unproject(closestPt, 18);
+            let d = this.map.distance(latlngRef, closestLatLng);
+            if (d < minDistancia) { minDistancia = d; puntoCercano = closestLatLng; }
+        }
+        return puntoCercano;
+    },
+
+    calcularDistanciaMinima(latlngRef, datosGeoJSON) {
+        let puntoOptimo = this.obtenerPuntoMasCercano(latlngRef, datosGeoJSON);
+        return puntoOptimo ? Math.round(this.map.distance(latlngRef, puntoOptimo)) : Infinity;
+    },
+
+    evaluarSentidoRuta(origenLatlng, destinoLatlng, datosGeoJSON) {
+        let coords = datosGeoJSON.features[0].geometry.coordinates;
+        let ptOrigen = this.map.project(origenLatlng, 18);
+        let ptDestino = this.map.project(destinoLatlng, 18);
+        
+        let minDOrigen = Infinity, idxOrigen = -1;
+        let minDDestino = Infinity, idxDestino = -1;
+
+        for (let i = 0; i < coords.length - 1; i++) {
+            let p1 = this.map.project(L.latLng(coords[i][1], coords[i][0]), 18);
+            let p2 = this.map.project(L.latLng(coords[i+1][1], coords[i+1][0]), 18);
+            
+            let cOrigen = L.LineUtil.closestPointOnSegment(ptOrigen, p1, p2);
+            let dOrigen = ptOrigen.distanceTo(cOrigen);
+            if (dOrigen < minDOrigen) {
+                minDOrigen = dOrigen;
+                let segLength = p1.distanceTo(p2);
+                let distToP1 = p1.distanceTo(cOrigen);
+                idxOrigen = i + (segLength > 0 ? distToP1 / segLength : 0);
+            }
+            
+            let cDestino = L.LineUtil.closestPointOnSegment(ptDestino, p1, p2);
+            let dDestino = ptDestino.distanceTo(cDestino);
+            if (dDestino < minDDestino) {
+                minDDestino = dDestino;
+                let segLength = p1.distanceTo(p2);
+                let distToP1 = p1.distanceTo(cDestino);
+                idxDestino = i + (segLength > 0 ? distToP1 / segLength : 0);
+            }
+        }
+        return idxDestino >= (idxOrigen - 0.05); 
+    },
+
+    async trazarRutaCaminando(inicio, fin, capa) {
+        if (!inicio || !fin || !capa) return;
+        try {
+            const url = `https://router.project-osrm.org/route/v1/foot/${inicio.lng},${inicio.lat};${fin.lng},${fin.lat}?geometries=geojson`;
+            const res = await fetch(url);
+            const data = await res.json();
+            if (data?.routes?.[0]?.geometry) {
+                L.geoJSON(data.routes[0].geometry, { 
+                    style: { color: '#305CDE', weight: 4, dashArray: '4, 8' } 
+                }).addTo(capa);
+                return;
+            }
+        } catch (e) {}
+        // Fallback si no hay conexión a internet con OSRM
+        L.polyline([inicio, fin], { color: '#305CDE', weight: 4, dashArray: '4, 8' }).addTo(capa);
+    },
+
+    centrarMapaConMenu(bounds, zoomLimite = null) {
+        const bottomSheet = document.querySelector('.map-bottom-sheet');
+        const sheetHeight = bottomSheet ? bottomSheet.offsetHeight : 200;
+        setTimeout(() => {
+            let opts = { 
+                paddingTopLeft: [18, 70], 
+                paddingBottomRight: [18, sheetHeight + 20] 
+            };
+            if (zoomLimite) opts.maxZoom = zoomLimite;
+            if (this.map) this.map.fitBounds(bounds, opts);
+        }, 80);
+    },
+
+    dibujarRutaYPasos(nombre, colorHex, idRuta) {
+        if (!this.map) return;
+        if (this.rutaDibujada && this.map.hasLayer(this.rutaDibujada)) {
+            this.map.removeLayer(this.rutaDibujada);
+        }
+        if (this.capasCaminata) this.capasCaminata.clearLayers();
+        if (this.marcadoresRuta) this.marcadoresRuta.clearLayers();
+
+        const datosRuta = window.RUTAS_DATA[idRuta];
+        if (!datosRuta) return;
+
+        this.rutaDibujada = L.geoJSON(datosRuta, { 
+            style: { color: colorHex || '#305CDE', weight: 5, opacity: 0.9, lineCap: 'round' } 
+        }).addTo(this.map);
+
+        const coords = datosRuta.features[0].geometry.coordinates;
+        if (coords?.length >= 2) {
+            // Marcador de inicio
+            L.marker([coords[0][1], coords[0][0]], { 
+                icon: L.divIcon({ 
+                    className: 'custom-start-icon', 
+                    html: `<div style="width: 18px; height: 18px; background: white; border: 4px solid ${colorHex}; border-radius: 50%; box-sizing: border-box;"></div>`, 
+                    iconSize: [18, 18],
+                    iconAnchor: [9, 9]
+                }) 
+            }).addTo(this.marcadoresRuta);
+
+            // Marcador de final con flecha apuntando hacia la dirección del recorrido
+            const p1 = this.map.project(L.latLng(coords[coords.length - 2][1], coords[coords.length - 2][0]), 18);
+            const p2 = this.map.project(L.latLng(coords[coords.length - 1][1], coords[coords.length - 1][0]), 18);
+            const angleDeg = Math.atan2(p2.y - p1.y, p2.x - p1.x) * 180 / Math.PI;
+
+            L.marker([coords[coords.length - 1][1], coords[coords.length - 1][0]], {
+                icon: L.divIcon({
+                    className: 'custom-end-arrow',
+                    html: `<div style="transform: rotate(${angleDeg}deg); width: 22px; height: 22px; display: flex; justify-content: center; align-items: center;">
+                             <svg width="18" height="18" viewBox="0 0 24 24" fill="${colorHex}" stroke="#ffffff" stroke-width="2" stroke-linejoin="round">
+                               <polygon points="3,3 21,12 3,21 7,12" />
+                             </svg>
+                           </div>`,
+                    iconSize: [22, 22],
+                    iconAnchor: [11, 11]
+                })
+            }).addTo(this.marcadoresRuta);
+        }
+
+        // Trazado de caminata si origen y destino están fijados
+        if (this.marcadorOrigen && this.marcadorDestino) {
+            let ptInicio = this.obtenerPuntoMasCercano(this.marcadorOrigen.getLatLng(), datosRuta);
+            let ptFin = this.obtenerPuntoMasCercano(this.marcadorDestino.getLatLng(), datosRuta);
+            if (ptInicio) this.trazarRutaCaminando(this.marcadorOrigen.getLatLng(), ptInicio, this.capasCaminata);
+            if (ptFin) this.trazarRutaCaminando(this.marcadorDestino.getLatLng(), ptFin, this.capasCaminata);
+        }
+    },
+
+    procesarIntersecciones() {
+        const resultsContainer = document.getElementById('route-results');
+        if (!resultsContainer) return;
+        if (!this.marcadorOrigen || !this.marcadorDestino) return;
+
+        let origenLatlng = this.marcadorOrigen.getLatLng();
+        let destinoLatlng = this.marcadorDestino.getLatLng();
+        resultsContainer.style.display = 'block';
+
+        let opciones = [];
+        let rutasDescartadas = 0;
+        const ciudadActual = localStorage.getItem('rapidito_ciudad') || "Barquisimeto";
+
+        for (const [idRuta, datosRuta] of Object.entries(window.RUTAS_DATA || {})) {
+            // Filtrar por ciudad si coincide
+            if (datosRuta.ciudad && datosRuta.ciudad !== ciudadActual) continue;
+
+            let sentidoValido = this.evaluarSentidoRuta(origenLatlng, destinoLatlng, datosRuta);
+            if (!sentidoValido) { 
+                rutasDescartadas++; 
+                continue; 
+            }
+
+            let dist = this.calcularDistanciaMinima(destinoLatlng, datosRuta);
+            let props = datosRuta.features[0].properties;
+            opciones.push({ 
+                idVar: idRuta, 
+                nombre: props.nombre, 
+                distanciaDestino: dist, 
+                origen: props.origen, 
+                destino: props.destino, 
+                colorLinea: datosRuta.color || '#305CDE',
+                frecuencia: props.frecuencia || '5-10 min'
+            });
+        }
+
+        if (opciones.length === 0) {
+            if (rutasDescartadas > 0) {
+                resultsContainer.innerHTML = `<div class="result-title" style="text-align:center; padding: 12px 8px; color: var(--text-gray); line-height: 1.45; text-transform:none;">❌ Ninguna ruta directa te sirve.<br>Las opciones cercanas van en <strong style="color:var(--text-dark);">sentido contrario</strong> a tu destino.</div>`;
+            } else {
+                resultsContainer.innerHTML = `<div class="result-title" style="text-align:center; padding: 8px; color: var(--text-gray); text-transform:none;">No se encontraron rutas para este tramo en ${ciudadActual}.</div>`;
+            }
+            this.centrarMapaConMenu(L.latLngBounds([origenLatlng, destinoLatlng]));
+            return;
+        }
+
+        opciones.sort((a, b) => a.distanciaDestino - b.distanciaDestino);
+        let htmlContent = `<div class="result-title">Opciones sugeridas (${ciudadActual})</div>`;
+
+        const tarifaStr = window.RatesManager?.pasajeNormalBs 
+            ? `${window.RatesManager.pasajeNormalBs.toFixed(2)} Bs` 
+            : 'Tarifa oficial';
+
+        opciones.forEach((ruta, index) => {
+            let textoDist = ruta.distanciaDestino > 1000 
+                ? (ruta.distanciaDestino / 1000).toFixed(1) + ' km' 
+                : ruta.distanciaDestino + ' m';
+            let etiquetaGanadora = index === 0 ? `<span class="badge-cercana">Más óptima</span>` : '';
+            
+            htmlContent += `
+                <div class="route-option interactive" onclick='GeoManager.dibujarRutaYPasos("${ruta.nombre}", "${ruta.colorLinea}", "${ruta.idVar}")'>
+                    <div class="route-badge" style="background:${ruta.colorLinea};">${ruta.nombre.substring(0, 4).toUpperCase()}</div>
+                    <div class="route-info">
+                        <h4>${ruta.nombre} ${etiquetaGanadora}</h4>
+                        <p style="margin-bottom: 2px; font-size: 11.5px; color: var(--neutral-accent); font-weight: 700;">${ruta.origen} → ${ruta.destino}</p>
+                        <p>Caminando: <span style="color:var(--text-dark); font-weight:800;">${textoDist}</span> • Tarifa: ${tarifaStr} • Frec: ${ruta.frecuencia}</p>
+                    </div>
+                </div>
+            `;
+        });
+
+        resultsContainer.innerHTML = htmlContent;
+        this.centrarMapaConMenu(L.latLngBounds([origenLatlng, destinoLatlng]));
+    }
+};
+
+window.GeoManager = GeoManager;
+
+
+/**
+ * Rapidito PWA - Coordinador Principal de la Aplicación
+ */
+
+const AppManager = {
+    inputActivo: 'destino',
+    vistaAnteriorMapa: 'viaje',
+    deferredPrompt: null,
+    typingTimerTrip: null,
+    typingTimerMap: null,
+    activeAbortController: null,
+
+    init() {
+        this.setupEventListeners();
+        this.setupNetworkStatus();
+        this.cargarTema();
+        this.cargarPerfil();
+        this.renderizarHistorial();
+        this.setupPWA();
+
+        // Ocultar pantalla de carga
+        const splash = document.getElementById('splash-screen');
+        if (splash) {
+            setTimeout(() => splash.classList.add('hidden'), 350);
+        }
+    },
+
+    setupEventListeners() {
+        const tripOrigenInput = document.getElementById('trip-origen-input');
+        const tripDestinoInput = document.getElementById('trip-destino-input');
+        const originInput = document.getElementById('input-origen');
+        const searchInput = document.getElementById('map-search-input');
+
+        if (tripOrigenInput) {
+            this.configurarAutocompletado(tripOrigenInput, 'trip-auto-origen', 'origen');
+        }
+        if (tripDestinoInput) {
+            this.configurarAutocompletado(tripDestinoInput, 'trip-auto-destino', 'destino');
+        }
+
+        if (originInput) {
+            originInput.addEventListener('focus', () => { 
+                this.inputActivo = 'origen'; 
+                this.actualizarFocoInputs(); 
+            });
+            this.configurarAutocompletadoMapa(originInput, 'origen');
+        }
+        if (searchInput) {
+            searchInput.addEventListener('focus', () => { 
+                this.inputActivo = 'destino'; 
+                this.actualizarFocoInputs(); 
+            });
+            this.configurarAutocompletadoMapa(searchInput, 'destino');
+        }
+
+        // Cierre de dropdowns al hacer clic fuera
+        window.addEventListener('click', (e) => {
+            const tripAutoOrigen = document.getElementById('trip-auto-origen');
+            const tripAutoDestino = document.getElementById('trip-auto-destino');
+            if (tripOrigenInput && tripAutoOrigen && !tripOrigenInput.contains(e.target) && !tripAutoOrigen.contains(e.target)) {
+                tripAutoOrigen.style.display = 'none';
+            }
+            if (tripDestinoInput && tripAutoDestino && !tripDestinoInput.contains(e.target) && !tripAutoDestino.contains(e.target)) {
+                tripAutoDestino.style.display = 'none';
+            }
+        });
+    },
+
+    setupNetworkStatus() {
+        const banner = document.getElementById('offline-banner');
+        if (!banner) return;
+
+        const updateStatus = () => {
+            if (!navigator.onLine) {
+                banner.innerText = '⚡ Modo sin conexión (rutas y tarifas en caché)';
+                banner.classList.remove('online-recovered');
+                banner.classList.add('active');
+            } else {
+                if (banner.classList.contains('active')) {
+                    banner.innerText = '✅ Conexión restablecida';
+                    banner.classList.add('online-recovered');
+                    setTimeout(() => {
+                        banner.classList.remove('active');
+                    }, 2500);
+                    // Actualizar tasas si volvimos online
+                    window.RatesManager?.actualizarTasas();
+                }
+            }
+        };
+
+        window.addEventListener('offline', updateStatus);
+        window.addEventListener('online', updateStatus);
+
+        if (!navigator.onLine) {
+            updateStatus();
+        }
+    },
+
+    showToast(mensaje, tipo = 'info') {
+        const container = document.getElementById('toast-container');
+        if (!container) return;
+
+        const toast = document.createElement('div');
+        toast.className = `toast ${tipo}`;
+        
+        let iconSvg = '';
+        if (tipo === 'success') {
+            iconSvg = `<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+        } else if (tipo === 'warning') {
+            iconSvg = `<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>`;
+        } else {
+            iconSvg = `<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>`;
+        }
+
+        toast.innerHTML = `${iconSvg}<span>${this.escapeHTML(mensaje)}</span>`;
+        container.appendChild(toast);
+
+        requestAnimationFrame(() => {
+            toast.classList.add('show');
+        });
+
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 300);
+        }, 3200);
+    },
+
+    escapeHTML(str) {
+        if (!str) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    },
+
+    cargarTema() {
+        const guardado = localStorage.getItem('rapidito_theme');
+        if (guardado === 'dark' || (!guardado && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.body.classList.add('dark-mode');
+        } else {
+            document.body.classList.remove('dark-mode');
+        }
+        this.actualizarIconoTema();
+    },
+
+    toggleDarkMode() {
+        document.body.classList.toggle('dark-mode');
+        const isDark = document.body.classList.contains('dark-mode');
+        localStorage.setItem('rapidito_theme', isDark ? 'dark' : 'light');
+        this.actualizarIconoTema();
+    },
+
+    actualizarIconoTema() {
+        const iconContainer = document.getElementById('theme-icon');
+        if (!iconContainer) return;
+        if (document.body.classList.contains('dark-mode')) {
+            iconContainer.innerHTML = `<circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>`;
+        } else {
+            iconContainer.innerHTML = `<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>`;
+        }
+    },
+
+    cargarPerfil() {
+        const nombre = localStorage.getItem('rapidito_nombre') || 'Jesús Vásquez';
+        const ciudad = localStorage.getItem('rapidito_ciudad') || 'Barquisimeto';
+        const inicial = nombre.charAt(0).toUpperCase();
+
+        const nameEl = document.getElementById('sp-name-text');
+        if (nameEl) nameEl.innerText = nombre;
+
+        const editCityEl = document.getElementById('edit-ciudad-display');
+        if (editCityEl) editCityEl.innerText = ciudad;
+
+        const badgeCity = document.getElementById('header-city-badge');
+        if (badgeCity) badgeCity.innerText = ciudad;
+
+        document.querySelectorAll('.avatar-dash, .sp-avatar').forEach(el => el.innerText = inicial);
+
+        const inputNombre = document.getElementById('edit-nombre');
+        if (inputNombre) inputNombre.value = nombre;
+    },
+
+    guardarPerfil() {
+        const inputNombre = document.getElementById('edit-nombre');
+        const inputCiudad = document.getElementById('edit-ciudad-value');
+        if (inputNombre && inputNombre.value.trim()) {
+            localStorage.setItem('rapidito_nombre', inputNombre.value.trim());
+        }
+        if (inputCiudad && inputCiudad.value.trim()) {
+            localStorage.setItem('rapidito_ciudad', inputCiudad.value.trim());
+        }
+        this.cargarPerfil();
+        this.cerrarModal('modal-editar-perfil');
+        this.showToast('Perfil actualizado correctamente', 'success');
+        setTimeout(() => this.abrirPanelPerfil(), 150);
+    },
+
+    abrirPanelPerfil() {
+        document.getElementById('panel-overlay')?.classList.add('active');
+        document.getElementById('side-panel')?.classList.add('active');
+    },
+
+    cerrarPanelPerfil() {
+        document.getElementById('panel-overlay')?.classList.remove('active');
+        document.getElementById('side-panel')?.classList.remove('active');
+    },
+
+    abrirDesdePanel(modalId) {
+        this.cerrarPanelPerfil();
+        setTimeout(() => {
+            if (modalId === 'modal-viajes') this.llenarModalViajes();
+            this.abrirModal(modalId);
+        }, 180);
+    },
+
+    abrirModal(id) {
+        document.getElementById(id)?.classList.add('active');
+    },
+
+    cerrarModal(id) {
+        document.getElementById(id)?.classList.remove('active');
+    },
+
+    // Vistas principales
+    abrirVistaViaje() {
+        window.GeoManager?.limpiarMapa();
+        document.getElementById('dashboard-wrapper')?.classList.add('hidden');
+        const tripView = document.getElementById('trip-view');
+        if (tripView) tripView.classList.add('active');
+
+        const tripOrigenInput = document.getElementById('trip-origen-input');
+        if (tripOrigenInput && !tripOrigenInput.value) {
+            tripOrigenInput.value = "Ubicación actual";
+        }
+        this.renderizarHistorial();
+        document.getElementById('trip-destino-input')?.focus();
+    },
+
+    cerrarVistaViaje() {
+        window.GeoManager?.limpiarMapa();
+        document.getElementById('trip-view')?.classList.remove('active');
+        document.getElementById('dashboard-wrapper')?.classList.remove('hidden');
+    },
+
+    volverAVistaViaje() {
+        window.GeoManager?.limpiarMapa();
+        document.getElementById('map-ui-view')?.classList.remove('active');
+        if (this.vistaAnteriorMapa === 'dashboard') {
+            document.getElementById('trip-view')?.classList.remove('active');
+            document.getElementById('dashboard-wrapper')?.classList.remove('hidden');
+        } else {
+            document.getElementById('dashboard-wrapper')?.classList.add('hidden');
+            document.getElementById('trip-view')?.classList.add('active');
+        }
+    },
+
+    abrirMapaDesdeVistaViaje() {
+        this.vistaAnteriorMapa = 'viaje';
+        document.getElementById('dashboard-wrapper')?.classList.add('hidden');
+        document.getElementById('trip-view')?.classList.remove('active');
+        document.getElementById('map-ui-view')?.classList.add('active');
+        setTimeout(() => {
+            if (window.GeoManager?.map) window.GeoManager.map.invalidateSize();
+        }, 80);
+        this.inputActivo = 'destino';
+        this.actualizarFocoInputs();
+    },
+
+    cotizarViajeDesdeVista() {
+        const destinoInput = document.getElementById('trip-destino-input');
+        const origenInput = document.getElementById('trip-origen-input');
+        if (!destinoInput || !destinoInput.value.trim()) {
+            this.showToast('Por favor introduce tu destino', 'warning');
+            return;
+        }
+        const destStr = destinoInput.value.trim();
+        const origStr = (origenInput?.value === "Ubicación actual") ? null : origenInput?.value?.trim();
+
+        this.guardarEnHistorial(destStr);
+        this.abrirMapaConRutasPersonalizadas(origStr, destStr, false);
+    },
+
+    abrirMapaConRutasPersonalizadas(origenStr, destinoStr, desdeDirectorio = false) {
+        this.vistaAnteriorMapa = desdeDirectorio ? 'dashboard' : 'viaje';
+        document.getElementById('dashboard-wrapper')?.classList.add('hidden');
+        document.getElementById('trip-view')?.classList.remove('active');
+        document.getElementById('map-ui-view')?.classList.add('active');
+
+        setTimeout(() => {
+            if (window.GeoManager?.map) window.GeoManager.map.invalidateSize();
+        }, 80);
+
+        const originInput = document.getElementById('input-origen');
+        const searchInput = document.getElementById('map-search-input');
+        if (originInput) originInput.value = origenStr || "⏳ Obteniendo GPS...";
+        if (searchInput) searchInput.value = destinoStr || "";
+
+        this.inputActivo = 'destino';
+        this.actualizarFocoInputs();
+
+        const ciudadActual = localStorage.getItem('rapidito_ciudad') || "Barquisimeto";
+        let bounds = L.latLngBounds();
+        let tieneDestino = false;
+
+        if (destinoStr) {
+            fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(destinoStr + ", " + ciudadActual)}&limit=1`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data?.length > 0 && window.GeoManager?.map) {
+                        const latlngDest = L.latLng(data[0].lat, data[0].lon);
+                        if (window.GeoManager.marcadorDestino && window.GeoManager.map.hasLayer(window.GeoManager.marcadorDestino)) {
+                            window.GeoManager.map.removeLayer(window.GeoManager.marcadorDestino);
+                        }
+                        window.GeoManager.marcadorDestino = L.marker(latlngDest).addTo(window.GeoManager.map);
+                        bounds.extend(latlngDest);
+                        tieneDestino = true;
+
+                        if (window.GeoManager.marcadorOrigen) {
+                            window.GeoManager.centrarMapaConMenu(bounds, 15);
+                            window.GeoManager.procesarIntersecciones();
+                        }
+                    }
+                }).catch(() => {});
+        }
+
+        if (origenStr && origenStr !== "Ubicación actual") {
+            fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(origenStr + ", " + ciudadActual)}&limit=1`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data?.length > 0 && window.GeoManager?.map) {
+                        const latlngOrig = L.latLng(data[0].lat, data[0].lon);
+                        if (window.GeoManager.marcadorOrigen && window.GeoManager.map.hasLayer(window.GeoManager.marcadorOrigen)) {
+                            window.GeoManager.map.removeLayer(window.GeoManager.marcadorOrigen);
+                        }
+                        window.GeoManager.marcadorOrigen = L.circleMarker(latlngOrig, {
+                            radius: 7,
+                            fillColor: "var(--primary-brand)",
+                            color: "#fff",
+                            weight: 2,
+                            fillOpacity: 1
+                        }).addTo(window.GeoManager.map);
+                        bounds.extend(latlngOrig);
+
+                        if (tieneDestino) {
+                            window.GeoManager.centrarMapaConMenu(bounds, 15);
+                            window.GeoManager.procesarIntersecciones();
+                        } else {
+                            window.GeoManager.centrarMapaConMenu(L.latLngBounds([latlngOrig, latlngOrig]), 15);
+                        }
+                    }
+                }).catch(() => {
+                    this.inputActivo = 'origen';
+                    this.ubicarConGPS();
+                });
+        } else if (!desdeDirectorio) {
+            this.inputActivo = 'origen';
+            this.ubicarConGPS();
+        }
+    },
+
+    ubicarConGPS() {
+        const targetInput = (this.inputActivo === 'origen')
+            ? document.getElementById('input-origen')
+            : document.getElementById('map-search-input');
+
+        if (targetInput) targetInput.value = "Obteniendo señal GPS...";
+
+        if (!navigator.geolocation) {
+            this.showToast('GPS no disponible en este dispositivo', 'warning');
+            return;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+            async (pos) => {
+                const latlng = L.latLng(pos.coords.latitude, pos.coords.longitude);
+                if (window.GeoManager?.map) {
+                    if (this.inputActivo === 'origen') {
+                        if (window.GeoManager.marcadorOrigen && window.GeoManager.map.hasLayer(window.GeoManager.marcadorOrigen)) {
+                            window.GeoManager.map.removeLayer(window.GeoManager.marcadorOrigen);
+                        }
+                        window.GeoManager.marcadorOrigen = L.circleMarker(latlng, {
+                            radius: 7,
+                            fillColor: "var(--primary-brand)",
+                            color: "#fff",
+                            weight: 2,
+                            fillOpacity: 1
+                        }).addTo(window.GeoManager.map);
+                    } else {
+                        if (window.GeoManager.marcadorDestino && window.GeoManager.map.hasLayer(window.GeoManager.marcadorDestino)) {
+                            window.GeoManager.map.removeLayer(window.GeoManager.marcadorDestino);
+                        }
+                        window.GeoManager.marcadorDestino = L.marker(latlng).addTo(window.GeoManager.map);
+                    }
+                    window.GeoManager.centrarMapaConMenu(L.latLngBounds([latlng, latlng]), 15);
+                }
+
+                try {
+                    const dir = await window.GeoManager?.reverseGeocode(latlng.lat, latlng.lng);
+                    if (targetInput) targetInput.value = dir || "Mi ubicación actual";
+                    if (this.inputActivo === 'destino' && dir) this.guardarEnHistorial(dir);
+                } catch(e) {
+                    if (targetInput) targetInput.value = "Mi ubicación actual";
+                }
+
+                if (window.GeoManager?.marcadorOrigen && window.GeoManager?.marcadorDestino) {
+                    window.GeoManager.procesarIntersecciones();
+                }
+            },
+            () => {
+                if (targetInput) targetInput.value = "Toca el mapa para fijar";
+                this.showToast('No pudimos acceder al GPS. Toca el mapa.', 'warning');
+            },
+            { enableHighAccuracy: true, timeout: 8000 }
+        );
+    },
+
+    actualizarFocoInputs() {
+        const originInput = document.getElementById('input-origen');
+        const searchInput = document.getElementById('map-search-input');
+        if (!originInput || !searchInput) return;
+
+        if (this.inputActivo === 'origen') {
+            originInput.style.borderColor = "var(--neutral-accent)";
+            originInput.style.backgroundColor = "var(--card-bg)";
+            searchInput.style.borderColor = "transparent";
+            searchInput.style.backgroundColor = "var(--input-bg)";
+        } else {
+            searchInput.style.borderColor = "var(--neutral-accent)";
+            searchInput.style.backgroundColor = "var(--card-bg)";
+            originInput.style.borderColor = "transparent";
+            originInput.style.backgroundColor = "var(--input-bg)";
+        }
+    },
+
+    // Autocompletado con Debounce y AbortController
+    configurarAutocompletado(inputEl, dropdownId, tipo) {
+        const dropdownEl = document.getElementById(dropdownId);
+        if (!inputEl || !dropdownEl) return;
+
+        inputEl.addEventListener('input', () => {
+            clearTimeout(this.typingTimerTrip);
+            const query = inputEl.value.trim();
+            if (query.length < 3) {
+                dropdownEl.style.display = 'none';
+                return;
+            }
+
+            this.typingTimerTrip = setTimeout(async () => {
+                const ciudadActual = localStorage.getItem('rapidito_ciudad') || "Barquisimeto";
+                try {
+                    const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query + ", " + ciudadActual)}&limit=4`);
+                    const data = await res.json();
+                    let html = '';
+                    data.forEach(item => {
+                        const nombreStr = item.display_name.split(',').slice(0, 3).join(', ');
+                        const safeNombre = this.escapeHTML(nombreStr);
+                        html += `<div class="trip-auto-item interactive" onclick="AppManager.seleccionarSugerenciaVista('${safeNombre.replace(/'/g, "\\'")}', '${tipo}')"><span class="auto-item-text">${safeNombre}</span></div>`;
+                    });
+                    dropdownEl.innerHTML = html;
+                    dropdownEl.style.display = data.length ? 'block' : 'none';
+                } catch(e) {}
+            }, 380);
+        });
+    },
+
+    seleccionarSugerenciaVista(lugar, tipo) {
+        const tripOrigenInput = document.getElementById('trip-origen-input');
+        const tripDestinoInput = document.getElementById('trip-destino-input');
+        const tripAutoOrigen = document.getElementById('trip-auto-origen');
+        const tripAutoDestino = document.getElementById('trip-auto-destino');
+
+        if (tipo === 'origen') {
+            if (tripOrigenInput) tripOrigenInput.value = lugar;
+            if (tripAutoOrigen) tripAutoOrigen.style.display = 'none';
+        } else {
+            if (tripDestinoInput) tripDestinoInput.value = lugar;
+            if (tripAutoDestino) tripAutoDestino.style.display = 'none';
+            this.guardarEnHistorial(lugar);
+            this.cotizarViajeDesdeVista();
+        }
+    },
+
+    configurarAutocompletadoMapa(inputElement, tipoInput) {
+        const autocompleteContainer = document.getElementById('autocomplete-container');
+        const resultsContainer = document.getElementById('route-results');
+
+        inputElement.addEventListener('input', () => {
+            clearTimeout(this.typingTimerMap);
+            const query = inputElement.value.trim();
+            if (query.length < 3) {
+                if (autocompleteContainer) autocompleteContainer.style.display = 'none';
+                return;
+            }
+
+            this.typingTimerMap = setTimeout(async () => {
+                const ciudadActual = localStorage.getItem('rapidito_ciudad') || "Barquisimeto";
+                try {
+                    const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query + ", " + ciudadActual)}&limit=4`);
+                    const data = await res.json();
+                    let html = '';
+                    data.forEach(item => {
+                        const nombreStr = item.display_name.split(',').slice(0, 3).join(', ');
+                        const safeNombre = this.escapeHTML(nombreStr);
+                        html += `<div class="trip-auto-item interactive" onclick="AppManager.seleccionarSugerenciaMapa(${item.lat}, ${item.lon}, '${safeNombre.replace(/'/g, "\\'")}', '${tipoInput}')"><span class="auto-item-text">${safeNombre}</span></div>`;
+                    });
+                    if (autocompleteContainer) {
+                        autocompleteContainer.innerHTML = html;
+                        autocompleteContainer.style.display = data.length ? 'block' : 'none';
+                    }
+                    if (resultsContainer) resultsContainer.style.display = 'none';
+                } catch(e) {}
+            }, 420);
+        });
+    },
+
+    seleccionarSugerenciaMapa(lat, lon, nombreLugar, tipoInput) {
+        const latlng = L.latLng(lat, lon);
+        const originInput = document.getElementById('input-origen');
+        const searchInput = document.getElementById('map-search-input');
+        const autocompleteContainer = document.getElementById('autocomplete-container');
+
+        if (tipoInput === 'origen') {
+            if (window.GeoManager?.marcadorOrigen && window.GeoManager.map.hasLayer(window.GeoManager.marcadorOrigen)) {
+                window.GeoManager.map.removeLayer(window.GeoManager.marcadorOrigen);
+            }
+            window.GeoManager.marcadorOrigen = L.circleMarker(latlng, {
+                radius: 7,
+                fillColor: "var(--primary-brand)",
+                color: "#fff",
+                weight: 2,
+                fillOpacity: 1
+            }).addTo(window.GeoManager.map);
+            if (originInput) originInput.value = nombreLugar;
+        } else {
+            if (window.GeoManager?.marcadorDestino && window.GeoManager.map.hasLayer(window.GeoManager.marcadorDestino)) {
+                window.GeoManager.map.removeLayer(window.GeoManager.marcadorDestino);
+            }
+            window.GeoManager.marcadorDestino = L.marker(latlng).addTo(window.GeoManager.map);
+            if (searchInput) searchInput.value = nombreLugar;
+            this.guardarEnHistorial(nombreLugar);
+        }
+
+        if (autocompleteContainer) autocompleteContainer.style.display = 'none';
+
+        if (window.GeoManager?.marcadorOrigen && window.GeoManager?.marcadorDestino) {
+            window.GeoManager.centrarMapaConMenu(L.latLngBounds([window.GeoManager.marcadorOrigen.getLatLng(), window.GeoManager.marcadorDestino.getLatLng()]), 15);
+            window.GeoManager.procesarIntersecciones();
+        } else {
+            window.GeoManager?.centrarMapaConMenu(L.latLngBounds([latlng, latlng]), 15);
+        }
+    },
+
+    // Gestión del Historial
+    guardarEnHistorial(destino) {
+        if (!destino || destino.trim() === "") return;
+        let historial = JSON.parse(localStorage.getItem('rapidito_historial')) || [];
+        historial = historial.filter(item => item.toLowerCase() !== destino.toLowerCase());
+        historial.unshift(destino);
+        if (historial.length > 6) historial.pop();
+        localStorage.setItem('rapidito_historial', JSON.stringify(historial));
+        this.renderizarHistorial();
+    },
+
+    eliminarDelHistorial(event, destino) {
+        event.stopPropagation();
+        let historial = JSON.parse(localStorage.getItem('rapidito_historial')) || [];
+        historial = historial.filter(item => item !== destino);
+        localStorage.setItem('rapidito_historial', JSON.stringify(historial));
+        this.renderizarHistorial();
+        this.llenarModalViajes();
+        this.showToast('Destino eliminado del historial', 'info');
+    },
+
+    renderizarHistorial() {
+        const contenedor = document.getElementById('historial-container');
+        if (!contenedor) return;
+        let historial = JSON.parse(localStorage.getItem('rapidito_historial')) || [];
+        if (historial.length === 0) {
+            contenedor.innerHTML = `<p style="font-size:12px; color:var(--text-gray); text-align:center; padding:10px;">No hay búsquedas recientes</p>`;
+            return;
+        }
+
+        let html = '';
+        historial.forEach(dest => {
+            const safeDest = this.escapeHTML(dest);
+            html += `
+                <div class="recent-item interactive" onclick="AppManager.seleccionarHistorial('${safeDest.replace(/'/g, "\\'")}')">
+                    <div class="recent-info">
+                        <div class="recent-icon">
+                            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                        </div>
+                        <div class="recent-text">
+                            <h4>${safeDest}</h4>
+                            <p>Búsqueda reciente</p>
+                        </div>
+                    </div>
+                    <span class="delete-recent interactive" onclick="AppManager.eliminarDelHistorial(event, '${safeDest.replace(/'/g, "\\'")}')" title="Eliminar">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </span>
+                </div>
+            `;
+        });
+        contenedor.innerHTML = html;
+    },
+
+    seleccionarHistorial(destino) {
+        const tripDestinoInput = document.getElementById('trip-destino-input');
+        if (tripDestinoInput) {
+            tripDestinoInput.value = destino;
+            this.cotizarViajeDesdeVista();
+        }
+    },
+
+    llenarModalViajes() {
+        const contenedor = document.getElementById('lista-mis-viajes');
+        if (!contenedor) return;
+        let historial = JSON.parse(localStorage.getItem('rapidito_historial')) || [];
+        if (historial.length === 0) {
+            contenedor.innerHTML = `<div style="padding:14px; text-align:center; color:var(--text-gray); font-size:12.5px; font-weight:600; background:var(--input-bg); border-radius:12px;">No tienes viajes registrados en el historial.</div>`;
+            return;
+        }
+        let html = '';
+        historial.forEach(dest => {
+            const safe = this.escapeHTML(dest);
+            html += `<div style="padding:10px 14px; background:var(--input-bg); border-radius:12px; font-weight:600; font-size:12.5px; color:var(--text-dark); display:flex; justify-content:space-between; align-items:center;">
+                <span>${safe}</span>
+                <span class="interactive" onclick="AppManager.eliminarDelHistorial(event, '${safe.replace(/'/g, "\\'")}')" style="color:var(--text-gray); padding:4px;">✕</span>
+            </div>`;
+        });
+        contenedor.innerHTML = html;
+    },
+
+    // Toggle de Rutas Urbanas en Dashboard
+    toggleRutasList() {
+        const list = document.getElementById('rutas-list-container');
+        const arrow = document.getElementById('flecha-rutas');
+        if (!list || !arrow) return;
+
+        if (list.classList.contains('active')) {
+            list.classList.remove('active');
+            arrow.classList.remove('up');
+        } else {
+            list.classList.add('active');
+            arrow.classList.add('up');
+            list.innerHTML = '<div class="ruta-item" style="color: var(--text-gray); justify-content: center; font-size: 12px;">Calculando rutas...</div>';
+
+            if (window.GeoManager?.marcadorOrigen) {
+                this.renderizarListaRutas(window.GeoManager.marcadorOrigen.getLatLng());
+            } else if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (pos) => this.renderizarListaRutas(L.latLng(pos.coords.latitude, pos.coords.longitude)),
+                    () => this.renderizarListaRutas(null),
+                    { timeout: 4000 }
+                );
+            } else {
+                this.renderizarListaRutas(null);
+            }
+        }
+    },
+
+    renderizarListaRutas(userLatlng) {
+        const list = document.getElementById('rutas-list-container');
+        if (!list) return;
+
+        const ciudadActual = localStorage.getItem('rapidito_ciudad') || "Barquisimeto";
+        let opciones = [];
+
+        for (const [id, ruta] of Object.entries(window.RUTAS_DATA || {})) {
+            if (ruta.ciudad && ruta.ciudad !== ciudadActual) continue;
+
+            const props = ruta.features[0].properties;
+            const dist = userLatlng ? window.GeoManager?.calcularDistanciaMinima(userLatlng, ruta) : null;
+            opciones.push({
+                idVar: id,
+                nombre: props.nombre,
+                distancia: dist,
+                acronimo: props.nombre.substring(0, 3).toUpperCase(),
+                origen: props.origen,
+                destino: props.destino,
+                color: ruta.color || '#305CDE'
+            });
+        }
+
+        if (opciones.length === 0) {
+            list.innerHTML = `<div class="ruta-item" style="color: var(--text-gray); justify-content: center; font-size: 12px;">No hay rutas disponibles para ${ciudadActual}.</div>`;
+            return;
+        }
+
+        if (userLatlng) {
+            opciones.sort((a, b) => a.distancia - b.distancia);
+        }
+
+        let html = '';
+        opciones.forEach((ruta, index) => {
+            let extraInfo = '';
+            if (userLatlng && ruta.distancia !== null) {
+                const textoDist = ruta.distancia > 1000 
+                    ? (ruta.distancia / 1000).toFixed(1) + ' km' 
+                    : ruta.distancia + ' m';
+                const etiqueta = index === 0 ? `<span class="badge-cercana" style="margin-left:auto;">Más cerca</span>` : '';
+                extraInfo = `<div style="display:flex; flex-direction:column; margin-left:auto; text-align:right;">${etiqueta}<span style="font-size:11px; color:var(--text-gray); margin-top:2px;">A ${textoDist}</span></div>`;
+            }
+
+            html += `
+                <div class="ruta-item interactive" onclick="AppManager.verRutaDesdeDirectorio('${ruta.idVar}')">
+                    <div class="icon" style="background:${ruta.color};">${ruta.acronimo}</div>
+                    <div style="max-width: 58%; display: flex; flex-direction: column; gap: 2px; flex-grow: 1; min-width: 0;">
+                        <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 700;">${this.escapeHTML(ruta.nombre)}</span>
+                        <span style="font-size: 11.5px; color: var(--text-gray); font-weight: 600;">${this.escapeHTML(ruta.origen)} → ${this.escapeHTML(ruta.destino)}</span>
+                    </div>
+                    ${extraInfo}
+                </div>
+            `;
+        });
+        list.innerHTML = html;
+    },
+
+    verRutaDesdeDirectorio(idRuta) {
+        window.GeoManager?.limpiarMapa();
+        this.abrirMapaConRutasPersonalizadas("Ubicación actual", "", true);
+        const ruta = window.RUTAS_DATA[idRuta];
+        if (!ruta) return;
+
+        const props = ruta.features[0].properties;
+        const color = ruta.color || '#305CDE';
+        window.GeoManager?.dibujarRutaYPasos(props.nombre, color, idRuta);
+
+        const resultsContainer = document.getElementById('route-results');
+        const tarifa = window.RatesManager?.pasajeNormalBs 
+            ? `${window.RatesManager.pasajeNormalBs.toFixed(2)} Bs` 
+            : 'Tarifa estándar';
+
+        if (resultsContainer) {
+            resultsContainer.style.display = 'block';
+            resultsContainer.innerHTML = `
+                <div class="result-title">Viendo ruta seleccionada</div>
+                <div class="route-option interactive" style="cursor:default;">
+                    <div class="route-badge" style="background:${color};">${props.nombre.substring(0, 4).toUpperCase()}</div>
+                    <div class="route-info">
+                        <h4>${this.escapeHTML(props.nombre)}</h4>
+                        <p style="margin-bottom: 2px; font-size: 11.5px; color: var(--neutral-accent); font-weight: 700;">${this.escapeHTML(props.origen)} → ${this.escapeHTML(props.destino)}</p>
+                        <p>Tarifa: ${tarifa} • Frecuencia: ${props.frecuencia || '5-10 min'}</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        if (window.GeoManager?.rutaDibujada) {
+            window.GeoManager.centrarMapaConMenu(window.GeoManager.rutaDibujada.getBounds(), 15);
+        }
+    },
+
+    // Selector de Ciudad
+    openCitySelector(target = 'dashboard') {
+        this.citySelectorTarget = target;
+        document.getElementById('city-modal')?.classList.add('active');
+    },
+
+    closeCitySelector() {
+        document.getElementById('city-modal')?.classList.remove('active');
+    },
+
+    selectCity(cityName, lat, lon) {
+        localStorage.setItem('rapidito_ciudad', cityName);
+        this.cargarPerfil();
+        window.GeoManager?.setCenter(lat, lon, 13);
+        this.closeCitySelector();
+
+        // Si la lista de rutas estaba abierta, recargarla
+        const list = document.getElementById('rutas-list-container');
+        if (list && list.classList.contains('active')) {
+            this.renderizarListaRutas(null);
+        }
+
+        this.showToast(`Ciudad cambiada a ${cityName}`, 'info');
+
+        if (this.citySelectorTarget === 'profile') {
+            setTimeout(() => this.abrirModal('modal-editar-perfil'), 200);
+        }
+    },
+
+    // Gestión PWA (Instalación nativa y Service Worker)
+    setupPWA() {
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(reg => {
+                        console.log('Service Worker de Rapidito activo con éxito', reg.scope);
+                        // Comprobar actualizaciones
+                        reg.addEventListener('updatefound', () => {
+                            const newWorker = reg.installing;
+                            newWorker.addEventListener('statechange', () => {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    this.showToast('Nueva versión disponible. Actualizando...', 'info');
+                                    setTimeout(() => window.location.reload(), 2000);
+                                }
+                            });
+                        });
+                    })
+                    .catch(err => console.warn('Error al registrar Service Worker:', err));
+            });
+        }
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            this.deferredPrompt = e;
+        });
+    },
+
+    instalarAppPWA() {
+        this.cerrarPanelPerfil();
+        this.abrirModal('modal-instalar');
+    },
+
+    async ejecutarInstalacionNativa() {
+        if (this.deferredPrompt) {
+            this.cerrarModal('modal-instalar');
+            this.deferredPrompt.prompt();
+            const { outcome } = await this.deferredPrompt.userChoice;
+            if (outcome === 'accepted') {
+                this.showToast('¡Gracias por instalar Rapidito!', 'success');
+            }
+            this.deferredPrompt = null;
+        } else {
+            const contenidoModal = document.querySelector('#modal-instalar .generic-modal-content');
+            if (contenidoModal) {
+                contenidoModal.innerHTML = `
+                    <button class="close-generic-btn interactive" onclick="AppManager.cerrarModal('modal-instalar')" style="position:absolute; top:12px; right:12px;">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </button>
+                    <div style="width: 46px; height: 46px; background: var(--input-bg); border-radius: 50%; display: flex; justify-content: center; align-items: center; color: var(--neutral-accent); margin: 4px auto 0 auto;">
+                        <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                    </div>
+                    <h3 style="margin:4px 0 2px 0; font-size:16px; font-weight:800;">Instalación</h3>
+                    <p style="font-size:12.5px; color:var(--text-gray); font-weight:600; line-height:1.45; margin:0 0 12px 0;">Abre el menú de tu navegador (los tres puntos <strong>⋮</strong> o icono compartir en iOS) y pulsa en <strong>"Instalar aplicación"</strong> o <strong>"Agregar a la pantalla de inicio"</strong>.</p>
+                    <button class="cotizar-btn interactive" style="padding:12px; font-size:13px; margin-top:0;" onclick="AppManager.cerrarModal('modal-instalar')">Entendido</button>
+                `;
+            }
+        }
+    }
+};
+
+window.AppManager = AppManager;
+
+
         function toggleDivisas() { 
             document.getElementById('detalles-divisas')?.classList.toggle('active'); 
             document.getElementById('flecha-divisas')?.classList.toggle('up'); 
@@ -486,7 +2819,6 @@
             document.getElementById('map-flecha-pasaje')?.classList.toggle('up'); 
         }
 
-        // Inicialización coordinada al cargar el DOM
         document.addEventListener('DOMContentLoaded', () => {
             RatesManager.init();
             GeoManager.init();
