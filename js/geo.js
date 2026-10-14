@@ -163,7 +163,7 @@ const GeoManager = {
             this.isLiveTracking = true;
             if (liveBtn) {
                 liveBtn.classList.add('active-tracking');
-                liveBtn.innerHTML = '🔴 En vivo (activo)';
+                liveBtn.innerHTML = 'En vivo (activo)';
             }
             window.AppManager?.showToast('Seguimiento GPS en tiempo real activado', 'success');
 
@@ -224,7 +224,7 @@ const GeoManager = {
             if (dist < 120 && this.lastProximityAlertStop !== rutaKey) {
                 this.lastProximityAlertStop = rutaKey;
                 const nombre = ruta.features[0].properties.nombre;
-                window.AppManager?.showToast(`🔔 Estás muy cerca de la ruta: ${nombre}`, 'success');
+                window.AppManager?.showToast(`Estás cerca de la ruta: ${nombre}`, 'success');
                 // Vibración háptica en móvil si está soportado
                 if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
                 break;
@@ -403,15 +403,16 @@ const GeoManager = {
                 origen: props.origen, 
                 destino: props.destino, 
                 colorLinea: datosRuta.color || '#305CDE',
-                frecuencia: props.frecuencia || '5-10 min'
+                frecuencia: props.frecuencia || '5-10 min',
+                categoria: datosRuta.categoria || datosRuta.tipo || 'urbana'
             });
         }
 
         if (opciones.length === 0) {
             if (rutasDescartadas > 0) {
-                resultsContainer.innerHTML = `<div class="result-title" style="text-align:center; padding: 12px 8px; color: var(--text-gray); line-height: 1.45; text-transform:none;">❌ Ninguna ruta directa te sirve.<br>Las opciones cercanas van en <strong style="color:var(--text-dark);">sentido contrario</strong> a tu destino.</div>`;
+                resultsContainer.innerHTML = `<div class="result-title" style="text-align:center; padding: 12px 8px; color: var(--text-gray); line-height: 1.45; text-transform:none;">Ninguna ruta directa te sirve.<br>Las opciones cercanas van en <strong style="color:var(--text-dark);">sentido contrario</strong> a tu destino.</div>`;
             } else {
-                resultsContainer.innerHTML = `<div class="result-title" style="text-align:center; padding: 8px; color: var(--text-gray); text-transform:none;">No se encontraron rutas para este tramo en ${ciudadActual}.</div>`;
+                resultsContainer.innerHTML = `<div class="result-title" style="text-align:center; padding: 12px 8px; color: var(--text-muted); text-transform:none; font-size:12px; line-height:1.4;">No se encontraron rutas registradas para este tramo en ${ciudadActual}.<br><span style="font-size:11px; opacity:0.75;">Próximamente se integrarán nuevas rutas a la base de datos.</span></div>`;
             }
             this.centrarMapaConMenu(L.latLngBounds([origenLatlng, destinoLatlng]));
             return;
@@ -430,13 +431,18 @@ const GeoManager = {
                 : ruta.distanciaDestino + ' m';
             let etiquetaGanadora = index === 0 ? `<span class="badge-cercana">Más óptima</span>` : '';
             
+            const esRapidito = ruta.categoria === 'rapidito' || ruta.categoria === 'Rapidito';
+            const tarifaItem = esRapidito
+                ? `${(window.RatesManager?.pasajeRapiditoBs || 500).toFixed(0)} Bs (Rapidito)`
+                : tarifaStr;
+
             htmlContent += `
                 <div class="route-option interactive" onclick='GeoManager.dibujarRutaYPasos("${ruta.nombre}", "${ruta.colorLinea}", "${ruta.idVar}")'>
                     <div class="route-badge" style="background:${ruta.colorLinea};">${ruta.nombre.substring(0, 4).toUpperCase()}</div>
                     <div class="route-info">
                         <h4>${ruta.nombre} ${etiquetaGanadora}</h4>
                         <p style="margin-bottom: 2px; font-size: 11.5px; color: var(--neutral-accent); font-weight: 700;">${ruta.origen} → ${ruta.destino}</p>
-                        <p>Caminando: <span style="color:var(--text-dark); font-weight:800;">${textoDist}</span> • Tarifa: ${tarifaStr} • Frec: ${ruta.frecuencia}</p>
+                        <p>Caminando: <span style="color:var(--text-dark); font-weight:800;">${textoDist}</span> • Tarifa: ${tarifaItem} • Frec: ${ruta.frecuencia}</p>
                     </div>
                 </div>
             `;

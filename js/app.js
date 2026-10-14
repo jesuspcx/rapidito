@@ -18,10 +18,15 @@ const AppManager = {
         this.renderizarHistorial();
         this.setupPWA();
 
-        // Ocultar pantalla de carga
+        // Ocultar pantalla de carga: siempre dura 5 segundos completos sincronizado con la barra de carga
         const splash = document.getElementById('splash-screen');
         if (splash) {
-            setTimeout(() => splash.classList.add('hidden'), 350);
+            setTimeout(() => {
+                splash.classList.add('hidden');
+                setTimeout(() => {
+                    splash.style.display = 'none';
+                }, 450);
+            }, 5000);
         }
     },
 
@@ -72,12 +77,12 @@ const AppManager = {
 
         const updateStatus = () => {
             if (!navigator.onLine) {
-                banner.innerText = '⚡ Modo sin conexión (rutas y tarifas en caché)';
+                banner.innerText = 'Modo sin conexión (rutas y tarifas en caché)';
                 banner.classList.remove('online-recovered');
                 banner.classList.add('active');
             } else {
                 if (banner.classList.contains('active')) {
-                    banner.innerText = '✅ Conexión restablecida';
+                    banner.innerText = 'Conexión restablecida';
                     banner.classList.add('online-recovered');
                     setTimeout(() => {
                         banner.classList.remove('active');
@@ -146,6 +151,13 @@ const AppManager = {
     },
 
     toggleDarkMode() {
+        const btn = document.getElementById('theme-toggle-btn');
+        if (btn) {
+            btn.classList.remove('theme-spinning');
+            void btn.offsetWidth; // forzar reflow para reiniciar animación
+            btn.classList.add('theme-spinning');
+            setTimeout(() => btn.classList.remove('theme-spinning'), 650);
+        }
         document.body.classList.toggle('dark-mode');
         const isDark = document.body.classList.contains('dark-mode');
         localStorage.setItem('rapidito_theme', isDark ? 'dark' : 'light');
@@ -156,15 +168,23 @@ const AppManager = {
         const iconContainer = document.getElementById('theme-icon');
         if (!iconContainer) return;
         if (document.body.classList.contains('dark-mode')) {
-            iconContainer.innerHTML = `<circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>`;
+            // Icono minimalista de Sol (para cambiar a modo claro)
+            iconContainer.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>`;
         } else {
-            iconContainer.innerHTML = `<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>`;
+            // Icono minimalista de Luna (para cambiar a modo oscuro)
+            iconContainer.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>`;
         }
     },
 
     cargarPerfil() {
         const nombre = localStorage.getItem('rapidito_nombre') || 'Jesús Vásquez';
         const ciudad = localStorage.getItem('rapidito_ciudad') || 'Barquisimeto';
+        const categoria = localStorage.getItem('rapidito_categoria') || 'estandar';
+        const transporte = localStorage.getItem('rapidito_transporte') || 'todos';
+        const moneda = localStorage.getItem('rapidito_moneda') || 'ambas';
+        const casa = localStorage.getItem('rapidito_casa') || '';
+        const trabajo = localStorage.getItem('rapidito_trabajo') || '';
+        const alertaGPS = localStorage.getItem('rapidito_alerta_gps') !== 'false';
         const inicial = nombre.charAt(0).toUpperCase();
 
         const nameEl = document.getElementById('sp-name-text');
@@ -173,28 +193,140 @@ const AppManager = {
         const editCityEl = document.getElementById('edit-ciudad-display');
         if (editCityEl) editCityEl.innerText = ciudad;
 
+        const editCityVal = document.getElementById('edit-ciudad-value');
+        if (editCityVal) editCityVal.value = ciudad;
+
         const badgeCity = document.getElementById('header-city-badge');
         if (badgeCity) badgeCity.innerText = ciudad;
 
+        const spCityBadge = document.getElementById('sp-city-badge');
+        if (spCityBadge) spCityBadge.innerText = ciudad;
+
+        const spCatBadge = document.getElementById('sp-category-badge');
+        if (spCatBadge) {
+            const catLabels = {
+                estandar: 'General',
+                estudiante: 'Estudiante (50%)',
+                adulto_mayor: 'Tercera Edad (50%)'
+            };
+            spCatBadge.innerText = catLabels[categoria] || 'General';
+        }
+
         document.querySelectorAll('.avatar-dash, .sp-avatar').forEach(el => el.innerText = inicial);
 
+        // Poblar campos del formulario modal de perfil
         const inputNombre = document.getElementById('edit-nombre');
         if (inputNombre) inputNombre.value = nombre;
+
+        const selectCategoria = document.getElementById('edit-categoria');
+        if (selectCategoria) selectCategoria.value = categoria;
+
+        const selectTransporte = document.getElementById('edit-transporte');
+        if (selectTransporte) selectTransporte.value = transporte;
+
+        const selectMoneda = document.getElementById('edit-moneda');
+        if (selectMoneda) selectMoneda.value = moneda;
+
+        const inputCasa = document.getElementById('edit-casa');
+        if (inputCasa) inputCasa.value = casa;
+
+        const inputTrabajo = document.getElementById('edit-trabajo');
+        if (inputTrabajo) inputTrabajo.value = trabajo;
+
+        const checkAlerta = document.getElementById('edit-alerta-gps');
+        if (checkAlerta) checkAlerta.checked = alertaGPS;
+
+        const inputTarifaRap = document.getElementById('edit-tarifa-rapidito');
+        const tarifaRap = localStorage.getItem('rapidito_tarifa_rapidito') || '500';
+        if (inputTarifaRap) inputTarifaRap.value = tarifaRap;
+
+        this.actualizarChipsLugares(casa, trabajo);
     },
 
     guardarPerfil() {
         const inputNombre = document.getElementById('edit-nombre');
         const inputCiudad = document.getElementById('edit-ciudad-value');
+        const selectCategoria = document.getElementById('edit-categoria');
+        const selectTransporte = document.getElementById('edit-transporte');
+        const selectMoneda = document.getElementById('edit-moneda');
+        const inputCasa = document.getElementById('edit-casa');
+        const inputTrabajo = document.getElementById('edit-trabajo');
+        const checkAlerta = document.getElementById('edit-alerta-gps');
+        const inputTarifaRap = document.getElementById('edit-tarifa-rapidito');
+
         if (inputNombre && inputNombre.value.trim()) {
             localStorage.setItem('rapidito_nombre', inputNombre.value.trim());
         }
         if (inputCiudad && inputCiudad.value.trim()) {
             localStorage.setItem('rapidito_ciudad', inputCiudad.value.trim());
         }
+        if (selectCategoria) {
+            localStorage.setItem('rapidito_categoria', selectCategoria.value);
+        }
+        if (selectTransporte) {
+            localStorage.setItem('rapidito_transporte', selectTransporte.value);
+        }
+        if (selectMoneda) {
+            localStorage.setItem('rapidito_moneda', selectMoneda.value);
+        }
+        if (inputCasa) {
+            localStorage.setItem('rapidito_casa', inputCasa.value.trim());
+        }
+        if (inputTrabajo) {
+            localStorage.setItem('rapidito_trabajo', inputTrabajo.value.trim());
+        }
+        if (checkAlerta) {
+            localStorage.setItem('rapidito_alerta_gps', checkAlerta.checked ? 'true' : 'false');
+        }
+        if (inputTarifaRap && !isNaN(parseFloat(inputTarifaRap.value)) && parseFloat(inputTarifaRap.value) > 0) {
+            const valRap = parseFloat(inputTarifaRap.value);
+            localStorage.setItem('rapidito_tarifa_rapidito', valRap.toString());
+            if (window.RatesManager) {
+                window.RatesManager.setPasajeRapidito(valRap);
+            }
+        }
+
         this.cargarPerfil();
         this.cerrarModal('modal-editar-perfil');
         this.showToast('Perfil actualizado correctamente', 'success');
         setTimeout(() => this.abrirPanelPerfil(), 150);
+    },
+
+    actualizarChipsLugares(casa, trabajo) {
+        const container = document.getElementById('trip-saved-chips');
+        if (!container) return;
+        container.innerHTML = '';
+        if (!casa && !trabajo) {
+            container.style.display = 'none';
+            return;
+        }
+        container.style.display = 'flex';
+        if (casa) {
+            const chip = document.createElement('div');
+            chip.className = 'saved-place-chip interactive';
+            chip.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg> <span>Casa: ${casa}</span>`;
+            chip.onclick = () => {
+                const destInput = document.getElementById('trip-destino-input');
+                if (destInput) {
+                    destInput.value = casa;
+                    this.cotizarViajeDesdeVista();
+                }
+            };
+            container.appendChild(chip);
+        }
+        if (trabajo) {
+            const chip = document.createElement('div');
+            chip.className = 'saved-place-chip interactive';
+            chip.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="7" width="20" height="14" rx="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg> <span>Trabajo: ${trabajo}</span>`;
+            chip.onclick = () => {
+                const destInput = document.getElementById('trip-destino-input');
+                if (destInput) {
+                    destInput.value = trabajo;
+                    this.cotizarViajeDesdeVista();
+                }
+            };
+            container.appendChild(chip);
+        }
     },
 
     abrirPanelPerfil() {
@@ -216,6 +348,23 @@ const AppManager = {
     },
 
     abrirModal(id) {
+        if (id === 'modal-calculadora' && window.RatesManager) {
+            const prefTransporte = localStorage.getItem('rapidito_transporte');
+            if (prefTransporte === 'rapidito') {
+                window.RatesManager.setServicioCalculadora('rapidito');
+            } else {
+                window.RatesManager.setServicioCalculadora('urbana');
+            }
+            const cat = localStorage.getItem('rapidito_categoria');
+            if (cat === 'estudiante' || cat === 'adulto_mayor') {
+                window.RatesManager.pasajerosRegular = 0;
+                window.RatesManager.pasajerosPref = 1;
+            } else {
+                window.RatesManager.pasajerosRegular = 1;
+                window.RatesManager.pasajerosPref = 0;
+            }
+            window.RatesManager.actualizarResultadosCalculadora();
+        }
         document.getElementById(id)?.classList.add('active');
     },
 
@@ -223,7 +372,54 @@ const AppManager = {
         document.getElementById(id)?.classList.remove('active');
     },
 
+    // Módulo Financiero Unificado (Bandeja sin espacios vacíos)
+    activeFinanceTab: null,
+    toggleFinanceModule(tipo) {
+        const tray = document.getElementById('finance-tray');
+        const trayDivisas = document.getElementById('tray-divisas');
+        const trayPasaje = document.getElementById('tray-pasaje');
+        const pillDivisas = document.getElementById('pill-divisas');
+        const pillPasaje = document.getElementById('pill-pasaje');
+        const flechaDivisas = document.getElementById('flecha-divisas');
+        const flechaPasaje = document.getElementById('flecha-pasaje');
+
+        if (!tray) return;
+
+        const isCurrentlyOpen = (this.activeFinanceTab === tipo && tray.classList.contains('open'));
+
+        if (isCurrentlyOpen) {
+            tray.classList.remove('open');
+            this.activeFinanceTab = null;
+            pillDivisas?.classList.remove('active');
+            pillPasaje?.classList.remove('active');
+            flechaDivisas?.classList.remove('up');
+            flechaPasaje?.classList.remove('up');
+        } else {
+            this.activeFinanceTab = tipo;
+            tray.classList.add('open');
+
+            if (tipo === 'divisas') {
+                trayDivisas?.classList.add('active');
+                trayPasaje?.classList.remove('active');
+                pillDivisas?.classList.add('active');
+                pillPasaje?.classList.remove('active');
+                flechaDivisas?.classList.add('up');
+                flechaPasaje?.classList.remove('up');
+            } else {
+                trayPasaje?.classList.add('active');
+                trayDivisas?.classList.remove('active');
+                pillPasaje?.classList.add('active');
+                pillDivisas?.classList.remove('active');
+                flechaPasaje?.classList.add('up');
+                flechaDivisas?.classList.remove('up');
+            }
+        }
+    },
+
     // Vistas principales
+    lastGpsCoords: null,
+    lastGpsAddress: null,
+
     abrirVistaViaje() {
         window.GeoManager?.limpiarMapa();
         document.getElementById('dashboard-wrapper')?.classList.add('hidden');
@@ -231,9 +427,29 @@ const AppManager = {
         if (tripView) tripView.classList.add('active');
 
         const tripOrigenInput = document.getElementById('trip-origen-input');
-        if (tripOrigenInput && !tripOrigenInput.value) {
-            tripOrigenInput.value = "Ubicación actual";
+        if (tripOrigenInput) {
+            tripOrigenInput.value = this.lastGpsAddress || "Mi ubicación actual";
         }
+
+        // Obtener GPS en segundo plano de inmediato
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                async (pos) => {
+                    this.lastGpsCoords = L.latLng(pos.coords.latitude, pos.coords.longitude);
+                    const addr = await window.GeoManager?.reverseGeocode(pos.coords.latitude, pos.coords.longitude);
+                    if (addr) {
+                        this.lastGpsAddress = addr;
+                        const inputOrig = document.getElementById('trip-origen-input');
+                        if (inputOrig && (inputOrig.value === "Mi ubicación actual" || inputOrig.value === "Ubicación actual")) {
+                            inputOrig.value = addr;
+                        }
+                    }
+                },
+                () => {},
+                { enableHighAccuracy: true, timeout: 6000 }
+            );
+        }
+
         this.renderizarHistorial();
         document.getElementById('trip-destino-input')?.focus();
     },
@@ -276,13 +492,19 @@ const AppManager = {
             return;
         }
         const destStr = destinoInput.value.trim();
-        const origStr = (origenInput?.value === "Ubicación actual") ? null : origenInput?.value?.trim();
-
         this.guardarEnHistorial(destStr);
-        this.abrirMapaConRutasPersonalizadas(origStr, destStr, false);
+
+        const origVal = origenInput?.value?.trim();
+        const esGps = (!origVal || origVal === "Ubicación actual" || origVal === "Mi ubicación actual" || origVal === this.lastGpsAddress);
+
+        if (esGps) {
+            this.abrirMapaConRutasPersonalizadas(null, destStr, false, this.lastGpsCoords);
+        } else {
+            this.abrirMapaConRutasPersonalizadas(origVal, destStr, false, null);
+        }
     },
 
-    abrirMapaConRutasPersonalizadas(origenStr, destinoStr, desdeDirectorio = false) {
+    abrirMapaConRutasPersonalizadas(origenStr, destinoStr, desdeDirectorio = false, coordsGps = null) {
         this.vistaAnteriorMapa = desdeDirectorio ? 'dashboard' : 'viaje';
         document.getElementById('dashboard-wrapper')?.classList.add('hidden');
         document.getElementById('trip-view')?.classList.remove('active');
@@ -294,7 +516,7 @@ const AppManager = {
 
         const originInput = document.getElementById('input-origen');
         const searchInput = document.getElementById('map-search-input');
-        if (originInput) originInput.value = origenStr || "⏳ Obteniendo GPS...";
+        if (originInput) originInput.value = origenStr || this.lastGpsAddress || "Mi ubicación actual";
         if (searchInput) searchInput.value = destinoStr || "";
 
         this.inputActivo = 'destino';
@@ -303,6 +525,21 @@ const AppManager = {
         const ciudadActual = localStorage.getItem('rapidito_ciudad') || "Barquisimeto";
         let bounds = L.latLngBounds();
         let tieneDestino = false;
+
+        // Fijar origen por GPS en automático si fue solicitado
+        if (coordsGps && window.GeoManager?.map) {
+            if (window.GeoManager.marcadorOrigen && window.GeoManager.map.hasLayer(window.GeoManager.marcadorOrigen)) {
+                window.GeoManager.map.removeLayer(window.GeoManager.marcadorOrigen);
+            }
+            window.GeoManager.marcadorOrigen = L.circleMarker(coordsGps, {
+                radius: 7,
+                fillColor: "var(--brand-primary)",
+                color: "#fff",
+                weight: 2,
+                fillOpacity: 1
+            }).addTo(window.GeoManager.map);
+            bounds.extend(coordsGps);
+        }
 
         if (destinoStr) {
             fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(destinoStr + ", " + ciudadActual)}&limit=1`)
@@ -320,12 +557,15 @@ const AppManager = {
                         if (window.GeoManager.marcadorOrigen) {
                             window.GeoManager.centrarMapaConMenu(bounds, 15);
                             window.GeoManager.procesarIntersecciones();
+                        } else if (!origenStr && !coordsGps && !desdeDirectorio) {
+                            this.inputActivo = 'origen';
+                            this.ubicarConGPS();
                         }
                     }
                 }).catch(() => {});
         }
 
-        if (origenStr && origenStr !== "Ubicación actual") {
+        if (origenStr && origenStr !== "Ubicación actual" && origenStr !== "Mi ubicación actual") {
             fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(origenStr + ", " + ciudadActual)}&limit=1`)
                 .then(res => res.json())
                 .then(data => {
@@ -336,7 +576,7 @@ const AppManager = {
                         }
                         window.GeoManager.marcadorOrigen = L.circleMarker(latlngOrig, {
                             radius: 7,
-                            fillColor: "var(--primary-brand)",
+                            fillColor: "var(--brand-primary)",
                             color: "#fff",
                             weight: 2,
                             fillOpacity: 1
@@ -354,7 +594,7 @@ const AppManager = {
                     this.inputActivo = 'origen';
                     this.ubicarConGPS();
                 });
-        } else if (!desdeDirectorio) {
+        } else if (!coordsGps && !desdeDirectorio) {
             this.inputActivo = 'origen';
             this.ubicarConGPS();
         }
@@ -626,7 +866,7 @@ const AppManager = {
             const safe = this.escapeHTML(dest);
             html += `<div style="padding:10px 14px; background:var(--input-bg); border-radius:12px; font-weight:600; font-size:12.5px; color:var(--text-dark); display:flex; justify-content:space-between; align-items:center;">
                 <span>${safe}</span>
-                <span class="interactive" onclick="AppManager.eliminarDelHistorial(event, '${safe.replace(/'/g, "\\'")}')" style="color:var(--text-gray); padding:4px;">✕</span>
+                <span class="interactive" onclick="AppManager.eliminarDelHistorial(event, '${safe.replace(/'/g, "\\'")}')" style="color:var(--text-gray); padding:4px; font-size:15px; line-height:1;">&times;</span>
             </div>`;
         });
         contenedor.innerHTML = html;
@@ -644,24 +884,52 @@ const AppManager = {
         } else {
             list.classList.add('active');
             arrow.classList.add('up');
-            list.innerHTML = '<div class="ruta-item" style="color: var(--text-gray); justify-content: center; font-size: 12px;">Calculando rutas...</div>';
+            list.innerHTML = '<div class="ruta-item" style="color: var(--text-gray); justify-content: center; font-size: 12px;">Buscando rutas urbanas...</div>';
 
             if (window.GeoManager?.marcadorOrigen) {
-                this.renderizarListaRutas(window.GeoManager.marcadorOrigen.getLatLng());
+                this.renderizarListaRutas(window.GeoManager.marcadorOrigen.getLatLng(), 'urbana', 'rutas-list-container');
             } else if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
-                    (pos) => this.renderizarListaRutas(L.latLng(pos.coords.latitude, pos.coords.longitude)),
-                    () => this.renderizarListaRutas(null),
+                    (pos) => this.renderizarListaRutas(L.latLng(pos.coords.latitude, pos.coords.longitude), 'urbana', 'rutas-list-container'),
+                    () => this.renderizarListaRutas(null, 'urbana', 'rutas-list-container'),
                     { timeout: 4000 }
                 );
             } else {
-                this.renderizarListaRutas(null);
+                this.renderizarListaRutas(null, 'urbana', 'rutas-list-container');
             }
         }
     },
 
-    renderizarListaRutas(userLatlng) {
-        const list = document.getElementById('rutas-list-container');
+    // Toggle de Líneas de Rapiditos en Dashboard
+    toggleRapiditosList() {
+        const list = document.getElementById('rapiditos-list-container');
+        const arrow = document.getElementById('flecha-rapiditos');
+        if (!list || !arrow) return;
+
+        if (list.classList.contains('active')) {
+            list.classList.remove('active');
+            arrow.classList.remove('up');
+        } else {
+            list.classList.add('active');
+            arrow.classList.add('up');
+            list.innerHTML = '<div class="ruta-item" style="color: var(--text-gray); justify-content: center; font-size: 12px;">Buscando líneas de rapiditos...</div>';
+
+            if (window.GeoManager?.marcadorOrigen) {
+                this.renderizarListaRutas(window.GeoManager.marcadorOrigen.getLatLng(), 'rapidito', 'rapiditos-list-container');
+            } else if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (pos) => this.renderizarListaRutas(L.latLng(pos.coords.latitude, pos.coords.longitude), 'rapidito', 'rapiditos-list-container'),
+                    () => this.renderizarListaRutas(null, 'rapidito', 'rapiditos-list-container'),
+                    { timeout: 4000 }
+                );
+            } else {
+                this.renderizarListaRutas(null, 'rapidito', 'rapiditos-list-container');
+            }
+        }
+    },
+
+    renderizarListaRutas(userLatlng, categoriaFiltro = 'urbana', contenedorId = 'rutas-list-container') {
+        const list = document.getElementById(contenedorId);
         if (!list) return;
 
         const ciudadActual = localStorage.getItem('rapidito_ciudad') || "Barquisimeto";
@@ -669,6 +937,8 @@ const AppManager = {
 
         for (const [id, ruta] of Object.entries(window.RUTAS_DATA || {})) {
             if (ruta.ciudad && ruta.ciudad !== ciudadActual) continue;
+            const catRuta = ruta.categoria || (ruta.tipo === 'Rapidito' ? 'rapidito' : 'urbana');
+            if (categoriaFiltro && catRuta !== categoriaFiltro) continue;
 
             const props = ruta.features[0].properties;
             const dist = userLatlng ? window.GeoManager?.calcularDistanciaMinima(userLatlng, ruta) : null;
@@ -679,12 +949,18 @@ const AppManager = {
                 acronimo: props.nombre.substring(0, 3).toUpperCase(),
                 origen: props.origen,
                 destino: props.destino,
-                color: ruta.color || '#305CDE'
+                color: ruta.color || (catRuta === 'rapidito' ? '#f59e0b' : '#305CDE')
             });
         }
 
         if (opciones.length === 0) {
-            list.innerHTML = `<div class="ruta-item" style="color: var(--text-gray); justify-content: center; font-size: 12px;">No hay rutas disponibles para ${ciudadActual}.</div>`;
+            const labelTipo = categoriaFiltro === 'rapidito' ? 'líneas de rapiditos' : 'rutas urbanas';
+            list.innerHTML = `
+                <div class="ruta-item" style="color: var(--text-muted); justify-content: center; font-size: 12px; text-align: center; padding: 16px 12px; flex-direction: column; gap: 4px; border: none; background: transparent;">
+                    <span style="font-weight: 700; color: var(--text-secondary);">No hay ${labelTipo} registradas aún en ${ciudadActual}</span>
+                    <span style="font-size: 11px; opacity: 0.75;">Próximamente se integrarán nuevas rutas a la base de datos.</span>
+                </div>
+            `;
             return;
         }
 
